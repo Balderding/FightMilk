@@ -1,0 +1,7 @@
+/// Kept in step with pubspec.yaml by tools/bump_version.py.
+const appVersion = '0.7.0';
+
+/// Where releases (app updates) and icon packs are published.
+const appRepo = 'Balderding/FightMilk';
+
+const appName = 'FightMilk';

@@ -1,0 +1,16 @@
+FightMilk assets
+================
+
+The following are licensed under Creative Commons Attribution-ShareAlike 4.0 International
+(CC BY-SA 4.0), https://creativecommons.org/licenses/by-sa/4.0/ , by balderding:
+
+- app/assets/exercises.json (the exercise library and its explanations)
+- app/assets/icons/ (exercise icons)
+- app/assets/sounds/ (reward sounds, synthesised by tools/gen_sounds.py)
+- app/lib/ui/anim/pose_data.dart (exercise animation keyframes)
+- mockups/
+
+You may share and adapt them, also commercially, as long as you give credit and share your
+changes under the same licence.
+
+Everything else in this repository is under the GNU General Public License v3.0 (LICENSE).

@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Workout app mockups</title>
+<style>
+:root{--bg:#0f1418;--card:#182129;--card2:#202c36;--line:#2c3a46;--text:#e8eef2;--dim:#93a4b1;--teal:#2ec4b6;--gold:#f2c14e;--navy:#1d3557;--green:#7bd389}
+*{box-sizing:border-box}
+body{margin:0;background:#0a0d10;color:var(--text);font:14px/1.4 system-ui,Segoe UI,Roboto,sans-serif;padding:20px 16px}
+h1{font-size:20px;margin:0 0 4px}
+.sub{color:var(--dim);margin:0 0 16px}
+.wrap{display:flex;flex-wrap:wrap;gap:28px;justify-content:center}
+.col{display:flex;flex-direction:column;align-items:center;gap:8px}
+.label{color:var(--gold);font-weight:600}
+.note{max-width:300px;color:var(--dim);font-size:12.5px}
+.phone{width:320px;height:660px;background:var(--bg);border:10px solid #000;border-radius:34px;overflow:hidden;position:relative;display:flex;flex-direction:column;box-shadow:0 0 0 2px #333}
+.bar{height:22px;font-size:11px;color:var(--dim);display:flex;justify-content:space-between;padding:4px 16px 0}
+.head{padding:8px 16px 10px;display:flex;align-items:center;justify-content:space-between}
+.head h2{font-size:19px;margin:0}
+.body{flex:1;overflow:auto;padding:0 14px 14px}
+.nav{display:flex;border-top:1px solid var(--line);background:var(--card)}
+.nav div{flex:1;text-align:center;padding:9px 0 11px;font-size:11px;color:var(--dim)}
+.nav div.on{color:var(--teal)}
+.card{background:var(--card);border-radius:14px;padding:12px;margin-bottom:10px}
+.row{display:flex;align-items:center;gap:10px}
+.ex .ic{width:44px;height:44px;border-radius:10px;background:var(--card2);display:flex;align-items:center;justify-content:center;flex:none}
+.ex .t{font-weight:600}
+.ex .s{color:var(--dim);font-size:12.5px}
+.pill{display:inline-block;padding:6px 11px;border-radius:999px;background:var(--card2);margin:3px 4px 3px 0;font-size:13px;cursor:pointer;user-select:none}
+.pill.on{background:var(--teal);color:#062a27;font-weight:600}
+.q{font-weight:600;margin:12px 0 4px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:14px;font-size:16px;font-weight:700;background:var(--teal);color:#062a27;cursor:pointer}
+.btn.alt{background:var(--card2);color:var(--text)}
+.btn.small{display:inline-block;width:auto;padding:7px 12px;font-size:13px;border-radius:10px}
+.tag{font-size:11px;padding:2px 7px;border-radius:6px;background:var(--navy);color:#cfe3ff}
+.tag.ai{background:#3b2f0b;color:var(--gold)}
+.step{display:flex;align-items:center;justify-content:space-between;background:var(--card2);border-radius:14px;padding:8px}
+.step b{font-size:34px;font-variant-numeric:tabular-nums}
+.step small{color:var(--dim);display:block;text-align:center}
+.step button{width:52px;height:52px;border-radius:12px;border:0;background:var(--line);color:var(--text);font-size:26px;cursor:pointer}
+.sets td{padding:5px 4px;font-variant-numeric:tabular-nums}
+.sets tr.done td{color:var(--green)}
+.sets tr.cur td{color:var(--gold);font-weight:700}
+.timer{text-align:center;font-size:40px;font-weight:700;color:var(--gold);font-variant-numeric:tabular-nums}
+.sw{width:42px;height:24px;border-radius:12px;background:var(--line);position:relative;cursor:pointer;flex:none}
+.sw::after{content:"";position:absolute;width:18px;height:18px;border-radius:50%;background:#cfd8de;top:3px;left:3px;transition:.15s}
+.sw.on{background:var(--teal)}.sw.on::after{left:21px}
+.field{background:var(--card2);border-radius:10px;padding:9px 10px;color:var(--dim);font-family:monospace;font-size:12px;margin-top:6px}
+.sheet{position:absolute;inset:auto 0 0 0;background:var(--card);border-radius:20px 20px 0 0;padding:16px;border-top:1px solid var(--line);max-height:80%;overflow:auto}
+.dim{position:absolute;inset:0;background:#0009}
+pre{white-space:pre-wrap;background:#0b1115;border-radius:10px;padding:10px;font-size:11.5px;color:#b9e6e0;margin:8px 0}
+.small{font-size:12px;color:var(--dim)}
+</style></head><body>
+<h1>Workout app: first mockups</h1>
+<p class="sub">Tap things: the pills, the + and −, "Done set", "Swap", the AI switch, "Ask AI". Nothing here is real code, it's just for reacting to.</p>
+
+<div class="wrap">
+
+<!-- 1 SETUP -->
+<div class="col"><div class="label">1 · First-time setup</div>
+<div class="phone"><div class="bar"><span>9:41</span><span>▮▮▮</span></div>
+<div class="head"><h2>Let's set you up</h2><span class="small">1 of 1</span></div>
+<div class="body" id="setup">
+ <div class="q">Goal</div><div data-g="1"><span class="pill">Strength</span><span class="pill">Size</span><span class="pill on">Both</span></div>
+ <div class="q">Days per week</div><div data-g="1"><span class="pill">2</span><span class="pill">3</span><span class="pill on">4</span><span class="pill">5</span><span class="pill">6</span></div>
+ <div class="q">Time per session</div><div data-g="1"><span class="pill">45 min</span><span class="pill on">60 min</span><span class="pill">90 min</span></div>
+ <div class="q">Your gym has</div><div><span class="pill on">Barbells</span><span class="pill on">Dumbbells</span><span class="pill on">Machines</span><span class="pill on">Cables</span><span class="pill">Smith</span><span class="pill">Kettlebells</span></div>
+ <div class="q">Go easy on</div><div><span class="pill">Shoulders</span><span class="pill">Lower back</span><span class="pill">Knees</span><span class="pill">Wrists</span></div>
+ <div class="q">Weights in</div><div data-g="1"><span class="pill on">lb</span><span class="pill">kg</span></div>
+ <div style="height:12px"></div>
+ <button class="btn">Make my plan</button>
+ <p class="small" style="margin-top:8px">No account, no email. This stays on your phone.</p>
+</div></div>
+<div class="note">One screen, under a minute. No sign-up. "Make my plan" uses the built-in plan maker, or the AI if you've turned it on.</div></div>
+
+<!-- 2 TODAY -->
+<div class="col"><div class="label">2 · Today</div>
+<div class="phone"><div class="bar"><span>9:41</span><span>▮▮▮</span></div>
+<div class="head"><div><h2>Upper A</h2><div class="small">Week 3 · day 1 of 4 · ~60 min</div></div><span class="tag">Built-in plan</span></div>
+<div class="body" id="today"></div>
+<div style="padding:0 14px 12px"><button class="btn" onclick="go('log')">Start workout</button></div>
+<div class="nav"><div class="on">Today</div><div>Plan</div><div>History</div><div>Progress</div><div>Settings</div></div></div>
+<div class="note">What to do today, already filled in. Gold arrows mean the weight went up because you hit all your reps last time. Tap Swap if a machine is taken.</div></div>
+
+<!-- 3 LOGGING -->
+<div class="col" id="log"><div class="label">3 · Logging a set</div>
+<div class="phone"><div class="bar"><span>9:41</span><span>▮▮▮</span></div>
+<div class="head"><div><h2 id="lgName">Bench press</h2><div class="small" id="lgTarget">Target 4 × 6 · last time 225 × 6,6,6,5</div></div></div>
+<div class="body">
+ <div class="row" style="gap:8px">
+  <div class="step" style="flex:1.3"><button onclick="adj('w',-5)">−</button><div><b id="w">230</b><small>lb</small></div><button onclick="adj('w',5)">+</button></div>
+  <div class="step" style="flex:1"><button onclick="adj('r',-1)">−</button><div><b id="r">6</b><small>reps</small></div><button onclick="adj('r',1)">+</button></div>
+ </div>
+ <div style="height:10px"></div>
+ <button class="btn" onclick="doneSet()">Done set</button>
+ <div class="card" style="margin-top:10px"><table class="sets" style="width:100%"><tbody id="sets"></tbody></table></div>
+ <div class="card" id="rest" hidden><div class="small" style="text-align:center">Rest</div><div class="timer" id="tm">2:30</div>
+  <div class="row" style="justify-content:center"><button class="btn small alt" onclick="addRest(-30)">−30s</button><button class="btn small alt" onclick="addRest(30)">+30s</button><button class="btn small alt" onclick="stopRest()">Skip</button></div></div>
+ <div class="row" style="justify-content:space-between"><button class="btn small alt">Note</button><button class="btn small alt" onclick="openSwap(0)">Swap</button><button class="btn small alt">Next exercise →</button></div>
+</div></div>
+<div class="note">The main screen. Big buttons for sweaty thumbs. Weight and reps are already filled in, so most sets take one tap. The rest timer starts by itself and buzzes.</div></div>
+
+<!-- 4 PROGRESS -->
+<div class="col"><div class="label">4 · Progress</div>
+<div class="phone"><div class="bar"><span>9:41</span><span>▮▮▮</span></div>
+<div class="head"><h2>Progress</h2></div>
+<div class="body">
+ <div><span class="pill on">Bench</span><span class="pill">Squat</span><span class="pill">Deadlift</span><span class="pill">Leg press</span></div>
+ <div class="card"><div class="small">Best set, estimated 1-rep max (lb)</div>
+ <svg viewBox="0 0 280 140" width="100%"><g stroke="#2c3a46"><line x1="30" y1="20" x2="275" y2="20"/><line x1="30" y1="60" x2="275" y2="60"/><line x1="30" y1="100" x2="275" y2="100"/></g>
+ <g fill="#93a4b1" font-size="10"><text x="0" y="24">280</text><text x="0" y="64">260</text><text x="0" y="104">240</text><text x="30" y="130">Sep</text><text x="140" y="130">Oct</text><text x="245" y="130">Nov</text></g>
+ <polyline fill="none" stroke="#2ec4b6" stroke-width="2.5" points="35,108 60,104 85,100 110,96 135,92 160,94 185,84 210,78 235,70 265,62"/>
+ <circle cx="265" cy="62" r="4" fill="#f2c14e"/></svg></div>
+ <div class="card"><div class="t" style="font-weight:600">Personal bests</div>
+ <div class="row" style="justify-content:space-between"><span>Heaviest</span><span>235 × 3</span></div>
+ <div class="row" style="justify-content:space-between"><span>Most reps at 225</span><span>8</span></div>
+ <div class="row" style="justify-content:space-between"><span>Est. 1-rep max</span><span style="color:var(--gold)">272 ↑</span></div></div>
+ <div class="card"><div class="t" style="font-weight:600">This week</div><div class="small">3 of 4 workouts · 41,250 lb lifted · chest 14 sets, back 16, legs 12</div></div>
+</div>
+<div class="nav"><div>Today</div><div>Plan</div><div>History</div><div class="on">Progress</div><div>Settings</div></div></div>
+<div class="note">Your numbers over time, worked out on the phone. Nothing is uploaded to draw this.</div></div>
+
+<!-- 5 SETTINGS / AI -->
+<div class="col"><div class="label">5 · Settings: AI, icons, privacy</div>
+<div class="phone" id="setPhone"><div class="bar"><span>9:41</span><span>▮▮▮</span></div>
+<div class="head"><h2>Settings</h2></div>
+<div class="body">
+ <div class="card"><div class="row" style="justify-content:space-between"><div><div style="font-weight:600">AI coach</div><div class="small">Off: the built-in plan maker is used</div></div><div class="sw" id="aiSw" onclick="toggleAI()"></div></div>
+  <div id="aiOpts" hidden>
+   <div class="q">Use</div><div data-g="1"><span class="pill on">Claude (your key)</span><span class="pill">My own server</span></div>
+   <div class="field">API key: sk-ant-••••••••••••3f9a</div>
+   <div class="field">Model: claude-sonnet-5-5</div>
+   <div class="row" style="justify-content:space-between;margin-top:10px"><span class="small">Show me what's sent before every request</span><div class="sw on"></div></div>
+   <div style="height:8px"></div><button class="btn small" onclick="openSend()">Ask AI to adjust today</button>
+  </div></div>
+ <div class="card"><div style="font-weight:600">Exercise icons</div><div class="small">Built-in set v1.0 · 142 icons</div>
+  <div class="row" style="justify-content:space-between;margin-top:8px"><span class="small">Check GitHub for new icons automatically</span><div class="sw" onclick="this.classList.toggle('on')"></div></div>
+  <div style="height:8px"></div><button class="btn small alt">Check now</button></div>
+ <div class="card"><div style="font-weight:600">Your data</div><div class="small">Stored only on this phone.</div>
+  <div class="row" style="margin-top:8px;gap:6px"><button class="btn small alt">Export backup</button><button class="btn small alt">Import</button></div></div>
+ <div class="card"><div style="font-weight:600">Privacy, in plain words</div><div class="small">No accounts. No tracking. No ads. The app only goes online when you ask the AI something (to the service you chose) or check for icons (GitHub). Nothing else, ever.</div></div>
+</div>
+<div class="nav"><div>Today</div><div>Plan</div><div>History</div><div>Progress</div><div class="on">Settings</div></div>
+<div id="sendSheet" hidden><div class="dim" onclick="closeSend()"></div><div class="sheet">
+ <div style="font-weight:700;font-size:16px">This is exactly what will be sent</div>
+ <div class="small">To: api.anthropic.com · No name, no phone ID, no location</div>
+<pre>Goal: both · 4 days/week · 60 min
+Equipment: barbell, dumbbell, machine, cable
+Go easy on: none
+Last 2 weeks:
+ Bench 225 x 6,6,6,5 (Nov 17)
+ Row 155 x 8,8,8,8 (Nov 17)
+ Squat 275 x 5,5,4 (Nov 19)
+ ...
+Ask: adjust Upper A for today.</pre>
+ <div class="row" style="gap:8px"><button class="btn alt" onclick="closeSend()">Cancel</button><button class="btn" onclick="closeSend()">Send</button></div>
+</div></div>
+</div>
+<div class="note">AI is off until you turn it on. Every request shows you the exact text first. Icon updates only if you press the button or turn the switch on.</div></div>
+
+</div>
+
+<!-- swap sheet lives in phone 2 -->
+<script>
+const ICON={
+ barbell:'<svg width="30" height="30" viewBox="0 0 30 30"><g fill="#2ec4b6"><rect x="2" y="9" width="4" height="12" rx="1"/><rect x="24" y="9" width="4" height="12" rx="1"/><rect x="6" y="11" width="3" height="8" rx="1"/><rect x="21" y="11" width="3" height="8" rx="1"/></g><rect x="9" y="14" width="12" height="2" fill="#93a4b1"/></svg>',
+ dumbbell:'<svg width="30" height="30" viewBox="0 0 30 30"><g fill="#f2c14e"><rect x="5" y="10" width="5" height="10" rx="1.5"/><rect x="20" y="10" width="5" height="10" rx="1.5"/></g><rect x="10" y="14" width="10" height="2" fill="#93a4b1"/></svg>',
+ machine:'<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#7bd389" stroke-width="2"><rect x="5" y="4" width="4" height="22"/><path d="M9 8h14M23 8v8M9 20h8l4 6"/><rect x="18" y="16" width="8" height="4" fill="#7bd389"/></svg>',
+ cable:'<svg width="30" height="30" viewBox="0 0 30 30" fill="none" stroke="#8ecae6" stroke-width="2"><path d="M6 3v24M6 5h16l-4 14"/><circle cx="18" cy="21" r="3"/></svg>'};
+let plan=[
+ {n:'Bench press',k:'barbell',t:'4 × 6 @ 230 lb',up:true},
+ {n:'Chest-supported row',k:'machine',t:'4 × 8 @ 160 lb',up:true},
+ {n:'Seated DB shoulder press',k:'dumbbell',t:'3 × 10 @ 55 lb',up:false},
+ {n:'Lat pulldown',k:'cable',t:'3 × 10 @ 150 lb',up:false},
+ {n:'Incline DB curl',k:'dumbbell',t:'3 × 12 @ 30 lb',up:true},
+ {n:'Cable triceps pushdown',k:'cable',t:'3 × 12 @ 60 lb',up:false}];
+const ALTS={0:[['Machine chest press','machine','4 × 8 @ 200 lb'],['DB bench press','dumbbell','4 × 8 @ 85 lb'],['Smith bench press','barbell','4 × 6 @ 210 lb']],
+ 1:[['Seated cable row','cable','4 × 10 @ 150 lb'],['One-arm DB row','dumbbell','4 × 10 @ 80 lb'],['Barbell row','barbell','4 × 8 @ 155 lb']]};
+function renderToday(){
+ document.getElementById('today').innerHTML=plan.map((e,i)=>`<div class="card ex"><div class="row"><div class="ic">${ICON[e.k]}</div><div style="flex:1"><div class="t">${e.n}</div><div class="s">${e.t} ${e.up?'<span style="color:var(--gold)">↑</span>':''}</div></div>${ALTS[i]?`<button class="btn small alt" onclick="openSwap(${i})">Swap</button>`:''}</div></div>`).join('');}
+renderToday();
+function openSwap(i){
+ const ph=document.querySelectorAll('.phone')[1];
+ let s=document.getElementById('swap'); if(s) s.remove();
+ s=document.createElement('div'); s.id='swap';
+ s.innerHTML=`<div class="dim" onclick="this.parentNode.remove()"></div><div class="sheet"><div style="font-weight:700;font-size:16px">Swap ${plan[i].n}</div><div class="small" style="margin-bottom:8px">Same muscles, with what your gym has</div>${ALTS[i].map((a,j)=>`<div class="card ex" style="background:var(--card2);cursor:pointer" onclick="doSwap(${i},${j})"><div class="row"><div class="ic" style="background:var(--card)">${ICON[a[1]]}</div><div><div class="t">${a[0]}</div><div class="s">${a[2]}</div></div></div></div>`).join('')}</div>`;
+ ph.appendChild(s); ph.scrollIntoView({behavior:'smooth',block:'center'});}
+function doSwap(i,j){const a=ALTS[i][j];const old=[plan[i].n,plan[i].k,plan[i].t];plan[i]={n:a[0],k:a[1],t:a[2],up:false};ALTS[i][j]=old;document.getElementById('swap').remove();renderToday();
+ if(i===0){document.getElementById('lgName').textContent=a[0];}}
+function go(id){document.getElementById(id).scrollIntoView({behavior:'smooth',block:'center'});}
+// pills
+document.querySelectorAll('.pill').forEach(p=>p.onclick=()=>{const g=p.parentNode;if(g.dataset.g)g.querySelectorAll('.pill').forEach(x=>x.classList.remove('on'));p.classList.toggle('on',g.dataset.g?true:!p.classList.contains('on'));});
+// logging
+let done=[],v={w:230,r:6};
+function adj(k,d){v[k]=Math.max(0,v[k]+d);document.getElementById(k).textContent=v[k];}
+function renderSets(){let h='';for(let i=0;i<4;i++){const d=done[i];h+=`<tr class="${d?'done':(i===done.length?'cur':'')}"><td>Set ${i+1}</td><td>${d?d.w+' lb':'230 lb'}</td><td>${d?d.r+' reps':'6 reps'}</td><td>${d?'✓':''}</td></tr>`;}document.getElementById('sets').innerHTML=h;}
+renderSets();
+let left=0,tid=null;
+function doneSet(){if(done.length>=4)return;done.push({...v});renderSets();left=150;document.getElementById('rest').hidden=false;tick();clearInterval(tid);tid=setInterval(tick,1000);}
+function tick(){document.getElementById('tm').textContent=Math.floor(left/60)+':'+String(left%60).padStart(2,'0');if(left<=0){stopRest();}left--;}
+function addRest(s){left=Math.max(0,left+s);}
+function stopRest(){clearInterval(tid);document.getElementById('rest').hidden=true;}
+// AI
+function toggleAI(){const s=document.getElementById('aiSw');s.classList.toggle('on');document.getElementById('aiOpts').hidden=!s.classList.contains('on');}
+function openSend(){document.getElementById('sendSheet').hidden=false;}
+function closeSend(){document.getElementById('sendSheet').hidden=true;}
+</script>
+</body></html>

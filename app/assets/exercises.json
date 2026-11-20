@@ -1,0 +1,6656 @@
+{
+ "version": 2,
+ "exercises": [
+  {
+   "id": "bench_press",
+   "name": "Bench press",
+   "equipment": "barbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_barbell",
+   "about": "The classic chest builder. Lie with eyes under the bar, feet planted, shoulder blades pinched. Lower to mid-chest, press up and slightly back. Keep wrists stacked over elbows."
+  },
+  {
+   "id": "db_bench_press",
+   "name": "Dumbbell bench press",
+   "equipment": "dumbbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_dumbbell",
+   "about": "Flat press with a dumbbell in each hand, so each side works on its own and you get a deeper stretch. Lower until elbows are just below the bench, then press up and slightly in."
+  },
+  {
+   "id": "machine_chest_press",
+   "name": "Machine chest press",
+   "equipment": "machine",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_machine",
+   "about": "A guided press that lets you push hard without balancing a bar. Set the seat so handles line up with mid-chest, keep your back on the pad and press until arms are nearly straight."
+  },
+  {
+   "id": "smith_bench_press",
+   "name": "Smith bench press",
+   "equipment": "smith",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_smith",
+   "about": "Bench press on a fixed track. Position the bench so the bar touches mid-chest. Good for pushing near failure without a spotter; use the safety hooks."
+  },
+  {
+   "id": "push_up",
+   "name": "Push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders",
+    "core"
+   ],
+   "pattern": "pushup",
+   "swap": "chest_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_bodyweight",
+   "about": "Hands a bit wider than shoulders, body in a straight line from head to heels. Lower your chest to the floor and push back up. Make it harder by raising your feet or adding weight."
+  },
+  {
+   "id": "dips",
+   "name": "Dips",
+   "equipment": "bodyweight",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders"
+   ],
+   "pattern": "dip",
+   "swap": "chest_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "dip_bodyweight",
+   "about": "On parallel bars, lean forward a little and lower until shoulders are just below elbows, then press up. Leaning forward hits chest more; staying upright shifts it to triceps."
+  },
+  {
+   "id": "decline_bench_press",
+   "name": "Decline bench press",
+   "equipment": "barbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_barbell",
+   "about": "Bench press with the head lower than the hips. Shorter range and easy on the shoulders; bring the bar to the lower chest."
+  },
+  {
+   "id": "decline_db_press",
+   "name": "Decline dumbbell press",
+   "equipment": "dumbbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_dumbbell",
+   "about": "Dumbbell press on a decline bench. Lower chest focus with a long, comfortable stretch."
+  },
+  {
+   "id": "floor_press",
+   "name": "Barbell floor press",
+   "equipment": "barbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_barbell",
+   "about": "Bench press lying on the floor. Elbows stop on the floor, which cuts the range and spares the shoulders while overloading the lockout."
+  },
+  {
+   "id": "db_floor_press",
+   "name": "Dumbbell floor press",
+   "equipment": "dumbbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_dumbbell",
+   "about": "Dumbbell press from the floor. Pause the elbows lightly on the ground each rep. A good shoulder-friendly option."
+  },
+  {
+   "id": "kb_floor_press",
+   "name": "Kettlebell floor press",
+   "equipment": "kettlebell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_kettlebell",
+   "about": "Press a kettlebell from the floor with the bell resting on the back of the forearm. Keep the wrist straight."
+  },
+  {
+   "id": "cable_chest_press",
+   "name": "Cable chest press",
+   "equipment": "cable",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_cable",
+   "about": "Standing or seated press between two cable stacks. Constant tension all the way through; step forward to load the start."
+  },
+  {
+   "id": "hammer_chest_press",
+   "name": "Plate-loaded chest press",
+   "equipment": "machine",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_machine",
+   "about": "Plate-loaded press with independent arms. Load it heavy; press each side evenly and control the way back."
+  },
+  {
+   "id": "weighted_push_up",
+   "name": "Weighted push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders",
+    "core"
+   ],
+   "pattern": "pushup",
+   "swap": "chest_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_bodyweight",
+   "about": "A push-up with a plate on your back or a weight vest. Log the added weight; keep the hips from sagging."
+  },
+  {
+   "id": "deficit_push_up",
+   "name": "Deficit push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "shoulders"
+   ],
+   "pattern": "pushup",
+   "swap": "chest_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_bodyweight",
+   "about": "Push-up with hands on plates or handles so the chest can go below hand level. More stretch for the chest."
+  },
+  {
+   "id": "band_chest_press",
+   "name": "Band chest press",
+   "equipment": "band",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "press",
+   "swap": "chest_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "press_band",
+   "about": "Anchor a band behind you at chest height and press forward. Handy at home or as a finisher. Log reps; use a stronger band to progress."
+  },
+  {
+   "id": "band_push_up",
+   "name": "Band push-up",
+   "equipment": "band",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps",
+    "core"
+   ],
+   "pattern": "pushup",
+   "swap": "chest_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_band",
+   "about": "Push-up with a band across your back held under each hand. The band gets harder near the top."
+  },
+  {
+   "id": "incline_bench_press",
+   "name": "Incline bench press",
+   "equipment": "barbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders",
+    "triceps"
+   ],
+   "pattern": "incline",
+   "swap": "incline_press",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "incline_barbell",
+   "about": "Bench set to about 30 degrees to work the upper chest. Lower to the top of the chest, keep shoulder blades pinned, press straight up."
+  },
+  {
+   "id": "incline_db_press",
+   "name": "Incline dumbbell press",
+   "equipment": "dumbbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders",
+    "triceps"
+   ],
+   "pattern": "incline",
+   "swap": "incline_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "incline_dumbbell",
+   "about": "Upper-chest press with dumbbells on a low incline. Let the elbows sit around 45 degrees from the body; press up and slightly together."
+  },
+  {
+   "id": "incline_machine_press",
+   "name": "Incline machine press",
+   "equipment": "machine",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders",
+    "triceps"
+   ],
+   "pattern": "incline",
+   "swap": "incline_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "incline_machine",
+   "about": "Machine press angled upward for the upper chest. Keep the chest up and the back on the pad."
+  },
+  {
+   "id": "smith_incline_press",
+   "name": "Smith incline press",
+   "equipment": "smith",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders",
+    "triceps"
+   ],
+   "pattern": "incline",
+   "swap": "incline_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "incline_smith",
+   "about": "Incline press on a fixed track. Line the bar up with the upper chest; easy to push near failure safely."
+  },
+  {
+   "id": "cable_incline_press",
+   "name": "Low-to-high cable press",
+   "equipment": "cable",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders",
+    "triceps"
+   ],
+   "pattern": "incline",
+   "swap": "incline_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "incline_cable",
+   "about": "Press from low pulleys up and forward for the upper chest with constant tension."
+  },
+  {
+   "id": "landmine_chest_press",
+   "name": "Landmine chest press",
+   "equipment": "barbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders",
+    "triceps"
+   ],
+   "pattern": "incline",
+   "swap": "incline_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "incline_barbell",
+   "about": "Press one end of a landmine bar up from the chest, kneeling or standing. Shoulder-friendly upper-chest pressing."
+  },
+  {
+   "id": "reverse_grip_bench",
+   "name": "Reverse-grip bench press",
+   "equipment": "barbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "incline",
+   "swap": "incline_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "incline_barbell",
+   "about": "Bench press with palms facing you. Hits the upper chest and triceps; use a spotter and a careful grip."
+  },
+  {
+   "id": "incline_push_up",
+   "name": "Incline push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "pushup",
+   "swap": "incline_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_bodyweight",
+   "about": "Push-up with hands on a bench. Easier than the floor; good for high reps or warm-ups."
+  },
+  {
+   "id": "decline_push_up",
+   "name": "Decline push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders",
+    "triceps"
+   ],
+   "pattern": "pushup",
+   "swap": "incline_press",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_bodyweight",
+   "about": "Push-up with feet raised on a bench, which shifts work toward the upper chest and shoulders."
+  },
+  {
+   "id": "pec_deck",
+   "name": "Pec deck",
+   "equipment": "machine",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_machine",
+   "about": "Machine fly. Sit tall, slight bend in the elbows, bring the handles together in a hugging arc and squeeze. Do not let the arms swing too far back."
+  },
+  {
+   "id": "cable_fly",
+   "name": "Cable fly",
+   "equipment": "cable",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_cable",
+   "about": "Stand between two high pulleys and bring the handles together in front of you. Constant tension; think of hugging a big tree."
+  },
+  {
+   "id": "db_fly",
+   "name": "Dumbbell fly",
+   "equipment": "dumbbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_dumbbell",
+   "about": "Lie flat, arms slightly bent, open wide until you feel a chest stretch, then bring the weights back up in an arc. Go light and controlled."
+  },
+  {
+   "id": "low_cable_fly",
+   "name": "Low-to-high cable fly",
+   "equipment": "cable",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders"
+   ],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_cable",
+   "about": "Fly from low pulleys up to face height for the upper chest."
+  },
+  {
+   "id": "incline_db_fly",
+   "name": "Incline dumbbell fly",
+   "equipment": "dumbbell",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders"
+   ],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_dumbbell",
+   "about": "Fly on an incline bench for the upper chest. Keep the elbows soft and stop at a comfortable stretch."
+  },
+  {
+   "id": "band_fly",
+   "name": "Band fly",
+   "equipment": "band",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_band",
+   "about": "Anchor a band behind you and bring the ends together in front. A light pump exercise for the chest."
+  },
+  {
+   "id": "svend_press",
+   "name": "Plate squeeze press",
+   "equipment": "bodyweight",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [
+    "shoulders"
+   ],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_bodyweight",
+   "about": "Squeeze a plate between your palms at chest height and press it straight out. Constant inner-chest squeeze; log the plate weight."
+  },
+  {
+   "id": "cable_crossover_low",
+   "name": "Cable crossover",
+   "equipment": "cable",
+   "primary": [
+    "chest"
+   ],
+   "secondary": [],
+   "pattern": "fly",
+   "swap": "chest_fly",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "fly_cable",
+   "about": "Pulleys at shoulder height, step forward and cross the hands slightly at the end. Great finisher for a chest day."
+  },
+  {
+   "id": "overhead_press",
+   "name": "Overhead press",
+   "equipment": "barbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps",
+    "core"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders",
+    "lowerBack",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_barbell",
+   "about": "Standing barbell press. Squeeze glutes and brace, press the bar straight up past your face, then push your head through at the top. Do not lean back."
+  },
+  {
+   "id": "seated_db_press",
+   "name": "Seated dumbbell shoulder press",
+   "equipment": "dumbbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_dumbbell",
+   "about": "Sit with back support, dumbbells at ear height, press up until arms are nearly straight. Keep the ribs down."
+  },
+  {
+   "id": "machine_shoulder_press",
+   "name": "Machine shoulder press",
+   "equipment": "machine",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_machine",
+   "about": "Guided overhead press. Set the seat so handles start at shoulder height and press without arching your lower back."
+  },
+  {
+   "id": "smith_overhead_press",
+   "name": "Smith overhead press",
+   "equipment": "smith",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_smith",
+   "about": "Standing or seated press on the Smith track; lets you focus on pushing hard."
+  },
+  {
+   "id": "kb_press",
+   "name": "Kettlebell press",
+   "equipment": "kettlebell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps",
+    "core"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_kettlebell",
+   "about": "Clean a kettlebell to the shoulder and press it overhead, fist up, biceps by the ear. Works shoulders and core stability."
+  },
+  {
+   "id": "landmine_press",
+   "name": "Landmine press",
+   "equipment": "barbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "chest",
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_barbell",
+   "about": "Press the end of a landmine bar up and forward with one arm. Very shoulder-friendly pressing."
+  },
+  {
+   "id": "smith_shoulder_press_seated",
+   "name": "Seated Smith shoulder press",
+   "equipment": "smith",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_smith",
+   "about": "Seated press on the Smith machine with back support."
+  },
+  {
+   "id": "seated_barbell_press",
+   "name": "Seated barbell press",
+   "equipment": "barbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_barbell",
+   "about": "Overhead press from a seat with back support. Less lower-back demand than standing."
+  },
+  {
+   "id": "push_press",
+   "name": "Push press",
+   "equipment": "barbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps",
+    "quads"
+   ],
+   "pattern": "olympic",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders",
+    "lowerBack"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_barbell",
+   "about": "Dip the knees slightly and drive up to help the bar overhead, then lock it out. Lets you handle more than a strict press."
+  },
+  {
+   "id": "arnold_press",
+   "name": "Arnold press",
+   "equipment": "dumbbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_dumbbell",
+   "about": "Start palms facing you at chin height, rotate them outward as you press up. Works all three heads of the shoulder."
+  },
+  {
+   "id": "standing_db_press",
+   "name": "Standing dumbbell press",
+   "equipment": "dumbbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps",
+    "core"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_dumbbell",
+   "about": "Standing press with dumbbells; brace the core and keep ribs down."
+  },
+  {
+   "id": "pike_push_up",
+   "name": "Pike push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "pushup",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_bodyweight",
+   "about": "Hips high in an upside-down V, lower your head toward the floor between your hands. Bodyweight shoulder press."
+  },
+  {
+   "id": "handstand_push_up",
+   "name": "Handstand push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_bodyweight",
+   "about": "Kick up to a handstand against a wall and lower your head to the floor, then press back up. Advanced."
+  },
+  {
+   "id": "band_overhead_press",
+   "name": "Band overhead press",
+   "equipment": "band",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_band",
+   "about": "Stand on a band and press the handles overhead. Light, joint-friendly pressing."
+  },
+  {
+   "id": "z_press",
+   "name": "Z press",
+   "equipment": "barbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "triceps",
+    "core"
+   ],
+   "pattern": "overhead",
+   "swap": "overhead_press",
+   "joints": [
+    "shoulders",
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "overhead_barbell",
+   "about": "Seated on the floor, legs straight, press a barbell overhead. Brutal for core and strict shoulder strength."
+  },
+  {
+   "id": "db_lateral_raise",
+   "name": "Dumbbell lateral raise",
+   "equipment": "dumbbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_dumbbell",
+   "about": "Raise dumbbells out to the sides until arms are level with shoulders, leading with the elbows. Light weight, no swinging. Builds wider shoulders."
+  },
+  {
+   "id": "cable_lateral_raise",
+   "name": "Cable lateral raise",
+   "equipment": "cable",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_cable",
+   "about": "One arm at a time from a low pulley across the body. Constant tension on the side delt."
+  },
+  {
+   "id": "machine_lateral_raise",
+   "name": "Machine lateral raise",
+   "equipment": "machine",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_machine",
+   "about": "Pads on the upper arms; raise to shoulder height. Easy to keep strict."
+  },
+  {
+   "id": "kb_lateral_raise",
+   "name": "Kettlebell lateral raise",
+   "equipment": "kettlebell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_kettlebell",
+   "about": "Lateral raise holding kettlebells by the handle. Same form as dumbbells."
+  },
+  {
+   "id": "upright_row_cable",
+   "name": "Cable upright row",
+   "equipment": "cable",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "traps"
+   ],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_cable",
+   "about": "Pull a bar or rope up along the body to chest height, elbows high and wide. Stop before shoulders pinch."
+  },
+  {
+   "id": "lean_away_lateral",
+   "name": "Leaning lateral raise",
+   "equipment": "dumbbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_dumbbell",
+   "about": "Hold a post and lean away, raise one dumbbell out to the side. Longer range for the side delt."
+  },
+  {
+   "id": "band_lateral_raise",
+   "name": "Band lateral raise",
+   "equipment": "band",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_band",
+   "about": "Stand on a band and raise the ends out to the sides. Good high-rep pump."
+  },
+  {
+   "id": "barbell_upright_row",
+   "name": "Barbell upright row",
+   "equipment": "barbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [
+    "traps"
+   ],
+   "pattern": "lateral",
+   "swap": "lateral_raise",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "lateral_barbell",
+   "about": "Pull a barbell up close to the body to chest height, elbows leading. Use a wider grip to keep it shoulder-friendly."
+  },
+  {
+   "id": "db_front_raise",
+   "name": "Dumbbell front raise",
+   "equipment": "dumbbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "frontraise",
+   "swap": "front_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "frontraise_dumbbell",
+   "about": "Raise dumbbells straight in front to shoulder height. Works the front delt; often already busy from pressing, so keep it light."
+  },
+  {
+   "id": "cable_front_raise",
+   "name": "Cable front raise",
+   "equipment": "cable",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "frontraise",
+   "swap": "front_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "frontraise_cable",
+   "about": "Front raise from a low pulley between the legs. Smooth tension through the whole lift."
+  },
+  {
+   "id": "plate_front_raise",
+   "name": "Plate front raise",
+   "equipment": "bodyweight",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "frontraise",
+   "swap": "front_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "frontraise_bodyweight",
+   "about": "Hold a plate at both sides and raise it to eye level. Log the plate weight."
+  },
+  {
+   "id": "barbell_front_raise",
+   "name": "Barbell front raise",
+   "equipment": "barbell",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "frontraise",
+   "swap": "front_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "frontraise_barbell",
+   "about": "Front raise with a light barbell or EZ bar, arms nearly straight."
+  },
+  {
+   "id": "band_front_raise",
+   "name": "Band front raise",
+   "equipment": "band",
+   "primary": [
+    "shoulders"
+   ],
+   "secondary": [],
+   "pattern": "frontraise",
+   "swap": "front_raise",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "frontraise_band",
+   "about": "Stand on a band and raise it in front to shoulder height."
+  },
+  {
+   "id": "reverse_pec_deck",
+   "name": "Reverse pec deck",
+   "equipment": "machine",
+   "primary": [
+    "rear_delts"
+   ],
+   "secondary": [
+    "traps"
+   ],
+   "pattern": "rear",
+   "swap": "rear_delt",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rear_machine",
+   "about": "Face the pec deck and open the arms back in a wide arc. Works the rear shoulder, which balances all the pressing."
+  },
+  {
+   "id": "face_pull",
+   "name": "Face pull",
+   "equipment": "cable",
+   "primary": [
+    "rear_delts"
+   ],
+   "secondary": [
+    "traps"
+   ],
+   "pattern": "rear",
+   "swap": "rear_delt",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rear_cable",
+   "about": "Rope at face height, pull toward your forehead with elbows high and hands apart. Great for shoulder health."
+  },
+  {
+   "id": "db_rear_delt_fly",
+   "name": "Dumbbell rear delt fly",
+   "equipment": "dumbbell",
+   "primary": [
+    "rear_delts"
+   ],
+   "secondary": [
+    "traps"
+   ],
+   "pattern": "rear",
+   "swap": "rear_delt",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rear_dumbbell",
+   "about": "Bend forward with a flat back and raise light dumbbells out to the sides. Lead with the elbows."
+  },
+  {
+   "id": "cable_rear_delt_fly",
+   "name": "Cable rear delt fly",
+   "equipment": "cable",
+   "primary": [
+    "rear_delts"
+   ],
+   "secondary": [],
+   "pattern": "rear",
+   "swap": "rear_delt",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rear_cable",
+   "about": "Cross the cables at shoulder height and pull them apart behind you. Constant tension on the rear delts."
+  },
+  {
+   "id": "band_pull_apart",
+   "name": "Band pull-apart",
+   "equipment": "band",
+   "primary": [
+    "rear_delts"
+   ],
+   "secondary": [
+    "traps"
+   ],
+   "pattern": "rear",
+   "swap": "rear_delt",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "rear_band",
+   "about": "Hold a band at shoulder height with straight arms and pull it apart to your chest. Simple, great warm-up."
+  },
+  {
+   "id": "chest_supported_rear_fly",
+   "name": "Chest-supported rear fly",
+   "equipment": "dumbbell",
+   "primary": [
+    "rear_delts"
+   ],
+   "secondary": [
+    "traps"
+   ],
+   "pattern": "rear",
+   "swap": "rear_delt",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rear_dumbbell",
+   "about": "Lie chest-down on an incline bench and raise dumbbells out to the sides. Takes the lower back out of it."
+  },
+  {
+   "id": "barbell_row",
+   "name": "Barbell row",
+   "equipment": "barbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_barbell",
+   "about": "Hinge forward with a flat back, pull the bar to your lower ribs, squeeze, lower under control. Keep the torso still."
+  },
+  {
+   "id": "one_arm_db_row",
+   "name": "One-arm dumbbell row",
+   "equipment": "dumbbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_dumbbell",
+   "about": "One hand and knee on a bench, pull the dumbbell toward your hip. Big range, easy on the lower back."
+  },
+  {
+   "id": "chest_supported_row",
+   "name": "Chest-supported row",
+   "equipment": "machine",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_machine",
+   "about": "Chest on the pad, pull the handles back and squeeze the shoulder blades. No lower-back strain."
+  },
+  {
+   "id": "seated_cable_row",
+   "name": "Seated cable row",
+   "equipment": "cable",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_cable",
+   "about": "Sit tall, pull the handle to your stomach, chest up, then let the shoulders stretch forward. Do not rock."
+  },
+  {
+   "id": "t_bar_row",
+   "name": "T-bar row",
+   "equipment": "barbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_barbell",
+   "about": "Straddle a landmine bar and row the handle to your chest. Heavy upper-back work."
+  },
+  {
+   "id": "smith_row",
+   "name": "Smith row",
+   "equipment": "smith",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_smith",
+   "about": "Bent-over row on the Smith track. Steady path, lets you focus on the squeeze."
+  },
+  {
+   "id": "chest_supported_db_row",
+   "name": "Chest-supported dumbbell row",
+   "equipment": "dumbbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_dumbbell",
+   "about": "Lie chest-down on an incline bench and row two dumbbells. Strict and back-friendly."
+  },
+  {
+   "id": "inverted_row",
+   "name": "Inverted row",
+   "equipment": "bodyweight",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "row_bodyweight",
+   "about": "Hang under a bar or Smith bar with straight body, pull your chest up to it. Lower the bar or raise feet to make it harder."
+  },
+  {
+   "id": "kb_row",
+   "name": "Kettlebell row",
+   "equipment": "kettlebell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_kettlebell",
+   "about": "One-arm row with a kettlebell; same form as the dumbbell row."
+  },
+  {
+   "id": "cable_row_wide",
+   "name": "Wide-grip cable row",
+   "equipment": "cable",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_cable",
+   "about": "Seated row with a wide bar, pulling to the upper stomach with elbows out. More upper back and rear delt."
+  },
+  {
+   "id": "machine_row",
+   "name": "Machine row",
+   "equipment": "machine",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_machine",
+   "about": "Seated row machine. Chest on the pad, drive elbows back."
+  },
+  {
+   "id": "pendlay_row",
+   "name": "Pendlay row",
+   "equipment": "barbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_barbell",
+   "about": "Barbell row from the floor each rep with the torso near flat. Explosive pull, reset on the ground."
+  },
+  {
+   "id": "seal_row",
+   "name": "Seal row",
+   "equipment": "barbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_barbell",
+   "about": "Lie face down on a high bench and row the bar up to it. Zero cheating, zero lower-back load."
+  },
+  {
+   "id": "meadows_row",
+   "name": "Meadows row",
+   "equipment": "barbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_barbell",
+   "about": "Stand side-on to a landmine and row the bar end with one hand. Big stretch for the lats."
+  },
+  {
+   "id": "yates_row",
+   "name": "Underhand barbell row",
+   "equipment": "barbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_barbell",
+   "about": "Barbell row with palms up and a more upright torso, pulling to the stomach. More lats and biceps."
+  },
+  {
+   "id": "single_arm_cable_row",
+   "name": "Single-arm cable row",
+   "equipment": "cable",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_cable",
+   "about": "Seated or standing one-arm row from a cable. Let the shoulder reach forward, then pull to the hip."
+  },
+  {
+   "id": "band_row",
+   "name": "Band row",
+   "equipment": "band",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "row_band",
+   "about": "Anchor a band at chest height and row it to your stomach. Good at home or as a warm-up."
+  },
+  {
+   "id": "iso_lateral_row",
+   "name": "Plate-loaded high row",
+   "equipment": "machine",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps",
+    "rear_delts"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "row_machine",
+   "about": "Plate-loaded row pulling down and back. Works the upper back and lats hard."
+  },
+  {
+   "id": "trx_row",
+   "name": "Suspension row",
+   "equipment": "bodyweight",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "row",
+   "swap": "row",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "row_bodyweight",
+   "about": "Lean back holding suspension straps and pull your chest to the handles. Walk feet forward to make it harder."
+  },
+  {
+   "id": "lat_pulldown",
+   "name": "Lat pulldown",
+   "equipment": "cable",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_cable",
+   "about": "Grip a little wider than shoulders, pull the bar to your upper chest, elbows down and back. Lean back only slightly."
+  },
+  {
+   "id": "pull_up",
+   "name": "Pull-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_bodyweight",
+   "about": "Hang with palms away, pull until your chin is over the bar, lower all the way. Add weight with a belt when you can do plenty."
+  },
+  {
+   "id": "chin_up",
+   "name": "Chin-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_bodyweight",
+   "about": "Pull-up with palms facing you. More biceps, often easier than a pull-up."
+  },
+  {
+   "id": "machine_pulldown",
+   "name": "Machine pulldown",
+   "equipment": "machine",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_machine",
+   "about": "Lever pulldown machine. Pull the handles down toward your sides and squeeze the lats."
+  },
+  {
+   "id": "assisted_pull_up",
+   "name": "Assisted pull-up machine",
+   "equipment": "machine",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_machine",
+   "about": "Pull-up with a pad pushing you up. Log the assistance as the weight; less assistance means progress."
+  },
+  {
+   "id": "close_grip_pulldown",
+   "name": "Close-grip pulldown",
+   "equipment": "cable",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_cable",
+   "about": "Pulldown with a narrow V-handle to the upper chest. Long range for the lats."
+  },
+  {
+   "id": "neutral_grip_pull_up",
+   "name": "Neutral-grip pull-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_bodyweight",
+   "about": "Pull-up on parallel handles, palms facing each other. The most joint-friendly pull-up grip."
+  },
+  {
+   "id": "single_arm_pulldown",
+   "name": "Single-arm cable pulldown",
+   "equipment": "cable",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_cable",
+   "about": "Kneel or sit and pull one handle down to your side. Lets each lat work fully."
+  },
+  {
+   "id": "band_pulldown",
+   "name": "Band pulldown",
+   "equipment": "band",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_band",
+   "about": "Anchor a band high and pull it down to your chest, elbows to the sides."
+  },
+  {
+   "id": "band_assisted_pull_up",
+   "name": "Band-assisted pull-up",
+   "equipment": "band",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_band",
+   "about": "Pull-up with a band under your knee or foot to help. Use thinner bands as you get stronger."
+  },
+  {
+   "id": "kneeling_lat_pulldown",
+   "name": "Kneeling cable pulldown",
+   "equipment": "cable",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "pulldown",
+   "swap": "vertical_pull",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "pulldown_cable",
+   "about": "Kneel in front of a high cable and pull a bar down to your chest. Simple alternative when the pulldown station is busy."
+  },
+  {
+   "id": "straight_arm_pulldown",
+   "name": "Straight-arm pulldown",
+   "equipment": "cable",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [],
+   "pattern": "pullover",
+   "swap": "lat_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pullover_cable",
+   "about": "Arms nearly straight, push the bar or rope from eye level down to your thighs. Feels the lats without the biceps."
+  },
+  {
+   "id": "db_pullover",
+   "name": "Dumbbell pullover",
+   "equipment": "dumbbell",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [
+    "chest"
+   ],
+   "pattern": "pullover",
+   "swap": "lat_iso",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pullover_dumbbell",
+   "about": "Lie across a bench holding one dumbbell over your chest, lower it behind your head, pull it back over. Stretches lats and chest."
+  },
+  {
+   "id": "machine_pullover",
+   "name": "Pullover machine",
+   "equipment": "machine",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [],
+   "pattern": "pullover",
+   "swap": "lat_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pullover_machine",
+   "about": "Machine that lets the lats pull the arms down in an arc. Very direct lat work."
+  },
+  {
+   "id": "band_straight_arm_pulldown",
+   "name": "Band straight-arm pulldown",
+   "equipment": "band",
+   "primary": [
+    "lats"
+   ],
+   "secondary": [],
+   "pattern": "pullover",
+   "swap": "lat_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "pullover_band",
+   "about": "Straight-arm pulldown with a band anchored high."
+  },
+  {
+   "id": "back_squat",
+   "name": "Back squat",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees",
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_barbell",
+   "about": "Bar on the upper back, brace hard, sit down between your hips until thighs are at least level, stand up driving through the whole foot. Knees track over toes."
+  },
+  {
+   "id": "front_squat",
+   "name": "Front squat",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees",
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_barbell",
+   "about": "Bar resting on the front of the shoulders, elbows high. Upright torso, very quad-heavy and easier on the back."
+  },
+  {
+   "id": "leg_press",
+   "name": "Leg press",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "legpress",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "legpress_machine",
+   "about": "Feet shoulder-width on the platform, lower until knees are well bent without the lower back lifting, press back up. Big leg work with no balance needed."
+  },
+  {
+   "id": "hack_squat",
+   "name": "Hack squat",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_machine",
+   "about": "Back on the pad, shoulders under the pads, squat deep. Heavy quad work with the back supported."
+  },
+  {
+   "id": "smith_squat",
+   "name": "Smith squat",
+   "equipment": "smith",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_smith",
+   "about": "Squat on the Smith track. Feet slightly in front lets you sit back; good for pushing hard safely."
+  },
+  {
+   "id": "goblet_squat",
+   "name": "Goblet squat",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_dumbbell",
+   "about": "Hold one dumbbell at your chest and squat between your knees. Teaches a great upright squat."
+  },
+  {
+   "id": "kb_goblet_squat",
+   "name": "Kettlebell goblet squat",
+   "equipment": "kettlebell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_kettlebell",
+   "about": "Goblet squat holding a kettlebell by the horns at your chest. Sit down between your knees with an upright torso."
+  },
+  {
+   "id": "pendulum_squat",
+   "name": "Pendulum squat",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_machine",
+   "about": "Swinging-arc squat machine. Deep knee bend, very quad-focused, light on the back."
+  },
+  {
+   "id": "belt_squat",
+   "name": "Belt squat",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_machine",
+   "about": "Load hangs from a hip belt, so legs work hard with no load on the spine."
+  },
+  {
+   "id": "safety_bar_squat",
+   "name": "Safety bar squat",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_barbell",
+   "about": "Squat with a cambered, padded bar and handles in front. Easier on shoulders and wrists."
+  },
+  {
+   "id": "box_squat",
+   "name": "Box squat",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "hamstrings"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees",
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_barbell",
+   "about": "Sit back onto a box, pause, then stand. Teaches depth and builds power out of the hole."
+  },
+  {
+   "id": "pause_squat",
+   "name": "Pause squat",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees",
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_barbell",
+   "about": "Back squat with a 2-second pause at the bottom. Builds strength where most people stall."
+  },
+  {
+   "id": "zercher_squat",
+   "name": "Zercher squat",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_barbell",
+   "about": "Hold the bar in the crook of the elbows and squat. Very upright, hard on the core."
+  },
+  {
+   "id": "db_squat",
+   "name": "Dumbbell squat",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_dumbbell",
+   "about": "Squat holding a dumbbell in each hand at your sides. Keep the chest up and sit between the hips; a simple way to load squats without a rack."
+  },
+  {
+   "id": "air_squat",
+   "name": "Bodyweight squat",
+   "equipment": "bodyweight",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_bodyweight",
+   "about": "Squat with no weight, arms forward for balance. Warm-up or high-rep finisher."
+  },
+  {
+   "id": "v_squat",
+   "name": "V-squat machine",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_machine",
+   "about": "Plate-loaded squat machine with shoulder pads; quad-friendly and stable."
+  },
+  {
+   "id": "band_squat",
+   "name": "Band squat",
+   "equipment": "band",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "squat",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "squat_band",
+   "about": "Stand on a band with it over the shoulders and squat. Gets harder at the top."
+  },
+  {
+   "id": "leg_press_single",
+   "name": "Single-leg leg press",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "legpress",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "legpress_machine",
+   "about": "Leg press with one leg at a time. Evens out left/right differences."
+  },
+  {
+   "id": "horizontal_leg_press",
+   "name": "Seated leg press",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "legpress",
+   "swap": "squat",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "legpress_machine",
+   "about": "Seated horizontal leg press. Same idea as the sled; keep the lower back on the pad."
+  },
+  {
+   "id": "db_split_squat",
+   "name": "Dumbbell Bulgarian split squat",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_dumbbell",
+   "about": "Back foot on a bench, front foot forward, drop straight down until the back knee nearly touches the floor. Tough but very effective."
+  },
+  {
+   "id": "walking_lunge",
+   "name": "Dumbbell walking lunge",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_dumbbell",
+   "about": "Step forward into a lunge, push through the front heel and step into the next one. Keep the torso tall."
+  },
+  {
+   "id": "smith_split_squat",
+   "name": "Smith split squat",
+   "equipment": "smith",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_smith",
+   "about": "Split squat on the Smith track for extra balance."
+  },
+  {
+   "id": "db_step_up",
+   "name": "Dumbbell step-up",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_dumbbell",
+   "about": "Step onto a box with one foot and stand up fully, without pushing off the back foot. Lower slowly."
+  },
+  {
+   "id": "reverse_lunge",
+   "name": "Barbell reverse lunge",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_barbell",
+   "about": "Step back into a lunge and return. Easier on the knees than forward lunges."
+  },
+  {
+   "id": "kb_lunge",
+   "name": "Kettlebell lunge",
+   "equipment": "kettlebell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_kettlebell",
+   "about": "Lunge holding a kettlebell in each hand or at the chest."
+  },
+  {
+   "id": "db_reverse_lunge",
+   "name": "Dumbbell reverse lunge",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_dumbbell",
+   "about": "Step back into a lunge holding dumbbells. Knee-friendly single-leg work."
+  },
+  {
+   "id": "barbell_split_squat",
+   "name": "Barbell split squat",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_barbell",
+   "about": "Split stance with a bar on your back, drop the back knee toward the floor."
+  },
+  {
+   "id": "bodyweight_lunge",
+   "name": "Bodyweight lunge",
+   "equipment": "bodyweight",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_bodyweight",
+   "about": "Lunges with no load. Good warm-up or high-rep burnout."
+  },
+  {
+   "id": "lateral_lunge",
+   "name": "Lateral lunge",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "adductors"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_dumbbell",
+   "about": "Step wide to the side and sit into that hip, other leg straight. Works inner thighs too."
+  },
+  {
+   "id": "curtsy_lunge",
+   "name": "Curtsy lunge",
+   "equipment": "dumbbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "quads"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_dumbbell",
+   "about": "Step one leg behind and across, like a curtsy. Hits the outer glutes."
+  },
+  {
+   "id": "pistol_squat",
+   "name": "Pistol squat",
+   "equipment": "bodyweight",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_bodyweight",
+   "about": "Squat all the way down on one leg with the other straight in front. Advanced balance and strength."
+  },
+  {
+   "id": "cable_split_squat",
+   "name": "Cable split squat",
+   "equipment": "cable",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_cable",
+   "about": "Split squat holding a low cable handle. Smooth constant load."
+  },
+  {
+   "id": "band_split_squat",
+   "name": "Band split squat",
+   "equipment": "band",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "lunge",
+   "swap": "lunge",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "lunge_band",
+   "about": "Split squat standing on a band held at the shoulders."
+  },
+  {
+   "id": "deadlift",
+   "name": "Deadlift",
+   "equipment": "barbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes",
+    "back"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Bar over mid-foot, grip just outside the legs, chest up and back flat. Push the floor away and stand tall; lower the same way. Brace before every rep."
+  },
+  {
+   "id": "romanian_deadlift",
+   "name": "Romanian deadlift",
+   "equipment": "barbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Start standing, push the hips back with soft knees, slide the bar down the thighs until hamstrings stretch, then drive the hips forward."
+  },
+  {
+   "id": "db_romanian_deadlift",
+   "name": "Dumbbell Romanian deadlift",
+   "equipment": "dumbbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_dumbbell",
+   "about": "Romanian deadlift with dumbbells in front of the thighs. Hips back, flat back, feel the stretch."
+  },
+  {
+   "id": "trap_bar_deadlift",
+   "name": "Trap bar deadlift",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "hamstrings",
+    "glutes",
+    "back"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Stand inside a hex bar and lift with a more upright torso. Easier on the back than a straight-bar deadlift."
+  },
+  {
+   "id": "kb_swing",
+   "name": "Kettlebell swing",
+   "equipment": "kettlebell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_kettlebell",
+   "about": "Hike the bell back between the legs, snap the hips forward to float it to chest height. Power from the hips, not the arms."
+  },
+  {
+   "id": "smith_rdl",
+   "name": "Smith Romanian deadlift",
+   "equipment": "smith",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_smith",
+   "about": "Romanian deadlift on the Smith machine. A fixed path that helps you focus on the hamstrings."
+  },
+  {
+   "id": "back_extension",
+   "name": "45\u00b0 back extension",
+   "equipment": "bodyweight",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes",
+    "back"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "hinge_bodyweight",
+   "about": "Hips on the pad, lower your chest toward the floor and raise back to a straight line. Hold a plate to load it."
+  },
+  {
+   "id": "cable_pull_through",
+   "name": "Cable pull-through",
+   "equipment": "cable",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "hinge_cable",
+   "about": "Face away from a low cable with a rope between your legs, hinge back and drive the hips forward. Teaches the hip hinge."
+  },
+  {
+   "id": "kb_deadlift",
+   "name": "Kettlebell deadlift",
+   "equipment": "kettlebell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_kettlebell",
+   "about": "Deadlift a kettlebell from between the feet. A gentle way to learn the movement."
+  },
+  {
+   "id": "sumo_deadlift",
+   "name": "Sumo deadlift",
+   "equipment": "barbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings",
+    "quads",
+    "adductors"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Wide stance, hands inside the knees, push the knees out and stand up. Shorter range and more upright."
+  },
+  {
+   "id": "stiff_leg_deadlift",
+   "name": "Stiff-leg deadlift",
+   "equipment": "barbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes",
+    "back"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Deadlift with nearly straight legs from the floor. Long hamstring stretch; go lighter than a normal deadlift."
+  },
+  {
+   "id": "good_morning",
+   "name": "Good morning",
+   "equipment": "barbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes",
+    "back"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Bar on the back, push the hips back with soft knees until your torso is near level, then stand. Light and strict."
+  },
+  {
+   "id": "single_leg_rdl",
+   "name": "Single-leg Romanian deadlift",
+   "equipment": "dumbbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes",
+    "core"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_dumbbell",
+   "about": "Hinge on one leg with the other reaching back, dumbbell in the opposite hand. Balance and hamstrings in one."
+  },
+  {
+   "id": "rack_pull",
+   "name": "Rack pull",
+   "equipment": "barbell",
+   "primary": [
+    "back"
+   ],
+   "secondary": [
+    "glutes",
+    "hamstrings",
+    "traps"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Deadlift from pins at knee height. Overloads the top half and the upper back."
+  },
+  {
+   "id": "deficit_deadlift",
+   "name": "Deficit deadlift",
+   "equipment": "barbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes",
+    "back",
+    "quads"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "hinge_barbell",
+   "about": "Deadlift standing on a plate so the bar starts lower. Builds speed off the floor."
+  },
+  {
+   "id": "reverse_hyper",
+   "name": "Reverse hyper",
+   "equipment": "machine",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings",
+    "back"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "hinge_machine",
+   "about": "Lie face down on the machine and swing the legs up behind you. Strengthens the lower back without loading the spine."
+  },
+  {
+   "id": "band_good_morning",
+   "name": "Band good morning",
+   "equipment": "band",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes",
+    "back"
+   ],
+   "pattern": "hinge",
+   "swap": "hinge",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "hinge_band",
+   "about": "Stand on a band looped behind the neck and hinge forward. Light hinge practice."
+  },
+  {
+   "id": "glute_ham_raise",
+   "name": "Glute-ham raise",
+   "equipment": "bodyweight",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_bodyweight",
+   "about": "On a GHD, lower your body forward from the knees and curl yourself back up with the hamstrings. Very hard; use arms to assist at first."
+  },
+  {
+   "id": "hip_thrust",
+   "name": "Barbell hip thrust",
+   "equipment": "barbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_barbell",
+   "about": "Upper back on a bench, bar over the hips, drive the hips up until the body is flat, squeeze hard at the top, chin tucked."
+  },
+  {
+   "id": "machine_hip_thrust",
+   "name": "Machine hip thrust",
+   "equipment": "machine",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_machine",
+   "about": "Hip thrust machine with a padded belt. Same movement with easier setup."
+  },
+  {
+   "id": "smith_hip_thrust",
+   "name": "Smith hip thrust",
+   "equipment": "smith",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_smith",
+   "about": "Hip thrust under the Smith bar for a stable path."
+  },
+  {
+   "id": "db_hip_thrust",
+   "name": "Dumbbell hip thrust",
+   "equipment": "dumbbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_dumbbell",
+   "about": "Hip thrust with a dumbbell held across the hips. Upper back on a bench, drive the hips up to a flat line and squeeze the glutes at the top."
+  },
+  {
+   "id": "glute_bridge",
+   "name": "Glute bridge",
+   "equipment": "bodyweight",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_bodyweight",
+   "about": "Lying on the floor, drive the hips up and squeeze. Add a weight on the hips to progress."
+  },
+  {
+   "id": "barbell_glute_bridge",
+   "name": "Barbell glute bridge",
+   "equipment": "barbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_barbell",
+   "about": "Glute bridge from the floor with a barbell over the hips. Shorter range, can go heavy."
+  },
+  {
+   "id": "single_leg_hip_thrust",
+   "name": "Single-leg hip thrust",
+   "equipment": "bodyweight",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_bodyweight",
+   "about": "Hip thrust on one leg. Hard without any weight."
+  },
+  {
+   "id": "band_hip_thrust",
+   "name": "Band hip thrust",
+   "equipment": "band",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_band",
+   "about": "Hip thrust with a band pinned over the hips. Gets hardest at the top."
+  },
+  {
+   "id": "kb_hip_thrust",
+   "name": "Kettlebell hip thrust",
+   "equipment": "kettlebell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings"
+   ],
+   "pattern": "thrust",
+   "swap": "glute",
+   "joints": [],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "thrust_kettlebell",
+   "about": "Hip thrust with a kettlebell held on the hips. Good when the barbell is busy; squeeze hard at the top."
+  },
+  {
+   "id": "glute_kickback",
+   "name": "Cable glute kickback",
+   "equipment": "cable",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [],
+   "pattern": "kickback",
+   "swap": "glute_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "kickback_cable",
+   "about": "Ankle strap on a low cable, kick the leg straight back without arching the lower back."
+  },
+  {
+   "id": "hip_abduction",
+   "name": "Hip abduction machine",
+   "equipment": "machine",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [],
+   "pattern": "abduction",
+   "swap": "glute_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "abduction_machine",
+   "about": "Sit and push the pads outward. Works the side glutes that steady your hips."
+  },
+  {
+   "id": "machine_glute_kickback",
+   "name": "Glute kickback machine",
+   "equipment": "machine",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [],
+   "pattern": "kickback",
+   "swap": "glute_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "kickback_machine",
+   "about": "Kickback machine; push the platform back with one leg and squeeze."
+  },
+  {
+   "id": "band_kickback",
+   "name": "Band kickback",
+   "equipment": "band",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [],
+   "pattern": "kickback",
+   "swap": "glute_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "kickback_band",
+   "about": "Band around the ankles or anchored low, kick one leg back."
+  },
+  {
+   "id": "cable_hip_abduction",
+   "name": "Cable hip abduction",
+   "equipment": "cable",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [],
+   "pattern": "abduction",
+   "swap": "glute_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "abduction_cable",
+   "about": "Stand side-on with an ankle strap and lift the leg out to the side."
+  },
+  {
+   "id": "band_lateral_walk",
+   "name": "Band lateral walk",
+   "equipment": "band",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [],
+   "pattern": "abduction",
+   "swap": "glute_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "abduction_band",
+   "about": "Band above the knees, half squat, step side to side keeping tension. Great glute warm-up."
+  },
+  {
+   "id": "frog_pump",
+   "name": "Frog pump",
+   "equipment": "bodyweight",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [],
+   "pattern": "thrust",
+   "swap": "glute_iso",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "thrust_bodyweight",
+   "about": "Lie on your back with soles together, knees out, and pump the hips up. High-rep glute burner."
+  },
+  {
+   "id": "leg_extension",
+   "name": "Leg extension",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [],
+   "pattern": "legext",
+   "swap": "quad_iso",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legext_machine",
+   "about": "Sit with the pad on your shins and straighten your knees, pause, lower slowly. Pure quad work."
+  },
+  {
+   "id": "cable_leg_extension",
+   "name": "Cable leg extension",
+   "equipment": "cable",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [],
+   "pattern": "legext",
+   "swap": "quad_iso",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legext_cable",
+   "about": "Ankle strap on a low cable, sit and straighten the knee."
+  },
+  {
+   "id": "sissy_squat",
+   "name": "Sissy squat",
+   "equipment": "bodyweight",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [],
+   "pattern": "legext",
+   "swap": "quad_iso",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legext_bodyweight",
+   "about": "Lean back and let your knees travel forward as you lower, hips straight. Intense quad stretch."
+  },
+  {
+   "id": "single_leg_extension",
+   "name": "Single-leg extension",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [],
+   "pattern": "legext",
+   "swap": "quad_iso",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legext_machine",
+   "about": "Leg extension one leg at a time to even out each side."
+  },
+  {
+   "id": "band_leg_extension",
+   "name": "Band leg extension",
+   "equipment": "band",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [],
+   "pattern": "legext",
+   "swap": "quad_iso",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legext_band",
+   "about": "Seated, band from behind around the ankle, straighten the knee."
+  },
+  {
+   "id": "reverse_nordic",
+   "name": "Reverse Nordic",
+   "equipment": "bodyweight",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [],
+   "pattern": "legext",
+   "swap": "quad_iso",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legext_bodyweight",
+   "about": "Kneel upright and lean back slowly with a straight line from knees to head. Strong quad stretch."
+  },
+  {
+   "id": "lying_leg_curl",
+   "name": "Lying leg curl",
+   "equipment": "machine",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_machine",
+   "about": "Lie face down, pad behind the ankles, curl the heels toward your glutes. Keep the hips down."
+  },
+  {
+   "id": "seated_leg_curl",
+   "name": "Seated leg curl",
+   "equipment": "machine",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_machine",
+   "about": "Sit with the pad behind the ankles and curl down and back. The stretched hip position makes it very effective."
+  },
+  {
+   "id": "db_leg_curl",
+   "name": "Dumbbell leg curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_dumbbell",
+   "about": "Lie face down with a dumbbell between the feet and curl it up. Go light and slow."
+  },
+  {
+   "id": "cable_leg_curl",
+   "name": "Standing cable leg curl",
+   "equipment": "cable",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_cable",
+   "about": "Ankle strap on a low cable, curl one heel up behind you."
+  },
+  {
+   "id": "nordic_curl",
+   "name": "Nordic curl",
+   "equipment": "bodyweight",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_bodyweight",
+   "about": "Kneel with feet anchored and lower your body forward as slowly as you can. Very strong hamstring builder."
+  },
+  {
+   "id": "standing_leg_curl",
+   "name": "Standing leg curl machine",
+   "equipment": "machine",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_machine",
+   "about": "One leg at a time on a standing curl machine: pad behind the ankle, curl the heel up toward your glute and lower slowly."
+  },
+  {
+   "id": "band_leg_curl",
+   "name": "Band leg curl",
+   "equipment": "band",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_band",
+   "about": "Face down, band around the ankle anchored in front, curl the heel up."
+  },
+  {
+   "id": "slider_leg_curl",
+   "name": "Slider leg curl",
+   "equipment": "bodyweight",
+   "primary": [
+    "hamstrings"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "legcurl",
+   "swap": "ham_curl",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legcurl_bodyweight",
+   "about": "Lie on your back with heels on sliders, hips up, slide the heels in and out."
+  },
+  {
+   "id": "standing_calf_raise",
+   "name": "Standing calf raise",
+   "equipment": "machine",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_machine",
+   "about": "Shoulders under the pads, rise onto your toes as high as you can, pause, lower to a full stretch."
+  },
+  {
+   "id": "seated_calf_raise",
+   "name": "Seated calf raise",
+   "equipment": "machine",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_machine",
+   "about": "Pad on the knees, lift the heels. Bent knees work the deeper calf muscle."
+  },
+  {
+   "id": "leg_press_calf_raise",
+   "name": "Leg press calf raise",
+   "equipment": "machine",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_machine",
+   "about": "Toes on the bottom edge of the leg press platform; push with the ankles only."
+  },
+  {
+   "id": "smith_calf_raise",
+   "name": "Smith calf raise",
+   "equipment": "smith",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_smith",
+   "about": "Calf raise under the Smith bar, toes on a plate for extra range."
+  },
+  {
+   "id": "db_calf_raise",
+   "name": "Dumbbell calf raise",
+   "equipment": "dumbbell",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_dumbbell",
+   "about": "Hold dumbbells and do calf raises, ideally with toes on a step."
+  },
+  {
+   "id": "single_leg_calf_raise",
+   "name": "Single-leg calf raise",
+   "equipment": "bodyweight",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_bodyweight",
+   "about": "Calf raise on one foot from a step. Add a dumbbell when easy."
+  },
+  {
+   "id": "donkey_calf_raise",
+   "name": "Donkey calf raise",
+   "equipment": "machine",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_machine",
+   "about": "Bent forward at the hips, rise up on the toes. Great stretch on the calves."
+  },
+  {
+   "id": "barbell_calf_raise",
+   "name": "Barbell calf raise",
+   "equipment": "barbell",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_barbell",
+   "about": "Calf raise with a barbell on your back, toes on a plate or step. Rise as high as you can, pause, then lower to a full stretch."
+  },
+  {
+   "id": "tibialis_raise",
+   "name": "Tibialis raise",
+   "equipment": "bodyweight",
+   "primary": [
+    "calves"
+   ],
+   "secondary": [],
+   "pattern": "calf",
+   "swap": "calf",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "calf_bodyweight",
+   "about": "Back against a wall, heels out, lift your toes toward your shins. Works the shin muscle and helps knees."
+  },
+  {
+   "id": "hip_adduction",
+   "name": "Hip adduction machine",
+   "equipment": "machine",
+   "primary": [
+    "adductors"
+   ],
+   "secondary": [],
+   "pattern": "adduction",
+   "swap": "adductor",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "adduction_machine",
+   "about": "Squeeze the pads together. Works the inner thighs."
+  },
+  {
+   "id": "copenhagen_plank",
+   "name": "Copenhagen plank",
+   "equipment": "bodyweight",
+   "primary": [
+    "adductors"
+   ],
+   "secondary": [
+    "core"
+   ],
+   "pattern": "adduction",
+   "swap": "adductor",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": true,
+   "icon": "adduction_bodyweight",
+   "about": "Side plank with the top leg on a bench, bottom leg off the floor. Tough inner-thigh and core hold."
+  },
+  {
+   "id": "cable_hip_adduction",
+   "name": "Cable hip adduction",
+   "equipment": "cable",
+   "primary": [
+    "adductors"
+   ],
+   "secondary": [],
+   "pattern": "adduction",
+   "swap": "adductor",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "adduction_cable",
+   "about": "Ankle strap on the inside leg, pull it across the body."
+  },
+  {
+   "id": "band_adduction",
+   "name": "Band adduction",
+   "equipment": "band",
+   "primary": [
+    "adductors"
+   ],
+   "secondary": [],
+   "pattern": "adduction",
+   "swap": "adductor",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "adduction_band",
+   "about": "Band anchored to the side at ankle height; pull the leg inward."
+  },
+  {
+   "id": "barbell_curl",
+   "name": "Barbell curl",
+   "equipment": "barbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_barbell",
+   "about": "Elbows pinned at your sides, curl the bar up, squeeze, lower slowly. Do not swing the hips."
+  },
+  {
+   "id": "ez_bar_curl",
+   "name": "EZ-bar curl",
+   "equipment": "barbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_barbell",
+   "about": "Curl with the angled EZ bar; easier on the wrists than a straight bar."
+  },
+  {
+   "id": "db_curl",
+   "name": "Dumbbell curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_dumbbell",
+   "about": "Curl dumbbells with palms turning up as they rise. Keep the upper arms still."
+  },
+  {
+   "id": "incline_db_curl",
+   "name": "Incline dumbbell curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_dumbbell",
+   "about": "Lie back on an incline bench, arms hanging, and curl. The stretch makes the biceps work hard."
+  },
+  {
+   "id": "hammer_curl",
+   "name": "Hammer curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [
+    "forearms"
+   ],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_dumbbell",
+   "about": "Curl with palms facing each other. Builds the outer arm and forearms."
+  },
+  {
+   "id": "cable_curl",
+   "name": "Cable curl",
+   "equipment": "cable",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_cable",
+   "about": "Curl a bar from a low pulley. Constant tension top to bottom."
+  },
+  {
+   "id": "preacher_curl_machine",
+   "name": "Machine preacher curl",
+   "equipment": "machine",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_machine",
+   "about": "Arms on the pad, curl up. The pad stops any cheating."
+  },
+  {
+   "id": "db_preacher_curl",
+   "name": "Dumbbell preacher curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_dumbbell",
+   "about": "One arm on a preacher pad, curl the dumbbell. Strict and hard at the bottom."
+  },
+  {
+   "id": "kb_curl",
+   "name": "Kettlebell curl",
+   "equipment": "kettlebell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_kettlebell",
+   "about": "Curl kettlebells by the handle; the offset weight works the grip too."
+  },
+  {
+   "id": "ez_preacher_curl",
+   "name": "EZ-bar preacher curl",
+   "equipment": "barbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_barbell",
+   "about": "Preacher curl with an EZ bar. Lower slowly to a near-straight arm."
+  },
+  {
+   "id": "spider_curl",
+   "name": "Spider curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_dumbbell",
+   "about": "Chest down on an incline bench, arms hanging straight down, curl up. Very hard at the top."
+  },
+  {
+   "id": "concentration_curl",
+   "name": "Concentration curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_dumbbell",
+   "about": "Seated, elbow braced on the inner thigh, curl one dumbbell. Great mind-muscle feel."
+  },
+  {
+   "id": "bayesian_curl",
+   "name": "Behind-the-body cable curl",
+   "equipment": "cable",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_cable",
+   "about": "Face away from a low cable, arm slightly behind you, and curl. Loads the biceps in the stretch."
+  },
+  {
+   "id": "rope_hammer_curl",
+   "name": "Rope hammer curl",
+   "equipment": "cable",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [
+    "forearms"
+   ],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_cable",
+   "about": "Hammer curl with a rope on a low cable, thumbs up. Keeps tension on the biceps and forearms the whole way; keep elbows at your sides."
+  },
+  {
+   "id": "reverse_curl",
+   "name": "Reverse curl",
+   "equipment": "barbell",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [
+    "biceps"
+   ],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_barbell",
+   "about": "Curl with palms facing down. Builds the forearms and the muscle under the biceps."
+  },
+  {
+   "id": "zottman_curl",
+   "name": "Zottman curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [
+    "forearms"
+   ],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_dumbbell",
+   "about": "Curl palms up, turn palms down at the top, lower slowly. Biceps and forearms together."
+  },
+  {
+   "id": "drag_curl",
+   "name": "Drag curl",
+   "equipment": "barbell",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_barbell",
+   "about": "Drag the bar up the front of your body with elbows moving back. Hits the long head of the biceps."
+  },
+  {
+   "id": "band_curl",
+   "name": "Band curl",
+   "equipment": "band",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_band",
+   "about": "Stand on a band and curl. Simple pump work anywhere."
+  },
+  {
+   "id": "cable_curl_single",
+   "name": "Single-arm cable curl",
+   "equipment": "cable",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [],
+   "pattern": "curl",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "curl_cable",
+   "about": "One-arm curl from a low cable, turning the palm up as you rise."
+  },
+  {
+   "id": "chin_up_hold",
+   "name": "Chin-up negative",
+   "equipment": "bodyweight",
+   "primary": [
+    "biceps"
+   ],
+   "secondary": [
+    "lats"
+   ],
+   "pattern": "pulldown",
+   "swap": "biceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "pulldown_bodyweight",
+   "about": "Jump to the top of a chin-up and lower as slowly as possible. Builds strength for full chin-ups."
+  },
+  {
+   "id": "triceps_pushdown",
+   "name": "Cable triceps pushdown",
+   "equipment": "cable",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "pushdown",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pushdown_cable",
+   "about": "Elbows tucked at your sides, push the bar down until arms are straight, squeeze, let it up under control."
+  },
+  {
+   "id": "rope_pushdown",
+   "name": "Rope pushdown",
+   "equipment": "cable",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "pushdown",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pushdown_cable",
+   "about": "Pushdown with a rope, spreading the ends apart at the bottom."
+  },
+  {
+   "id": "overhead_cable_ext",
+   "name": "Overhead cable triceps extension",
+   "equipment": "cable",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "overhead_ext",
+   "swap": "triceps",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "overhead_ext_cable",
+   "about": "Face away from the cable, rope behind your head, straighten your arms overhead. Stretches the long head of the triceps."
+  },
+  {
+   "id": "db_overhead_ext",
+   "name": "Dumbbell overhead triceps extension",
+   "equipment": "dumbbell",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "overhead_ext",
+   "swap": "triceps",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "overhead_ext_dumbbell",
+   "about": "Hold one dumbbell overhead with both hands, lower it behind your head, press back up."
+  },
+  {
+   "id": "skull_crusher",
+   "name": "EZ-bar skull crusher",
+   "equipment": "barbell",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "overhead_ext",
+   "swap": "triceps",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "overhead_ext_barbell",
+   "about": "Lying on a bench, lower the bar toward your forehead by bending only the elbows, then straighten."
+  },
+  {
+   "id": "close_grip_bench",
+   "name": "Close-grip bench press",
+   "equipment": "barbell",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [
+    "chest"
+   ],
+   "pattern": "press",
+   "swap": "triceps",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_barbell",
+   "about": "Bench press with hands about shoulder-width and elbows close. Heavy triceps work."
+  },
+  {
+   "id": "machine_triceps_ext",
+   "name": "Machine triceps extension",
+   "equipment": "machine",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "pushdown",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pushdown_machine",
+   "about": "Seated triceps machine; push the handles down and straighten the arms."
+  },
+  {
+   "id": "machine_dip",
+   "name": "Machine dip",
+   "equipment": "machine",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [
+    "chest"
+   ],
+   "pattern": "dip",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "dip_machine",
+   "about": "Seated dip machine; push the handles down. All the dip, none of the balance."
+  },
+  {
+   "id": "db_skull_crusher",
+   "name": "Dumbbell skull crusher",
+   "equipment": "dumbbell",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "overhead_ext",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "overhead_ext_dumbbell",
+   "about": "Lying extension with dumbbells, palms facing each other. Easier on the elbows."
+  },
+  {
+   "id": "bench_dip",
+   "name": "Bench dip",
+   "equipment": "bodyweight",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [
+    "chest"
+   ],
+   "pattern": "dip",
+   "swap": "triceps",
+   "joints": [
+    "shoulders",
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "dip_bodyweight",
+   "about": "Hands on a bench behind you, lower your hips and press back up. Keep the shoulders from rolling forward."
+  },
+  {
+   "id": "diamond_push_up",
+   "name": "Close-grip push-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [
+    "chest"
+   ],
+   "pattern": "pushup",
+   "swap": "triceps",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "pushup_bodyweight",
+   "about": "Push-up with hands close together under the chest. Bodyweight triceps work."
+  },
+  {
+   "id": "db_kickback",
+   "name": "Dumbbell kickback",
+   "equipment": "dumbbell",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "pushdown",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pushdown_dumbbell",
+   "about": "Bent over, upper arm level with your body, straighten the elbow to kick the dumbbell back."
+  },
+  {
+   "id": "cable_kickback",
+   "name": "Cable kickback",
+   "equipment": "cable",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "pushdown",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pushdown_cable",
+   "about": "Kickback with a low cable; tension stays on at the top."
+  },
+  {
+   "id": "jm_press",
+   "name": "JM press",
+   "equipment": "barbell",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [
+    "chest"
+   ],
+   "pattern": "press",
+   "swap": "triceps",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "press_barbell",
+   "about": "A mix of close-grip bench and skull crusher: lower the bar toward your chin, then press. Heavy triceps builder."
+  },
+  {
+   "id": "single_arm_pushdown",
+   "name": "Single-arm pushdown",
+   "equipment": "cable",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "pushdown",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "pushdown_cable",
+   "about": "Pushdown with one handle, palm up or down. Evens out the arms."
+  },
+  {
+   "id": "band_pushdown",
+   "name": "Band pushdown",
+   "equipment": "band",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "pushdown",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "pushdown_band",
+   "about": "Band anchored high, push down to straight arms."
+  },
+  {
+   "id": "weighted_dip",
+   "name": "Weighted dip",
+   "equipment": "bodyweight",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [
+    "chest",
+    "shoulders"
+   ],
+   "pattern": "dip",
+   "swap": "triceps",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 6,
+   "repHigh": 10,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "dip_bodyweight",
+   "about": "Dips with a weight on a belt, staying fairly upright for triceps. Log the added weight."
+  },
+  {
+   "id": "tate_press",
+   "name": "Tate press",
+   "equipment": "dumbbell",
+   "primary": [
+    "triceps"
+   ],
+   "secondary": [],
+   "pattern": "overhead_ext",
+   "swap": "triceps",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "overhead_ext_dumbbell",
+   "about": "Lying, dumbbells over the chest, bend the elbows out so the bells touch your chest, then press back up."
+  },
+  {
+   "id": "barbell_shrug",
+   "name": "Barbell shrug",
+   "equipment": "barbell",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "shrug",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_barbell",
+   "about": "Hold the bar at arm's length and lift your shoulders straight up toward your ears, pause, lower. No rolling."
+  },
+  {
+   "id": "db_shrug",
+   "name": "Dumbbell shrug",
+   "equipment": "dumbbell",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "shrug",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_dumbbell",
+   "about": "Hold heavy dumbbells at your sides and lift the shoulders straight up toward the ears. Pause at the top; no rolling the shoulders."
+  },
+  {
+   "id": "smith_shrug",
+   "name": "Smith shrug",
+   "equipment": "smith",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "shrug",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_smith",
+   "about": "Shrug on the Smith machine; easy to load heavy."
+  },
+  {
+   "id": "machine_shrug",
+   "name": "Machine shrug",
+   "equipment": "machine",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "shrug",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_machine",
+   "about": "Shrug on a shrug machine or plate-loaded station. Lift the shoulders straight up, hold a second, lower slowly. Easy to load heavy."
+  },
+  {
+   "id": "cable_shrug",
+   "name": "Cable shrug",
+   "equipment": "cable",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "shrug",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_cable",
+   "about": "Shrug a straight bar from a low cable. The cable keeps tension at the bottom; lift straight up and squeeze the traps."
+  },
+  {
+   "id": "kb_shrug",
+   "name": "Kettlebell shrug",
+   "equipment": "kettlebell",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "shrug",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_kettlebell",
+   "about": "Shrug holding a kettlebell in each hand. Lift the shoulders straight up and pause; the handles let you grip comfortably."
+  },
+  {
+   "id": "trap_bar_shrug",
+   "name": "Trap bar shrug",
+   "equipment": "barbell",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "shrug",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_barbell",
+   "about": "Shrug inside a hex bar; the neutral grip feels natural."
+  },
+  {
+   "id": "farmer_carry",
+   "name": "Farmer carry",
+   "equipment": "dumbbell",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [
+    "traps",
+    "core"
+   ],
+   "pattern": "carry",
+   "swap": "carry",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_dumbbell",
+   "about": "Pick up heavy dumbbells and walk tall for time or distance. Grip, traps and core. Log seconds as reps."
+  },
+  {
+   "id": "kb_farmer_carry",
+   "name": "Kettlebell farmer carry",
+   "equipment": "kettlebell",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [
+    "traps",
+    "core"
+   ],
+   "pattern": "carry",
+   "swap": "carry",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_kettlebell",
+   "about": "Farmer carry with a heavy kettlebell in each hand. Walk tall with short steps for time or distance. Works grip, traps and core. Log seconds."
+  },
+  {
+   "id": "trap_bar_carry",
+   "name": "Trap bar carry",
+   "equipment": "barbell",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [
+    "traps",
+    "core"
+   ],
+   "pattern": "carry",
+   "swap": "carry",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_barbell",
+   "about": "Lift a loaded hex bar and walk. Lets you carry a lot."
+  },
+  {
+   "id": "suitcase_carry",
+   "name": "Suitcase carry",
+   "equipment": "dumbbell",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "forearms"
+   ],
+   "pattern": "carry",
+   "swap": "carry",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_dumbbell",
+   "about": "Carry one heavy dumbbell on one side and walk without leaning. A sneaky core exercise."
+  },
+  {
+   "id": "sled_push",
+   "name": "Sled push",
+   "equipment": "machine",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "calves"
+   ],
+   "pattern": "carry",
+   "swap": "carry",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_machine",
+   "about": "Lean into a sled and drive it forward with short powerful steps. Leg power with no lowering phase. Log seconds; weight = plates on the sled."
+  },
+  {
+   "id": "dead_hang",
+   "name": "Dead hang",
+   "equipment": "bodyweight",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [
+    "lats"
+   ],
+   "pattern": "carry",
+   "swap": "carry",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_bodyweight",
+   "about": "Hang from a pull-up bar as long as you can. Builds grip and opens the shoulders. Log seconds."
+  },
+  {
+   "id": "db_wrist_curl",
+   "name": "Dumbbell wrist curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [],
+   "pattern": "wristcurl",
+   "swap": "forearm",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "wristcurl_dumbbell",
+   "about": "Forearms on your thighs, palms up, curl the wrists up and down."
+  },
+  {
+   "id": "cable_wrist_curl",
+   "name": "Cable wrist curl",
+   "equipment": "cable",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [],
+   "pattern": "wristcurl",
+   "swap": "forearm",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "wristcurl_cable",
+   "about": "Wrist curls with a bar on a low cable, forearms resting on your thighs. Curl the wrists up and lower all the way for forearm strength."
+  },
+  {
+   "id": "reverse_wrist_curl",
+   "name": "Reverse wrist curl",
+   "equipment": "dumbbell",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [],
+   "pattern": "wristcurl",
+   "swap": "forearm",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "wristcurl_dumbbell",
+   "about": "Wrist curl with palms down, for the top of the forearm."
+  },
+  {
+   "id": "barbell_wrist_curl",
+   "name": "Barbell wrist curl",
+   "equipment": "barbell",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [],
+   "pattern": "wristcurl",
+   "swap": "forearm",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "wristcurl_barbell",
+   "about": "Seated, forearms on the thighs, curl a light barbell with the wrists."
+  },
+  {
+   "id": "plate_pinch",
+   "name": "Plate pinch",
+   "equipment": "bodyweight",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [],
+   "pattern": "carry",
+   "swap": "forearm",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_bodyweight",
+   "about": "Pinch two smooth plates together and hold for time. Thumb and finger strength. Log seconds."
+  },
+  {
+   "id": "wrist_roller",
+   "name": "Wrist roller",
+   "equipment": "bodyweight",
+   "primary": [
+    "forearms"
+   ],
+   "secondary": [],
+   "pattern": "wristcurl",
+   "swap": "forearm",
+   "joints": [
+    "wrists"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "wristcurl_bodyweight",
+   "about": "Roll a weight up on a rope by twisting a handle, then lower it. Big forearm pump. Log rolls as reps."
+  },
+  {
+   "id": "band_neck_ext",
+   "name": "Neck extension (band)",
+   "equipment": "band",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "neck",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_band",
+   "about": "Band around the back of the head, gently nod back against it. Light and controlled."
+  },
+  {
+   "id": "plate_neck_curl",
+   "name": "Plate neck curl",
+   "equipment": "bodyweight",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [],
+   "pattern": "shrug",
+   "swap": "neck",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "shrug_bodyweight",
+   "about": "Lie on a bench, plate on the forehead (with a towel), slowly nod up and down. Go very light."
+  },
+  {
+   "id": "cable_crunch",
+   "name": "Cable crunch",
+   "equipment": "cable",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "crunch",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "crunch_cable",
+   "about": "Kneel under a high rope, crunch your ribs toward your hips. Move from the spine, not the hips."
+  },
+  {
+   "id": "machine_crunch",
+   "name": "Machine crunch",
+   "equipment": "machine",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "crunch",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "crunch_machine",
+   "about": "Ab crunch machine; curl the chest toward the knees."
+  },
+  {
+   "id": "hanging_leg_raise",
+   "name": "Hanging leg raise",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "legraise",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legraise_bodyweight",
+   "about": "Hang from a bar and raise your legs, curling the pelvis up. Bent knees make it easier."
+  },
+  {
+   "id": "captains_chair",
+   "name": "Captain's chair knee raise",
+   "equipment": "machine",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "legraise",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "machine",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "legraise_machine",
+   "about": "Forearms on the pads, back on the pad, raise the knees toward your chest."
+  },
+  {
+   "id": "plank",
+   "name": "Plank",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": true,
+   "icon": "plank_bodyweight",
+   "about": "Forearms and toes, straight line from head to heels, squeeze glutes and abs. Log seconds."
+  },
+  {
+   "id": "ab_wheel",
+   "name": "Ab wheel rollout",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "plank_bodyweight",
+   "about": "From the knees, roll the wheel out as far as you can without the lower back sagging, then pull back."
+  },
+  {
+   "id": "pallof_press",
+   "name": "Pallof press",
+   "equipment": "cable",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "rotation",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rotation_cable",
+   "about": "Side-on to a cable at chest height, press the handle straight out and resist the twist."
+  },
+  {
+   "id": "db_side_bend",
+   "name": "Dumbbell side bend",
+   "equipment": "dumbbell",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "crunch",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "crunch_dumbbell",
+   "about": "Hold a dumbbell on one side and bend sideways, then return. Works the side of the waist."
+  },
+  {
+   "id": "kb_windmill",
+   "name": "Kettlebell windmill",
+   "equipment": "kettlebell",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "shoulders"
+   ],
+   "pattern": "rotation",
+   "swap": "core",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rotation_kettlebell",
+   "about": "Bell locked overhead, push the hips out and reach down to the opposite foot. Slow and controlled."
+  },
+  {
+   "id": "woodchop",
+   "name": "Cable woodchop",
+   "equipment": "cable",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "rotation",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rotation_cable",
+   "about": "Pull a cable diagonally across your body from high to low (or low to high), turning through the trunk."
+  },
+  {
+   "id": "decline_situp",
+   "name": "Decline sit-up",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "crunch",
+   "swap": "core",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "crunch_bodyweight",
+   "about": "Feet hooked on a decline bench, sit up and lower slowly. Hold a plate to load it."
+  },
+  {
+   "id": "side_plank",
+   "name": "Side plank",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": true,
+   "icon": "plank_bodyweight",
+   "about": "On one forearm and the side of your foot, body straight. Log seconds per side."
+  },
+  {
+   "id": "dead_bug",
+   "name": "Dead bug",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "plank_bodyweight",
+   "about": "On your back, arms up and knees bent, lower the opposite arm and leg while keeping the lower back flat."
+  },
+  {
+   "id": "hollow_hold",
+   "name": "Hollow body hold",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": true,
+   "icon": "plank_bodyweight",
+   "about": "Lie on your back, arms and legs off the floor, lower back pressed down. Log seconds."
+  },
+  {
+   "id": "russian_twist",
+   "name": "Russian twist",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "rotation",
+   "swap": "core",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "rotation_bodyweight",
+   "about": "Sit leaning back with feet up, rotate a weight side to side. Log each side as a rep."
+  },
+  {
+   "id": "lying_leg_raise",
+   "name": "Lying leg raise",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "legraise",
+   "swap": "core",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legraise_bodyweight",
+   "about": "On your back, raise straight legs up and lower slowly without the lower back arching."
+  },
+  {
+   "id": "reverse_crunch",
+   "name": "Reverse crunch",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "legraise",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legraise_bodyweight",
+   "about": "On your back, curl the knees and hips up off the floor toward your chest."
+  },
+  {
+   "id": "crunch",
+   "name": "Crunch",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "crunch",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "crunch_bodyweight",
+   "about": "Lie on your back and curl your ribs toward your hips. Small, controlled movement."
+  },
+  {
+   "id": "weighted_plank",
+   "name": "Weighted plank",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": true,
+   "icon": "plank_bodyweight",
+   "about": "Plank with a plate on your back. Log the plate as weight and seconds as reps."
+  },
+  {
+   "id": "bird_dog",
+   "name": "Bird dog",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "plank_bodyweight",
+   "about": "On hands and knees, reach one arm and the opposite leg out long, hold, switch. Back-friendly core work."
+  },
+  {
+   "id": "landmine_rotation",
+   "name": "Landmine rotation",
+   "equipment": "barbell",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "shoulders"
+   ],
+   "pattern": "rotation",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "rotation_barbell",
+   "about": "Hold the end of a landmine bar overhead and rotate it side to side in an arc."
+  },
+  {
+   "id": "cable_side_bend",
+   "name": "Cable side bend",
+   "equipment": "cable",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "crunch",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "cable",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "crunch_cable",
+   "about": "Stand side-on to a low cable holding the handle and bend away from it, then return. Works the side of the waist (obliques)."
+  },
+  {
+   "id": "band_pallof_press",
+   "name": "Band Pallof press",
+   "equipment": "band",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "rotation",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "rotation_band",
+   "about": "Pallof press with a band anchored to the side."
+  },
+  {
+   "id": "toes_to_bar",
+   "name": "Toes to bar",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "lats"
+   ],
+   "pattern": "legraise",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legraise_bodyweight",
+   "about": "Hang and lift your toes to touch the bar. Advanced, needs control."
+  },
+  {
+   "id": "dragon_flag",
+   "name": "Dragon flag",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "legraise",
+   "swap": "core",
+   "joints": [
+    "lowerBack"
+   ],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "legraise_bodyweight",
+   "about": "Lying on a bench, hold behind your head and lower your straight body from the shoulders. Very advanced."
+  },
+  {
+   "id": "stir_the_pot",
+   "name": "Stir the pot",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [],
+   "pattern": "plank",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": false,
+   "timed": false,
+   "icon": "plank_bodyweight",
+   "about": "Forearm plank on a stability ball, draw small circles. Brutal for the abs."
+  },
+  {
+   "id": "suitcase_deadlift",
+   "name": "Suitcase deadlift",
+   "equipment": "dumbbell",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "glutes"
+   ],
+   "pattern": "hinge",
+   "swap": "core",
+   "joints": [],
+   "repLow": 10,
+   "repHigh": 15,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": false,
+   "icon": "hinge_dumbbell",
+   "about": "Deadlift one dumbbell at your side without leaning. Core anti-bend strength."
+  },
+  {
+   "id": "farmer_march",
+   "name": "Kettlebell march",
+   "equipment": "kettlebell",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "forearms"
+   ],
+   "pattern": "carry",
+   "swap": "carry",
+   "joints": [],
+   "repLow": 30,
+   "repHigh": 60,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": false,
+   "timed": true,
+   "icon": "carry_kettlebell",
+   "about": "Hold kettlebells and march in place, lifting knees high. Core and grip; log seconds."
+  },
+  {
+   "id": "power_clean",
+   "name": "Power clean",
+   "equipment": "barbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings",
+    "traps",
+    "quads"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "lowerBack",
+    "wrists"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_barbell",
+   "about": "Pull the bar from the floor, jump it up with the hips and catch it on the shoulders in a quarter squat. Technical; learn it with light weight first."
+  },
+  {
+   "id": "hang_clean",
+   "name": "Hang clean",
+   "equipment": "barbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings",
+    "traps"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "lowerBack",
+    "wrists"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_barbell",
+   "about": "Start with the bar at mid-thigh, dip and explode up, catch on the shoulders."
+  },
+  {
+   "id": "hang_power_snatch",
+   "name": "Hang power snatch",
+   "equipment": "barbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "shoulders",
+    "traps",
+    "hamstrings"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "shoulders",
+    "lowerBack",
+    "wrists"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_barbell",
+   "about": "Wide grip from mid-thigh, explode up and punch the bar overhead in one move."
+  },
+  {
+   "id": "clean_and_jerk",
+   "name": "Clean and jerk",
+   "equipment": "barbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "shoulders",
+    "quads",
+    "traps"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "shoulders",
+    "lowerBack",
+    "wrists"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_barbell",
+   "about": "Clean the bar to the shoulders, then drive it overhead with the legs. Full-body power."
+  },
+  {
+   "id": "thruster",
+   "name": "Thruster",
+   "equipment": "barbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "shoulders",
+    "glutes"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "knees",
+    "shoulders"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_barbell",
+   "about": "Front squat and drive straight into an overhead press in one move. Huge conditioning lift."
+  },
+  {
+   "id": "db_thruster",
+   "name": "Dumbbell thruster",
+   "equipment": "dumbbell",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "shoulders",
+    "glutes"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "knees",
+    "shoulders"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_dumbbell",
+   "about": "Thruster with dumbbells at the shoulders."
+  },
+  {
+   "id": "db_snatch",
+   "name": "Dumbbell snatch",
+   "equipment": "dumbbell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "shoulders",
+    "hamstrings"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "shoulders",
+    "lowerBack"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_dumbbell",
+   "about": "One dumbbell from between the feet straight overhead in one explosive pull."
+  },
+  {
+   "id": "kb_clean",
+   "name": "Kettlebell clean",
+   "equipment": "kettlebell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "hamstrings",
+    "forearms"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_kettlebell",
+   "about": "Swing the bell back and pull it into the rack position at the shoulder, wrist straight."
+  },
+  {
+   "id": "kb_snatch",
+   "name": "Kettlebell snatch",
+   "equipment": "kettlebell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "shoulders",
+    "hamstrings"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_kettlebell",
+   "about": "Swing the bell and punch it straight overhead in one move. Great conditioning."
+  },
+  {
+   "id": "high_pull",
+   "name": "Barbell high pull",
+   "equipment": "barbell",
+   "primary": [
+    "traps"
+   ],
+   "secondary": [
+    "shoulders",
+    "glutes"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "shoulders"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "barbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_barbell",
+   "about": "Explode from mid-thigh and pull the bar to chest height, elbows high."
+  },
+  {
+   "id": "box_jump",
+   "name": "Box jump",
+   "equipment": "bodyweight",
+   "primary": [
+    "quads"
+   ],
+   "secondary": [
+    "glutes",
+    "calves"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_bodyweight",
+   "about": "Jump onto a box landing softly, step down. Leg power; log jumps as reps."
+  },
+  {
+   "id": "med_ball_slam",
+   "name": "Medicine ball slam",
+   "equipment": "bodyweight",
+   "primary": [
+    "core"
+   ],
+   "secondary": [
+    "shoulders",
+    "lats"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "bodyweight",
+   "bodyweight": true,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_bodyweight",
+   "about": "Lift a slam ball overhead and throw it down hard. Log ball weight and reps."
+  },
+  {
+   "id": "kb_goblet_clean",
+   "name": "Kettlebell swing to goblet squat",
+   "equipment": "kettlebell",
+   "primary": [
+    "glutes"
+   ],
+   "secondary": [
+    "quads"
+   ],
+   "pattern": "olympic",
+   "swap": "power",
+   "joints": [
+    "knees"
+   ],
+   "repLow": 3,
+   "repHigh": 5,
+   "step": "dumbbell",
+   "bodyweight": false,
+   "compound": true,
+   "timed": false,
+   "icon": "olympic_kettlebell",
+   "about": "Swing the bell up, catch it at the chest and squat. Flowing full-body work."
+  }
+ ]
+}
