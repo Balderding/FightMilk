@@ -51,7 +51,7 @@ String? pickApk(List<String> names, String abi) {
 }
 
 /// Returns the newer release for this phone, or null when the app is up to date.
-Future<Update?> checkUpdate(http.Client c, String abi) async {
+Future<Update?> checkUpdate(http.Client c, String abi, {String current = appVersion}) async {
   final http.Response r;
   try {
     r = await c.get(Uri.parse('https://api.github.com/repos/$appRepo/releases/latest'), headers: {'accept': 'application/vnd.github+json'});
@@ -67,7 +67,7 @@ Future<Update?> checkUpdate(http.Client c, String abi) async {
     throw UpdateError('GitHub sent something unexpected.');
   }
   final tag = (j['tag_name'] ?? '') as String;
-  if (!isNewer(tag, appVersion)) return null;
+  if (!isNewer(tag, current)) return null;
   final assets = (j['assets'] as List? ?? const []).cast<Map<String, dynamic>>();
   final name = pickApk([for (final a in assets) a['name'] as String], abi);
   final sums = assets.where((a) => a['name'] == 'SHA256SUMS.txt').firstOrNull;

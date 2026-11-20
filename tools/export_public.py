@@ -60,14 +60,11 @@ if not (PUB / ".git").exists():
     git("init", "-q", "-b", "main", cwd=PUB)
 git("config", "user.name", "balderding", cwd=PUB)
 git("config", "user.email", EMAIL, cwd=PUB)
-for p in PUB.iterdir():
-    if p.name == ".git":
-        continue
-    if p.is_dir():
-        import shutil
-        shutil.rmtree(p)
-    else:
-        p.unlink()
+# sync: overwrite what HEAD has, drop tracked files HEAD no longer has; build output is left alone
+keep = {m.name for m in members}
+for f in git("ls-files", cwd=PUB).splitlines():
+    if f not in keep:
+        (PUB / f).unlink(missing_ok=True)
 tar.extractall(PUB, members=members)
 git("add", "-A", cwd=PUB)
 if not git("status", "--porcelain", cwd=PUB).strip():
