@@ -27,7 +27,14 @@ if(ANDROID)
   endif()
 endif()
 
+# Keep build-machine folder names out of the binaries (compilers embed source paths for messages).
+function(wk_neutral_paths dir name)
+  add_compile_options("-ffile-prefix-map=${dir}=${name}" "-fmacro-prefix-map=${dir}=${name}")
+endfunction()
+wk_neutral_paths("${CMAKE_CURRENT_SOURCE_DIR}" "wk")
+
 if(LLAMA_DIR AND EXISTS "${LLAMA_DIR}/CMakeLists.txt")
+  wk_neutral_paths("${LLAMA_DIR}" "llama.cpp")
   add_subdirectory(${LLAMA_DIR} llama-build EXCLUDE_FROM_ALL)
 else()
   include(FetchContent)
@@ -36,6 +43,7 @@ else()
   if(NOT llama_POPULATED)
     FetchContent_Populate(llama)
   endif()
+  wk_neutral_paths("${llama_SOURCE_DIR}" "llama.cpp")
   add_subdirectory(${llama_SOURCE_DIR} llama-build EXCLUDE_FROM_ALL)
 endif()
 

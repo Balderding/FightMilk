@@ -10,3 +10,5 @@ app/android/key.properties
 work/
 release/
 app/android/app/.cxx/
+app/android/build/
+**/build/
