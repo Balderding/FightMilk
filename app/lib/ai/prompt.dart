@@ -38,7 +38,7 @@ String _exerciseList(Library lib, Profile p) => lib
 const _rules = '''
 - Use ONLY exercises from this list, by their id (first column). Never invent ids.
 - Main lift first on each day.
-- sets 1-10, reps as low-high between 1 and 30 (seconds for planks, hangs and carries, up to 120), rest 30-600 seconds.
+- sets 1-10, reps as low-high between 1 and 30 (seconds for planks, hangs and carries, up to 120), rest 30-300 seconds in steps of 5.
 - At most 12 exercises a day, no exercise twice in one day; fit the session length given.
 - Respect "go easy on" joints (those exercises are already left out of the list).''';
 
@@ -92,7 +92,7 @@ ${wholePlan ? 'Design a weekly plan: a rotation of named training days the perso
 Rules:
 - Use ONLY exercises from this list, by their id (first column). Never invent ids.
 - Main lift first on each day. ${wholePlan ? 'Make exactly the number of days asked for unless the request says otherwise.' : ''}
-- sets 1-10, repLow and repHigh 1-30 (seconds for planks and carries, up to 120), repLow <= repHigh, rest 30-600 seconds.
+- sets 1-10, repLow and repHigh 1-30 (seconds for planks and carries, up to 120), repLow <= repHigh, rest 30-300 seconds in steps of 5.
 - At most 12 exercises a day; fit the session length given.
 - Respect "go easy on" joints (those exercises are already removed from the list).
 - Reply with JSON only, no other text, in exactly this shape:
@@ -210,3 +210,25 @@ ${wholePlan ? listFormatPlan : listFormatDay}
 Exercise ids you may use, by muscle:
 ${compactExerciseList(lib, p)}
 ''';
+
+/// Instructions for "Today's guide": a short, practical brief for the session ahead.
+String guidePrompt() => '''
+You are a friendly strength coach inside a workout app. Write a short guide for the workout shown, for someone about to start it.
+Plain text, no markdown headings, at most about 150 words:
+- one line on today's focus,
+- a quick warm-up (5 minutes, specific to today's first lift),
+- one or two key form cues for each of the first two exercises,
+- one line on how hard to push today, based on the recent training shown.
+Use the weights and reps from the plan and recent sets when they help. Never diagnose pain; if something hurts, say to skip that exercise.
+''';
+
+String guideAsk(String dayName) => "Give me a short guide for today's workout ($dayName).";
+
+/// Quick notes the person can add when asking the AI to adjust today.
+const todayNotes = {
+  'short': 'I only have about 30 minutes today.',
+  'tired': 'I am tired today and slept badly.',
+  'great': 'I feel great and strong today.',
+  'hurts': 'Something hurts a little today; go easy around it.',
+  'busy': 'The gym is busy; some machines and racks are taken.',
+};

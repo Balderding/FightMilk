@@ -100,13 +100,33 @@ void main() {
       expect(const NetGuard(models: true).allows(Uri.parse('http://huggingface.co/x')), isFalse);
     });
     test('the built-in catalog is pinned and fingerprinted', () {
-      for (final m in modelCatalog) {
+      for (final m in modelCatalog.where((m) => !m.importOnly)) {
         expect(m.url, contains('/resolve/'));
         expect(m.url, isNot(contains('/resolve/main/')));
         expect(m.sha256.length, 64);
         expect(m.bytes, greaterThan(100000000));
       }
       expect(modelCatalog.first.id, 'lfm2.5-1.2b-instruct');
+    });
+  });
+
+  group('own model file', () {
+    test('a copied-in GGUF is accepted, anything else is thrown away', () {
+      final dir = Directory.systemTemp.createTempSync('fm_import');
+      final store = ModelStore(dir.path);
+      final m = modelById('own-model');
+      expect(m.importOnly, isTrue);
+      expect(store.isReady(m), isFalse);
+      final part = File('${store.pathOf(m)}.part')..parent.createSync(recursive: true);
+      part.writeAsBytesSync([...'NOPE'.codeUnits, ...List.filled(2000000, 0)]);
+      expect(() => store.finishImport(m), throwsA(isA<ModelError>()));
+      expect(part.existsSync(), isFalse);
+      part.writeAsBytesSync([...'GGUF'.codeUnits, ...List.filled(2000000, 0)]);
+      store.finishImport(m);
+      expect(store.isReady(m), isTrue);
+      expect(store.sizeOf(m), 2000004);
+      expect(store.have(m), 0);
+      dir.deleteSync(recursive: true);
     });
   });
 }

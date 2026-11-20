@@ -428,7 +428,7 @@ class _PhoneModel extends StatelessWidget {
         selected: {a.model},
         onTap: (id) => s.saveSettings(s.settings.copyWith(ai: a.copyWith(model: id))),
       ),
-      Padding(padding: const EdgeInsets.only(top: 4), child: Dim('${m.size} download. ${m.note}', size: 12)),
+      Padding(padding: const EdgeInsets.only(top: 4), child: Dim(m.importOnly ? m.note : '${m.size} download. ${m.note}', size: 12)),
       const SizedBox(height: 10),
       if (p != null) ...[
         LinearProgressIndicator(value: p, color: C.teal, backgroundColor: C.card2),
@@ -454,11 +454,19 @@ class _PhoneModel extends StatelessWidget {
           const SizedBox(width: 8),
           OutlinedButton(
             onPressed: () async {
-              if (await confirm(context, 'Delete the model?', 'Frees ${m.size}. You can download it again any time.', yes: 'Delete')) s.deleteModel();
+              if (await confirm(context, 'Delete the model?', m.importOnly ? 'Frees ${sizeText(s.models.sizeOf(m))}. You can import it again any time.' : 'Frees ${m.size}. You can download it again any time.', yes: 'Delete')) s.deleteModel();
             },
             child: const Text('Delete'),
           ),
         ]),
+      ] else if (m.importOnly) ...[
+        FilledButton.icon(
+          onPressed: engine && !s.modelImporting ? s.importModel : null,
+          icon: s.modelImporting ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2)) : const Icon(Icons.file_open_outlined),
+          label: Text(s.modelImporting ? 'Copying… keep the app open' : 'Import model file (.gguf)'),
+        ),
+        const SizedBox(height: 4),
+        const Dim('First save the file on this phone (for example in Google Drive: ⋮ → Download, it lands in Downloads), then pick it here. The app keeps its own copy; nothing is sent anywhere.', size: 12),
       ] else ...[
         FilledButton.icon(
           onPressed: engine ? s.downloadModel : null,

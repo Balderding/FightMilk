@@ -7,11 +7,36 @@ A free Android app for people who lift heavy: machines, barbells, dumbbells. It 
 - **One-tap logging.** Weight and reps are already filled in. Smart rest times based on how heavy the set was and how hard it felt. The rest timer buzzes with the screen off.
 - **296 exercises** with how-to explanations and animations showing each movement, swaps for the same muscles with what your gym has, and full plan editing.
 - **A coach that guides you** through the workout, cute reward sounds (or simple ones, or none), and training reminders.
-- **Optional AI coach**, off by default, your choice of:
-  - **On this phone (LFM)**: a small model runs inside the app, offline, free. Nothing leaves the phone.
-  - **Claude app (no key)**: hands the request to the Claude (or ChatGPT/Gemini) app and you paste the plan back.
-  - **Claude, OpenAI or Gemini** with your own API key, or **your own server** (llama-server, Ollama, LM Studio).
-  Every AI answer is checked against your equipment, sore joints and sane numbers before it is used.
+- **Optional AI coach**, off by default. See [What the AI can do](#what-the-ai-can-do).
+
+## What the AI can do
+
+The app works fully without AI. Turn it on in Settings → AI coach when you want help, and pick where it runs.
+
+**What it does for you**
+
+- **Make your plan.** From your setup (goal, days a week, session length, equipment, sore joints, split) it builds a whole week, or improves the built-in plan. Plan → Make a new plan → Make my plan with AI.
+- **Adjust today.** Tell it how today is going ("short on time", "shoulder is sore", "benches are taken", "feeling great") and it reworks just today's workout from your recent sets. Today → Ask AI to adjust today.
+- **Today's guide.** A short brief before you start: what to aim for on each lift based on last time, warm-up weights, and a form cue or two.
+- **Ask the coach.** Free questions about form, plateaus, rest, soreness, splits, swaps. It sees your plan and recent sets, so the answers are about your training.
+
+Every plan or day the AI makes is checked before it is used: only your gym's exercises, nothing that loads a sore joint, sane sets, reps and rest. A bad answer is shown with the reasons and nothing changes.
+
+**Where it runs**
+
+| Choice | Cost | Internet | What leaves the phone |
+|---|---|---|---|
+| **On this phone (LFM)** | free | only to download the model once | nothing |
+| **My own model file** | free | none | nothing |
+| **Claude app (no key)** | your Claude/ChatGPT/Gemini subscription | yes | the request, through that app, when you tap send |
+| **Claude, OpenAI or Gemini** with your own API key | a cent or two per request | yes | the request, straight to that company |
+| **Your own server** (llama-server, Ollama, LM Studio) | free | your network | the request, to your server only |
+
+- **On this phone** downloads Liquid AI's LFM2.5 model (1.2B, about 700 MB, or 2.6B for phones with 8 GB of memory). It runs inside the app with no server. A grammar locks it to your split and your gym's exercises, so even a small model can't produce a broken plan.
+- **My own model file** imports any `.gguf` model you have copied onto the phone, for example one you trained yourself. It gets the same prompts and checks as the built-in model, and stays on your phone.
+- **With an API key**, Claude Sonnet (`claude-sonnet-5-5`) is a good, cheap choice. Use a key made just for this app and give it a spending limit in your provider's console. The key is kept in Android's encrypted storage and only sent to that provider.
+
+The request is always the same short text: your setup answers, your plan or today's workout, your recent sets and your question. Never your name, contacts, location or anything about the phone. You can read it before it is sent.
 
 ## Screenshots
 

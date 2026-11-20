@@ -9,9 +9,14 @@ import 'package:path/path.dart' as p;
 class ModelInfo {
   final String id, label, file, url, sha256, note;
   final int bytes;
-  const ModelInfo({required this.id, required this.label, required this.file, required this.url, required this.sha256, required this.bytes, required this.note});
-  String get size => bytes >= 1e9 ? '${(bytes / 1e9).toStringAsFixed(1)} GB' : '${(bytes / 1e6).round()} MB';
+
+  /// A file the person copies onto the phone themselves (no download, any size).
+  final bool importOnly;
+  const ModelInfo({required this.id, required this.label, required this.file, required this.url, required this.sha256, required this.bytes, required this.note, this.importOnly = false});
+  String get size => sizeText(bytes);
 }
+
+String sizeText(int bytes) => bytes >= 1e9 ? '${(bytes / 1e9).toStringAsFixed(1)} GB' : '${(bytes / 1e6).round()} MB';
 
 const modelCatalog = [
   ModelInfo(
@@ -31,6 +36,16 @@ const modelCatalog = [
     sha256: 'e1a61bf937bc60726e18626e97f7ee9bfd2574d95744c2ed909de98b78006fbe',
     bytes: 1593894912,
     note: 'Better answers; needs a newer phone with 8 GB of memory or more.',
+  ),
+  ModelInfo(
+    id: 'own-model',
+    label: 'My own model file',
+    file: 'own-model.gguf',
+    url: '',
+    sha256: '',
+    bytes: 0,
+    note: 'A .gguf model you copy onto this phone yourself, for example a coach you trained. It gets the same prompts as LFM2.5 1.2B.',
+    importOnly: true,
   ),
 ];
 
@@ -53,17 +68,38 @@ class ModelStore {
 
   bool isReady(ModelInfo m) {
     final f = File(pathOf(m));
-    return f.existsSync() && f.lengthSync() == m.bytes;
+    return f.existsSync() && (m.importOnly ? f.lengthSync() > 1000000 : f.lengthSync() == m.bytes);
   }
+
+  /// Size on the phone (imported files have no fixed size).
+  int sizeOf(ModelInfo m) => m.importOnly ? (isReady(m) ? File(pathOf(m)).lengthSync() : 0) : m.bytes;
 
   /// Bytes already downloaded (finished or partial).
   int have(ModelInfo m) {
+    if (m.importOnly) return 0;
     if (isReady(m)) return m.bytes;
     final part = File('${pathOf(m)}.part');
     return part.existsSync() ? part.lengthSync() : 0;
   }
 
+  /// Checks a copied-in file (at the model path plus ".part") and puts it in place. Only GGUF model files pass.
+  void finishImport(ModelInfo m) {
+    final part = File('${pathOf(m)}.part');
+    if (!part.existsSync()) throw ModelError('Nothing was copied.');
+    final raf = part.openSync();
+    final head = raf.readSync(4);
+    raf.closeSync();
+    if (String.fromCharCodes(head) != 'GGUF' || part.lengthSync() < 1000000) {
+      part.deleteSync();
+      throw ModelError('That file is not a .gguf model, so it was not used.');
+    }
+    final f = File(pathOf(m));
+    if (f.existsSync()) f.deleteSync();
+    part.renameSync(pathOf(m));
+  }
+
   Future<void> download(ModelInfo m, http.Client client, {void Function(double)? onProgress, bool Function()? stop}) async {
+    if (m.importOnly) throw ModelError('This one is not downloaded: use Import to pick the file.');
     final part = File('${pathOf(m)}.part');
     part.parent.createSync(recursive: true);
     var got = part.existsSync() ? part.lengthSync() : 0;

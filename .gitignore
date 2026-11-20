@@ -12,3 +12,4 @@ release/
 app/android/app/.cxx/
 app/android/build/
 **/build/
+__pycache__/

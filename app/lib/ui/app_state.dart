@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
-import 'package:flutter/services.dart' show MethodChannel;
+import 'package:flutter/services.dart' show MethodChannel, PlatformException;
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
@@ -101,7 +101,7 @@ class Target {
 }
 
 /// An AI request ready to send: the exact texts and where they go.
-enum AiTask { plan, today, ask }
+enum AiTask { plan, today, ask, guide }
 
 class AiRequest {
   final String host;
@@ -125,7 +125,7 @@ String handoffText(AiRequest r, {bool project = false}) {
       ..writeln('---');
   }
   b.writeln(r.user.trim());
-  if (r.task != AiTask.ask) {
+  if (r.task == AiTask.plan || r.task == AiTask.today) {
     b
       ..writeln()
       ..writeln(project
@@ -471,16 +471,24 @@ class AppState extends ChangeNotifier {
     return AiRequest(_where, systemPrompt(lib, pr, wholePlan: true, plainText: settings.ai.isHandoff), buildRequest(pr, plan, recent, lib, ask), AiTask.plan, schema: planSchema(lib, pr));
   }
 
-  Future<AiRequest> aiTodayRequest() async {
+  /// [note]: how today is going, in the person's words (optional).
+  Future<AiRequest> aiTodayRequest({String note = ''}) async {
     final recent = await repo.setsSince(DateTime.now().subtract(const Duration(days: 14)));
+    final extra = note.trim().isEmpty ? '' : ' ${note.trim()}';
     if (settings.ai.isOnDevice) {
       return AiRequest(_where, localSystemPrompt(lib, profile!, wholePlan: false),
-          buildRequest(profile!, today, recent, lib, "Adjust today's workout (${today!.name}) based on my recent training."), AiTask.today,
+          buildRequest(profile!, today, recent, lib, "Adjust today's workout (${today!.name}) based on my recent training.$extra"), AiTask.today,
           grammar: dayGrammar(lib, profile!, today!.name));
     }
     return AiRequest(_where, systemPrompt(lib, profile!, wholePlan: false, plainText: settings.ai.isHandoff),
-        buildRequest(profile!, today, recent, lib, 'Adjust today\'s workout (${today!.name}) based on my recent training. Keep it the same kind of day.'), AiTask.today,
+        buildRequest(profile!, today, recent, lib, 'Adjust today\'s workout (${today!.name}) based on my recent training. Keep it the same kind of day.$extra'), AiTask.today,
         schema: daySchema(lib, profile!));
+  }
+
+  /// "Today's guide": a short brief for the session ahead (plain text).
+  Future<AiRequest> aiGuideRequest() async {
+    final recent = await repo.setsSince(DateTime.now().subtract(const Duration(days: 14)));
+    return AiRequest(_where, guidePrompt(), buildRequest(profile!, today, recent, lib, guideAsk(today!.name)), AiTask.guide);
   }
 
   /// A free question for the coach. Earlier questions and answers on screen go along so it can follow up.
@@ -514,8 +522,8 @@ class AppState extends ChangeNotifier {
       system: r.system,
       user: r.user,
       grammar: r.grammar,
-      maxTokens: switch (r.task) { AiTask.plan => 900, AiTask.today => 400, AiTask.ask => 800 },
-      temperature: r.task == AiTask.ask ? 0.7 : 0.4,
+      maxTokens: switch (r.task) { AiTask.plan => 900, AiTask.today => 400, AiTask.ask => 800, AiTask.guide => 400 },
+      temperature: (r.task == AiTask.ask || r.task == AiTask.guide) ? 0.7 : 0.4,
       seed: 42 + seed,
     );
     return switch (res.status) {
@@ -591,6 +599,33 @@ class AppState extends ChangeNotifier {
   }
 
   void stopModelDownload() => _stopDownload = true;
+
+  bool modelImporting = false;
+
+  /// "My own model file": the person picks a .gguf (e.g. from Downloads); it is copied into the app.
+  Future<void> importModel() async {
+    if (modelImporting || modelProgress != null) return;
+    final m = phoneModel;
+    modelImporting = true;
+    modelNote = null;
+    notifyListeners();
+    try {
+      final n = await _sys.invokeMethod<int>('pickFile', {'dest': '${models.pathOf(m)}.part'}) ?? -1;
+      if (n < 0) {
+        modelNote = 'No file picked.';
+      } else {
+        models.finishImport(m);
+        modelNote = 'Ready. Your model (${sizeText(n)}) is on this phone. You can delete the copy in Downloads now.';
+      }
+    } on ModelError catch (e) {
+      modelNote = e.message;
+    } on PlatformException catch (e) {
+      modelNote = 'Could not copy the file: ${e.message ?? e.code}.';
+    } finally {
+      modelImporting = false;
+      notifyListeners();
+    }
+  }
 
   void deleteModel() {
     models.delete(phoneModel);

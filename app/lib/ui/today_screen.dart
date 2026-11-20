@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../domain/plan.dart';
 import '../domain/units.dart';
 import 'ai_sheet.dart';
+import '../ai/prompt.dart';
 import 'coach_screen.dart';
 import 'app_state.dart';
 import 'log_screen.dart';
@@ -63,7 +64,9 @@ class TodayScreen extends StatelessWidget {
                 } else if (v.startsWith('day:')) {
                   s.pickDay(int.parse(v.substring(4)));
                 } else if (v == 'ai') {
-                  if (context.mounted) await runAi(context, s, s.aiTodayRequest);
+                  if (context.mounted) await adjustToday(context, s);
+                } else if (v == 'guide') {
+                  if (context.mounted) await todaysGuide(context, s);
                 }
               },
               itemBuilder: (c) => [
@@ -71,6 +74,7 @@ class TodayScreen extends StatelessWidget {
                 if (s.session == null)
                   for (var i = 0; i < plan.days.length; i++)
                     if (i != di) PopupMenuItem(value: 'day:$i', child: Text('Do ${plan.days[i].name} instead')),
+                if (s.settings.aiOn) const PopupMenuItem(value: 'guide', child: Text("Today's guide")),
                 if (s.settings.aiOn) const PopupMenuItem(value: 'ai', child: Text('Ask AI to adjust today')),
               ],
             ),
@@ -96,7 +100,7 @@ class TodayScreen extends StatelessWidget {
             for (var i = 0; i < day.items.length; i++) _ExTile(s: s, item: day.items[i], index: i),
             if (s.settings.aiOn && s.session == null)
               TextButton.icon(onPressed: () async {
-                await runAi(context, s, s.aiTodayRequest);
+                await adjustToday(context, s);
               }, icon: const Icon(Icons.auto_awesome, color: C.gold), label: const Text('Ask AI to adjust today')),
           ]),
         ),
@@ -216,4 +220,65 @@ class _RestBannerState extends State<_RestBanner> {
       ),
     );
   }
+}
+
+
+/// "Ask AI to adjust today", with an optional note on how today is going.
+Future<void> adjustToday(BuildContext context, AppState s) async {
+  final notes = <String>{};
+  final free = TextEditingController();
+  final go = await showModalBottomSheet<bool>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: C.card,
+    builder: (c) => StatefulBuilder(
+      builder: (c, set) => SafeArea(
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(c).viewInsets.bottom),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const Text('How is today going?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 4),
+            const Dim('Optional. The AI adjusts today\'s workout to it.', size: 13),
+            const SizedBox(height: 10),
+            Pills<String>(
+              values: todayNotes.keys.toList(),
+              label: (k) => const {'short': 'Short on time', 'tired': 'Tired', 'great': 'Feeling great', 'hurts': 'Something hurts', 'busy': 'Gym is busy'}[k]!,
+              selected: notes,
+              onTap: (k) => set(() => notes.contains(k) ? notes.remove(k) : notes.add(k)),
+            ),
+            const SizedBox(height: 10),
+            TextField(controller: free, decoration: const InputDecoration(hintText: 'Anything else? e.g. "no bench today"')),
+            const SizedBox(height: 12),
+            FilledButton(onPressed: () => Navigator.pop(c, true), child: const Text('Adjust today')),
+          ]),
+        ),
+      ),
+    ),
+  );
+  if (go != true || !context.mounted) return;
+  final note = [for (final k in todayNotes.keys) if (notes.contains(k)) todayNotes[k]!, free.text.trim()].where((x) => x.isNotEmpty).join(' ');
+  await runAi(context, s, () => s.aiTodayRequest(note: note));
+}
+
+/// "Today's guide": the coach's short brief for the session, shown in a sheet.
+Future<void> todaysGuide(BuildContext context, AppState s) async {
+  final a = await runAsk(context, s, s.aiGuideRequest);
+  if (a == null || !context.mounted) return;
+  await showModalBottomSheet<void>(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: C.card,
+    builder: (c) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+          Text("Today's guide: ${s.today?.name ?? ''}", style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+          const SizedBox(height: 10),
+          Flexible(child: SingleChildScrollView(child: SelectableText(plainText(a), style: const TextStyle(fontSize: 15, height: 1.4)))),
+          const SizedBox(height: 12),
+          FilledButton(onPressed: () => Navigator.pop(c), child: const Text("Let's go")),
+        ]),
+      ),
+    ),
+  );
 }

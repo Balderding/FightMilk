@@ -233,7 +233,7 @@ class _PreviewState extends State<_Preview> {
                     child: Row(children: [
                       Icon(showSystem ? Icons.expand_less : Icons.expand_more, color: C.dim),
                       const SizedBox(width: 6),
-                      Expanded(child: Dim('Also sent: the app\'s instructions${r.task == AiTask.ask ? '' : ' and exercise list'} ($lines lines). Tap to ${showSystem ? 'hide' : 'show'}.')),
+                      Expanded(child: Dim('Also sent: the app\'s instructions${(r.task == AiTask.ask || r.task == AiTask.guide) ? '' : ' and exercise list'} ($lines lines). Tap to ${showSystem ? 'hide' : 'show'}.')),
                     ]),
                   ),
                 ),

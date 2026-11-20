@@ -24,7 +24,7 @@ Set<String>? musclesFor(String dayName) {
   if (n.contains('push')) return _push;
   if (n.contains('pull')) return _pull;
   if (n.contains('chest')) return {'chest', 'triceps'};
-  if (n.contains('back')) return {'back', 'lats', 'biceps', 'rear_delts'};
+  if (n.contains('back')) return {'back', 'lats', 'biceps', 'rear_delts', 'traps', 'forearms'};
   if (n.contains('shoulder')) return {'shoulders', 'rear_delts', 'traps'};
   if (n.contains('arm')) return {'biceps', 'triceps', 'forearms'};
   return null;
@@ -43,11 +43,11 @@ String _alt(List<Exercise> l) => l.map((e) => '"${e.id}"').join(' | ');
 String _lit(String s) => '"${s.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"';
 
 const _common = '''
-name ::= [A-Za-z0-9 /&()+-]{1,30}
+name ::= [A-Za-z0-9 /&()+-]{1,40}
 sets ::= [1-8]
 reps ::= num "-" num
 num ::= [1-9] [0-9]? [0-9]?
-rest ::= [3-9] "0" | [1-2] [0-9] [05] | "300"
+rest ::= [3-9] [05] | [1-2] [0-9] [05] | "300"
 ''';
 
 String _dayRules(Library lib, Profile p, String rule, String name, int cap) {
