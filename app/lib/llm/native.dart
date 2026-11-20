@@ -42,7 +42,11 @@ bool cpuSupported() {
 }
 
 /// True when the engine is in this build and this phone's processor can run it.
+/// Screenshot/test builds can say the engine is there.
+bool? engineAvailableOverride;
+
 bool engineAvailable([String? lib]) {
+  if (engineAvailableOverride != null) return engineAvailableOverride!;
   if (!cpuSupported()) return false;
   try {
     DynamicLibrary.open(lib ?? defaultLibrary);

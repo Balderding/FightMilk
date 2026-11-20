@@ -13,6 +13,17 @@ A free Android app for people who lift heavy: machines, barbells, dumbbells. It 
   - **Claude, OpenAI or Gemini** with your own API key, or **your own server** (llama-server, Ollama, LM Studio).
   Every AI answer is checked against your equipment, sore joints and sane numbers before it is used.
 
+## Screenshots
+
+| | | | |
+|:-:|:-:|:-:|:-:|
+| <img src="docs/screenshots/2-today.png" width="200" alt="Today: the next workout, filled in"> | <img src="docs/screenshots/4-workout.png" width="200" alt="Logging a set with the animation, coach line and rest timer"> | <img src="docs/screenshots/3-how-to.png" width="200" alt="How to do an exercise, with its animation"> | <img src="docs/screenshots/6-progress.png" width="200" alt="Progress chart and personal bests"> |
+| **Today** | **During a workout** | **How to do it** | **Progress** |
+| <img src="docs/screenshots/5-plan.png" width="200" alt="Plan editor"> | <img src="docs/screenshots/8-library.png" width="200" alt="296 exercises"> | <img src="docs/screenshots/1-setup.png" width="200" alt="One-screen setup"> | <img src="docs/screenshots/7-settings.png" width="200" alt="AI coach choices, including on this phone"> |
+| **Your plan** | **296 exercises** | **Setup** | **AI coach on your phone** |
+
+<sub>Rendered from the app's own screens with sample workouts (`app/test_screens/screenshots_test.dart`).</sub>
+
 ## Install
 
 Download the APK from [Releases](https://github.com/Balderding/FightMilk/releases) (`-arm64` for almost every phone, `-universal` if unsure), open it and allow the install. Needs Android 7.0 or newer. After that the app can update itself: Settings → App updates. Every update is checked against the release's `SHA256SUMS.txt`, and Android only installs it over the old one if it is signed with the same key.

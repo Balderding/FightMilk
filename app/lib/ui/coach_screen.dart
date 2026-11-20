@@ -8,6 +8,13 @@ import 'widgets.dart';
 
 /// Ask the AI coach anything about training. The conversation lives only on this screen:
 /// nothing is saved, and it is gone when you leave.
+/// Chat models like markdown; this screen shows plain text.
+String plainText(String a) => a
+    .replaceAllMapped(RegExp(r'\*\*(.+?)\*\*'), (m) => m.group(1)!)
+    .replaceAllMapped(RegExp(r'^#{1,6}\s*', multiLine: true), (_) => '')
+    .replaceAllMapped(RegExp(r'^\s*[*-]\s+', multiLine: true), (_) => '• ')
+    .trim();
+
 class CoachScreen extends StatefulWidget {
   final AppState s;
   const CoachScreen({super.key, required this.s});
@@ -36,7 +43,7 @@ class _CoachScreenState extends State<CoachScreen> {
     setState(() {
       busy = false;
       if (a != null) {
-        turns.add((t, a.trim()));
+        turns.add((t, plainText(a)));
         q.clear();
       } else if (widget.s.settings.ai.isHandoff) {
         q.clear();

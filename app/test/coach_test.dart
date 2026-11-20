@@ -6,6 +6,7 @@ import 'package:workout/domain/library.dart';
 import 'package:workout/domain/plan.dart';
 import 'package:workout/ui/anim/pose.dart';
 import 'package:workout/ui/anim/pose_data.dart';
+import 'package:workout/ui/coach_screen.dart';
 
 void main() {
   final lib = Library.fromJsonString(File('assets/exercises.json').readAsStringSync());
@@ -83,5 +84,9 @@ void main() {
       expect(midLift, closeTo(0.5, 0.01));
       expect(midLower, closeTo(0.5, 0.01));
     });
+  });
+
+  test('coach answers lose markdown', () {
+    expect(plainText('**Primary lifts:**\n- **Bench** press\n## Rest\n* two minutes'), 'Primary lifts:\n• Bench press\nRest\n• two minutes');
   });
 }

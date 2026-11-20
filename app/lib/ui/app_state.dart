@@ -514,7 +514,7 @@ class AppState extends ChangeNotifier {
       system: r.system,
       user: r.user,
       grammar: r.grammar,
-      maxTokens: switch (r.task) { AiTask.plan => 900, AiTask.today => 400, AiTask.ask => 450 },
+      maxTokens: switch (r.task) { AiTask.plan => 900, AiTask.today => 400, AiTask.ask => 800 },
       temperature: r.task == AiTask.ask ? 0.7 : 0.4,
       seed: 42 + seed,
     );

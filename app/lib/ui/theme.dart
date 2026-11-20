@@ -31,7 +31,7 @@ ThemeData buildTheme() {
     error: C.gold,
     onError: Color(0xFF2A1F00),
   );
-  final base = ThemeData(colorScheme: scheme, useMaterial3: true, brightness: Brightness.dark);
+  final base = ThemeData(colorScheme: scheme, useMaterial3: true, brightness: Brightness.dark, fontFamily: 'Roboto');
   return base.copyWith(
     scaffoldBackgroundColor: C.bg,
     cardTheme: const CardThemeData(color: C.card, elevation: 0, margin: EdgeInsets.only(bottom: 10), shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(14)))),
@@ -44,7 +44,7 @@ ThemeData buildTheme() {
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
         minimumSize: const Size(48, 52),
-        textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        textStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 16, fontWeight: FontWeight.w700),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
     ),
@@ -56,7 +56,7 @@ ThemeData buildTheme() {
       selectedColor: C.teal,
       side: BorderSide.none,
       shape: const StadiumBorder(),
-      labelStyle: const TextStyle(fontSize: 14),
+      labelStyle: const TextStyle(fontFamily: 'Roboto', fontSize: 14),
       checkmarkColor: C.onTeal,
     ),
     snackBarTheme: const SnackBarThemeData(backgroundColor: C.card2, contentTextStyle: TextStyle(color: C.text), behavior: SnackBarBehavior.floating),
