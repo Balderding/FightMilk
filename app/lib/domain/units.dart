@@ -50,4 +50,11 @@ String fmtWeight(double kg, Unit u) => fmtNum(toUnit(kg, u));
 String unitLabel(Unit u) => u == Unit.kg ? 'kg' : 'lb';
 
 /// Estimated one-rep max (Epley).
-double e1rm(double kg, int reps) => reps <= 1 ? kg : kg * (1 + reps / 30);
+/// 'epley' (default) or 'brzycki' (Settings → Progression).
+String e1rmFormula = 'epley';
+
+double e1rm(double kg, int reps) {
+  if (reps <= 1) return kg;
+  if (e1rmFormula == 'brzycki' && reps < 37) return kg * 36 / (37 - reps);
+  return kg * (1 + reps / 30);
+}

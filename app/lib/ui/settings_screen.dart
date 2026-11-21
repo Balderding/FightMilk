@@ -7,6 +7,7 @@ import 'package:flutter/services.dart';
 import '../ai/ai.dart';
 import '../ai/prompt.dart';
 import '../data/backup.dart';
+import '../data/csv_export.dart';
 import '../domain/exercise.dart';
 import '../domain/plan.dart';
 import '../domain/units.dart';
@@ -17,6 +18,7 @@ import '../llm/native.dart';
 import '../version.dart';
 import 'app_state.dart';
 import 'coach_screen.dart';
+import 'gyms_screen.dart';
 import '../services/handoff.dart';
 import 'setup_screen.dart';
 import 'theme.dart';
@@ -86,12 +88,23 @@ class SettingsScreen extends StatelessWidget {
                 title: const Text('Keep the screen on during a workout'),
               ),
               const Dim('The rest timer buzzes even with the screen off.'),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: st.warmups,
+                onChanged: (v) => s.saveSettings(st.copyWith(warmups: v)),
+                title: const Text('Warm-up help'),
+                subtitle: const Dim('A 5-minute warm-up before the first lift, warm-up sets worked out for each big lift, stretches at the end.', size: 12),
+              ),
               const Q('Rest between sets'),
               Pills<int>(
-                values: const [-1, 0, 60, 90, 120, 180, 240],
-                label: (v) => v == -1 ? 'Smart (by effort)' : v == 0 ? "Plan's own" : '${v ~/ 60}:${(v % 60).toString().padLeft(2, '0')}',
-                selected: {st.rest ?? (st.smartRest ? -1 : 0)},
-                onTap: (v) => s.saveSettings(v <= 0 ? st.copyWith(planRest: true, smartRest: v == -1) : st.copyWith(rest: v)),
+                values: const [-1, 0, 60, 90, 120, 180, 240, -9],
+                label: (v) => v == -9 ? 'Off' : v == -1 ? 'Smart (by effort)' : v == 0 ? "Plan's own" : '${v ~/ 60}:${(v % 60).toString().padLeft(2, '0')}',
+                selected: {st.restOff ? -9 : (st.rest ?? (st.smartRest ? -1 : 0))},
+                onTap: (v) => s.saveSettings(v == -9
+                    ? st.copyWith(restOff: true)
+                    : v <= 0
+                        ? st.copyWith(planRest: true, smartRest: v == -1, restOff: false)
+                        : st.copyWith(rest: v, restOff: false)),
               ),
               const Dim('Smart: heavy sets and big lifts rest longer, missed reps add time, and you can tap how hard a set felt.', size: 12),
               const Q('Reward sounds'),
@@ -141,20 +154,75 @@ class SettingsScreen extends StatelessWidget {
             ]),
           ),
         ),
+        Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              const Text('Progression', style: TextStyle(fontWeight: FontWeight.w600)),
+              const Dim('How the app moves your weights after each workout.', size: 12),
+              const Q('Speed'),
+              Pills<String>(
+                values: const ['slow', 'steady', 'fast'],
+                label: (v) => {'slow': 'Slow (2 good sessions)', 'steady': 'Steady (1 step)', 'fast': 'Fast (2 steps)'}[v]!,
+                selected: {st.progSpeed},
+                onTap: (v) => s.saveSettings(st.copyWith(progSpeed: v)),
+              ),
+              const Q('Drop the weight after'),
+              Pills<int>(values: const [1, 2, 3], label: (v) => '$v missed session${v == 1 ? '' : 's'}', selected: {st.missesToDrop}, onTap: (v) => s.saveSettings(st.copyWith(missesToDrop: v))),
+              Pills<int>(values: const [5, 10, 15], label: (v) => 'by $v%', selected: {st.dropPct}, onTap: (v) => s.saveSettings(st.copyWith(dropPct: v))),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: st.effortDrives,
+                onChanged: (v) => s.saveSettings(st.copyWith(effortDrives: v)),
+                title: const Text('Effort taps change the jump'),
+                subtitle: const Dim('All "Easy" at the top of the range: a bigger jump. "All-out": one step only.', size: 12),
+              ),
+              const Q('Deload week'),
+              Pills<int>(values: const [0, 4, 5, 6], label: (v) => v == 0 ? 'When I ask' : 'Every $v weeks', selected: {st.deloadEvery}, onTap: (v) => s.saveSettings(st.copyWith(deloadEvery: v))),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: st.checkin,
+                onChanged: (v) => s.saveSettings(st.copyWith(checkin: v)),
+                title: const Text('Ask how I feel before a workout'),
+                subtitle: const Dim('Rough: one set fewer and a bit lighter. Optional every time.', size: 12),
+              ),
+              const Q('One-rep max formula'),
+              Pills<String>(values: const ['epley', 'brzycki'], label: (v) => v == 'epley' ? 'Epley' : 'Brzycki', selected: {st.formula}, onTap: (v) => s.saveSettings(st.copyWith(formula: v))),
+            ]),
+          ),
+        ),
+        Card(
+          child: ListTile(
+            leading: const Icon(Icons.fitness_center, color: C.teal),
+            title: const Text('Your gyms'),
+            subtitle: Dim(s.activeGym == null ? 'Set up the machines and equipment your gym has' : 'At ${s.activeGym!.name} · ${s.gyms.length} gym${s.gyms.length == 1 ? '' : 's'}', size: 12),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => GymsScreen(s: s))),
+          ),
+        ),
         _UpdateCard(s: s),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(12),
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               const Text('Your data', style: TextStyle(fontWeight: FontWeight.w600)),
-              const Dim('Stored only on this phone. A backup is one file you keep wherever you like (API keys are never in it).'),
+              const Dim('Stored only on this phone. A backup is one file you keep wherever you like (API keys are never in it). '
+                  'Export sets as CSV gives every set you logged as a spreadsheet that Strong, Hevy, Liftosaur and spreadsheet apps can import.'),
               const SizedBox(height: 8),
+              SwitchListTile(
+                contentPadding: EdgeInsets.zero,
+                value: st.hideRecents,
+                onChanged: (v) => s.saveSettings(st.copyWith(hideRecents: v)),
+                title: const Text('Hide the app in recent apps'),
+                subtitle: const Dim('The app switcher shows a blank card, and screenshots of the app are blocked.', size: 12),
+              ),
               Wrap(spacing: 8, runSpacing: 8, children: [
                 OutlinedButton(onPressed: () => _export(context), child: const Text('Export backup')),
                 OutlinedButton(onPressed: () => _import(context), child: const Text('Import backup')),
+                OutlinedButton(onPressed: () => _exportCsv(context), child: const Text('Export sets as CSV')),
                 OutlinedButton(
                   onPressed: () async {
-                    if (await confirm(context, 'Delete everything?', 'All workouts, plans, settings and saved API keys are removed from this phone. This cannot be undone. Export a backup first if you want one.', yes: 'Delete everything')) {
+                    if (await confirm(context, 'Delete everything?', 'All workouts, plans, settings, saved API keys, reminders and downloaded AI models are removed from this phone. This cannot be undone. Export a backup first if you want one.', yes: 'Delete everything')) {
                       await s.wipeEverything();
                     }
                   },
@@ -197,6 +265,18 @@ class SettingsScreen extends StatelessWidget {
       if (context.mounted) toast(context, uri == null ? 'Not saved.' : 'Backup saved.');
     } catch (e) {
       if (context.mounted) toast(context, 'Could not save the backup: $e');
+    }
+  }
+
+  Future<void> _exportCsv(BuildContext context) async {
+    try {
+      final text = await exportCsv(s.repo, s.lib, s.unit);
+      final d = DateTime.now();
+      final name = 'fightmilk-sets-${s.unit.name}-${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}.csv';
+      final uri = await FilePicker.saveFile(fileName: name, bytes: Uint8List.fromList(utf8.encode(text)), mimeType: 'text/csv', dialogTitle: 'Save sets as CSV');
+      if (context.mounted) toast(context, uri == null ? 'Not saved.' : 'CSV saved (weights in ${s.unit.name}).');
+    } catch (e) {
+      if (context.mounted) toast(context, 'Could not save the CSV: $e');
     }
   }
 
@@ -320,6 +400,18 @@ class _AiCardState extends State<_AiCard> {
                 await _fill();
               },
             ),
+            if (!a.isHandoff) ...[
+              const Q('When the AI changes something in the app'),
+              Pills<bool>(
+                values: const [false, true],
+                label: (v) => v ? 'Auto: just do it' : 'Ask me first',
+                selected: {st.aiAuto},
+                onTap: (v) => s.saveSettings(st.copyWith(aiAuto: v)),
+              ),
+              Dim(st.aiAuto
+                  ? 'Ask AI makes the changes right away and tells you what it did. Every change can be undone (Ask AI → AI changes).'
+                  : 'Ask AI shows what it wants to change and waits for you to tap Apply.', size: 12),
+            ],
             const SizedBox(height: 10),
             if (a.isOnDevice) ...[
               _PhoneModel(s: s),
@@ -337,7 +429,7 @@ class _AiCardState extends State<_AiCard> {
               const SizedBox(height: 8),
               OutlinedButton.icon(
                 onPressed: () async {
-                  await Clipboard.setData(ClipboardData(text: projectInstructions(s.lib, s.profile!)));
+                  await copySensitive(projectInstructions(s.lib, s.profile!));
                   if (context.mounted) toast(context, 'Project instructions copied. Paste them into the project in the Claude app.');
                 },
                 icon: const Icon(Icons.copy),
@@ -354,27 +446,27 @@ class _AiCardState extends State<_AiCard> {
               OutlinedButton.icon(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CoachScreen(s: s))),
                 icon: const Icon(Icons.chat_bubble_outline, color: C.gold),
-                label: const Text('Ask the coach'),
+                label: const Text('Ask AI'),
               ),
               const SizedBox(height: 6),
               const Dim('This app sends nothing in this mode.', size: 12),
             ] else ...[
             if (a.kind == AiKind.local) ...[
-              TextField(controller: url, decoration: const InputDecoration(labelText: 'Server address', hintText: 'http://192.168.1.20:8081'), onChanged: (_) => setState(() {}), onSubmitted: (_) => _save()),
+              TextField(enableIMEPersonalizedLearning: false, controller: url, decoration: const InputDecoration(labelText: 'Server address', hintText: 'http://192.168.1.20:8081'), onChanged: (_) => setState(() {}), onSubmitted: (_) => _save()),
               const SizedBox(height: 4),
               const Dim('Any OpenAI-compatible server: llama-server, Ollama, LM Studio. Plain http works only on your home network.', size: 12),
               if (httpWarn && !badLocal) const Dim('Note: http is not encrypted. Fine at home, not on public Wi-Fi.', size: 12),
               if (badLocal) const Padding(padding: EdgeInsets.only(top: 6), child: Problem(['A server on the internet must use https.'])),
               const SizedBox(height: 8),
             ],
-            TextField(
+            TextField(enableIMEPersonalizedLearning: false, 
               controller: key,
               obscureText: true,
               decoration: InputDecoration(labelText: a.kind == AiKind.local ? 'API key (only if your server needs one)' : 'API key', hintText: hasKey ? 'saved ••••••• (type to replace)' : 'paste your key'),
               onSubmitted: (_) => _save(),
             ),
             const SizedBox(height: 8),
-            TextField(controller: model, decoration: const InputDecoration(labelText: 'Model'), onSubmitted: (_) => _save()),
+            TextField(enableIMEPersonalizedLearning: false, controller: model, decoration: const InputDecoration(labelText: 'Model'), onSubmitted: (_) => _save()),
             const SizedBox(height: 4),
             Dim(a.kind == AiKind.local ? 'The model name your server uses.' : 'Change it to any model your account has.', size: 12),
             SwitchListTile(
@@ -392,7 +484,7 @@ class _AiCardState extends State<_AiCard> {
             OutlinedButton.icon(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CoachScreen(s: s))),
               icon: const Icon(Icons.chat_bubble_outline, color: C.gold),
-              label: const Text('Ask the coach'),
+              label: const Text('Ask AI'),
             ),
             const SizedBox(height: 6),
             Dim('Requests go only to ${host ?? 'your server'}. Your key stays in this phone\'s secure storage.', size: 12),
@@ -448,7 +540,7 @@ class _PhoneModel extends StatelessWidget {
             child: OutlinedButton.icon(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CoachScreen(s: s))),
               icon: const Icon(Icons.chat_bubble_outline, color: C.gold),
-              label: const Text('Ask the coach'),
+              label: const Text('Ask AI'),
             ),
           ),
           const SizedBox(width: 8),

@@ -55,8 +55,47 @@ class Notifier {
     }
   }
 
+  /// While resting with the app in the background: an ongoing notice with a live countdown
+  /// (Android draws the clock itself; nothing runs in the app). Gone when the app comes back.
+  Future<void> restOngoing(DateTime end, String next) async {
+    if (!_ready) return;
+    try {
+      await _p.show(
+        id: 2,
+        title: 'Resting',
+        body: next.isEmpty ? 'Your next set is up when the clock hits zero' : 'Next: $next',
+        notificationDetails: NotificationDetails(
+          android: AndroidNotificationDetails(
+            'rest_live',
+            'Rest countdown',
+            channelDescription: 'A quiet countdown while you rest with the app closed',
+            importance: Importance.low,
+            priority: Priority.low,
+            ongoing: true,
+            onlyAlertOnce: true,
+            showWhen: true,
+            when: end.millisecondsSinceEpoch,
+            usesChronometer: true,
+            chronometerCountDown: true,
+            timeoutAfter: end.difference(DateTime.now()).inMilliseconds.clamp(1000, 3600000),
+            visibility: NotificationVisibility.public,
+            category: AndroidNotificationCategory.stopwatch,
+          ),
+        ),
+      );
+    } catch (_) {}
+  }
+
+  Future<void> cancelOngoing() async {
+    if (!_ready) return;
+    try {
+      await _p.cancel(id: 2);
+    } catch (_) {}
+  }
+
   static const _remind = NotificationDetails(
-    android: AndroidNotificationDetails('reminders', 'Training reminders', channelDescription: 'Reminds you on your training days', importance: Importance.defaultImportance),
+    android: AndroidNotificationDetails('reminders', 'Training reminders', channelDescription: 'Reminds you on your training days', importance: Importance.defaultImportance,
+        visibility: NotificationVisibility.private), // lock screen shows only the app name
   );
 
   /// Reminders for the next 2 weeks on the chosen weekdays (1 = Monday) at [minutes] after midnight,
@@ -84,6 +123,14 @@ class Notifier {
         );
       } catch (_) {}
     }
+  }
+
+  /// Every notification and reminder this app has scheduled.
+  Future<void> cancelAll() async {
+    if (!_ready) return;
+    try {
+      await _p.cancelAll();
+    } catch (_) {}
   }
 
   Future<void> cancel() async {

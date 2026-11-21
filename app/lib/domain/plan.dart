@@ -16,6 +16,9 @@ class Profile {
   final Set<Joint> avoid;
   final Unit unit;
   final String? split; // null = let the app choose; 'full_body' | 'upper_lower' | 'ppl' | 'bro'
+  /// The active gym's items minus anything taken today (see gym.dart). null = no gym set up,
+  /// [have] alone decides. Not saved with the profile: it comes from the gym list.
+  final Set<String>? items;
 
   const Profile({
     required this.goal,
@@ -25,9 +28,10 @@ class Profile {
     required this.avoid,
     required this.unit,
     this.split,
+    this.items,
   });
 
-  Profile copyWith({Goal? goal, int? days, int? minutes, Set<Equipment>? have, Set<Joint>? avoid, Unit? unit, String? split, bool clearSplit = false}) =>
+  Profile copyWith({Goal? goal, int? days, int? minutes, Set<Equipment>? have, Set<Joint>? avoid, Unit? unit, String? split, bool clearSplit = false, Set<String>? items, bool clearItems = false}) =>
       Profile(
         goal: goal ?? this.goal,
         days: days ?? this.days,
@@ -36,6 +40,7 @@ class Profile {
         avoid: avoid ?? this.avoid,
         unit: unit ?? this.unit,
         split: clearSplit ? null : (split ?? this.split),
+        items: clearItems ? null : (items ?? this.items),
       );
 
   Map<String, dynamic> toJson() => {
@@ -59,24 +64,33 @@ class Profile {
       );
 }
 
+/// How the last planned set of an exercise is done.
+const lastSetStyles = {'': 'Normal', 'drop': 'Drop set', 'amrap': 'As many reps as possible', 'failure': 'To failure', 'restpause': 'Rest-pause'};
+
 class PlanItem {
   final String exerciseId;
   final int sets, repLow, repHigh, restSec;
+  final String style; // last set: '' normal, 'drop', 'amrap', 'failure', 'restpause'
+  final int? group; // superset / circuit group (same number = done together)
 
-  const PlanItem({required this.exerciseId, required this.sets, required this.repLow, required this.repHigh, required this.restSec});
+  const PlanItem({required this.exerciseId, required this.sets, required this.repLow, required this.repHigh, required this.restSec, this.style = '', this.group});
 
-  PlanItem copyWith({String? exerciseId, int? sets, int? repLow, int? repHigh, int? restSec}) => PlanItem(
+  PlanItem copyWith({String? exerciseId, int? sets, int? repLow, int? repHigh, int? restSec, String? style, int? group, bool clearGroup = false}) => PlanItem(
         exerciseId: exerciseId ?? this.exerciseId,
         sets: sets ?? this.sets,
         repLow: repLow ?? this.repLow,
         repHigh: repHigh ?? this.repHigh,
         restSec: restSec ?? this.restSec,
+        style: style ?? this.style,
+        group: clearGroup ? null : (group ?? this.group),
       );
 
-  Map<String, dynamic> toJson() => {'exercise': exerciseId, 'sets': sets, 'repLow': repLow, 'repHigh': repHigh, 'rest': restSec};
+  Map<String, dynamic> toJson() => {'exercise': exerciseId, 'sets': sets, 'repLow': repLow, 'repHigh': repHigh, 'rest': restSec, if (style.isNotEmpty) 'style': style, if (group != null) 'group': group};
 
   factory PlanItem.fromJson(Map<String, dynamic> j) => PlanItem(
         exerciseId: j['exercise'] as String,
+        style: (j['style'] ?? '') as String,
+        group: j['group'] as int?,
         sets: j['sets'] as int,
         repLow: j['repLow'] as int,
         repHigh: j['repHigh'] as int,

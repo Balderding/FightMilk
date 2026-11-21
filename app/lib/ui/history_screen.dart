@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../data/repo.dart';
 import '../domain/exercise.dart';
+import '../domain/plan.dart';
 import '../domain/units.dart';
 import 'app_state.dart';
 import 'theme.dart';
@@ -24,24 +25,64 @@ class HistoryScreen extends StatefulWidget {
 }
 
 class _HistoryScreenState extends State<HistoryScreen> {
+  String q = '';
+
+  bool _match((Session, List<SetLog>) x) {
+    if (q.trim().isEmpty) return true;
+    final t = q.trim().toLowerCase();
+    final (ses, sets) = x;
+    return ses.day.name.toLowerCase().contains(t) ||
+        ses.note.toLowerCase().contains(t) ||
+        fmtDate(ses.started).toLowerCase().contains(t) ||
+        sets.any((y) => (widget.s.lib.byId(y.exerciseId)?.name.toLowerCase().contains(t) ?? false) || y.note.toLowerCase().contains(t));
+  }
+
+  static const _months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+
   @override
   Widget build(BuildContext context) {
     final s = widget.s;
     return SafeArea(
       child: FutureBuilder<List<(Session, List<SetLog>)>>(
         future: () async {
-          final h = await s.repo.history();
+          final h = await s.repo.history(limit: 100000);
           return [for (final x in h) (x, await s.repo.setsFor(x.id))];
         }(),
         builder: (c, snap) {
-          final l = snap.data;
-          if (l == null) return const Center(child: CircularProgressIndicator());
-          if (l.isEmpty) return const Center(child: Dim('No workouts yet. Finished workouts show up here.', size: 15));
+          final all = snap.data;
+          if (all == null) return const Center(child: CircularProgressIndicator());
+          if (all.isEmpty) return const Center(child: Dim('No workouts yet. Finished workouts show up here.', size: 15));
+          final l = all.where(_match).toList();
+          final rows = <Widget>[];
+          String? month;
+          for (final (ses, sets) in l) {
+            final m = '${_months[ses.started.month - 1]} ${ses.started.year}';
+            if (m != month) {
+              month = m;
+              final n = l.where((x) => x.$1.started.year == ses.started.year && x.$1.started.month == ses.started.month).length;
+              rows.add(Padding(padding: const EdgeInsets.fromLTRB(4, 12, 4, 4), child: Text('$m · $n workout${n == 1 ? '' : 's'}', style: const TextStyle(color: C.teal, fontWeight: FontWeight.w600))));
+            }
+            rows.add(_card(ses, sets));
+          }
           return ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 24), children: [
             const Text('History', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 10),
-            for (final (ses, sets) in l)
-              Card(
+            const SizedBox(height: 8),
+            TextField(
+              enableIMEPersonalizedLearning: false,
+              decoration: const InputDecoration(hintText: 'Search: exercise, day, note, date', prefixIcon: Icon(Icons.search)),
+              onChanged: (v) => setState(() => q = v),
+            ),
+            if (l.isEmpty) const Padding(padding: EdgeInsets.all(20), child: Center(child: Dim('Nothing matches.'))),
+            ...rows,
+          ]);
+        },
+      ),
+    );
+  }
+
+  Widget _card(Session ses, List<SetLog> sets) {
+    final s = widget.s;
+    return Card(
                 child: ListTile(
                   title: Text('${fmtDate(ses.started)} · ${ses.day.name}', style: const TextStyle(fontWeight: FontWeight.w600)),
                   subtitle: Dim('${sets.length} sets · ${fmtNum(toUnit(sets.fold<double>(0, (a, x) => a + volumeOf(x, s.lib.byId(x.exerciseId))), s.unit))} ${unitLabel(s.unit)} lifted'
@@ -51,11 +92,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
                     setState(() {});
                   },
                 ),
-              ),
-          ]);
-        },
-      ),
-    );
+              );
   }
 }
 
@@ -111,6 +148,26 @@ class _SessionDetailState extends State<SessionDetail> {
       appBar: AppBar(
         title: Text('${fmtDate(ses.started)} · ${ses.day.name}'),
         actions: [
+          PopupMenuButton<String>(
+            onSelected: (v) async {
+              if (v == 'again') {
+                if (s.session != null) {
+                  toast(context, 'A workout is going. Finish it first.');
+                  return;
+                }
+                if (s.plan == null) return;
+                await s.setToday(ses.day);
+                if (context.mounted) toast(context, 'Set as today\'s workout. Start it from Today.');
+              } else if (v == 'plan' && s.plan != null) {
+                await s.savePlanEdits(s.plan!.addDay(ses.day.name).let((pl) => Plan(id: pl.id, name: pl.name, source: pl.source, days: [...pl.days]..[pl.days.length - 1] = ses.day, userEdited: true, created: pl.created)));
+                if (context.mounted) toast(context, 'Added to your plan as a new day.');
+              }
+            },
+            itemBuilder: (c) => const [
+              PopupMenuItem(value: 'again', child: Text('Do this again today')),
+              PopupMenuItem(value: 'plan', child: Text('Add to my plan as a day')),
+            ],
+          ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
             tooltip: 'Delete workout',
@@ -143,7 +200,11 @@ class _SessionDetailState extends State<SessionDetail> {
                     Text(s.lib.byId(g.key)?.name ?? g.key, style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
                     Wrap(spacing: 8, runSpacing: 6, children: [
-                      for (final x in g.value) ActionChip(label: Text('${fmtWeight(x.kg, s.unit)} × ${x.reps}'), onPressed: () => _edit(x)),
+                      for (final x in g.value)
+                        ActionChip(
+                          label: Text('${setTypeLetter[x.type]!.isEmpty ? '' : '${setTypeLetter[x.type]} '}${fmtWeight(x.kg, s.unit)} × ${x.reps}${x.note.isEmpty ? '' : ' ✎'}'),
+                          onPressed: () => _edit(x),
+                        ),
                     ]),
                   ]),
                 ),
@@ -154,4 +215,8 @@ class _SessionDetailState extends State<SessionDetail> {
       ),
     );
   }
+}
+
+extension _Let<T> on T {
+  R let<R>(R Function(T) f) => f(this);
 }

@@ -33,7 +33,7 @@ Set<String>? musclesFor(String dayName) {
 List<Exercise> _for(Library lib, Profile p, String dayName, {bool compound = false}) {
   final m = musclesFor(dayName);
   return [
-    for (final e in lib.available(p.have, p.avoid))
+    for (final e in lib.available(p.have, p.avoid, items: p.items))
       if ((m == null || m.contains(e.primary.first) || e.primary.first == 'core') && (!compound || (e.compound && e.primary.first != 'core'))) e
   ];
 }
@@ -80,8 +80,39 @@ String dayGrammar(Library lib, Profile p, String dayName) {
 /// the prompt quickly. The grammar already stops it from using anything else.
 String compactExerciseList(Library lib, Profile p) {
   final by = <String, List<String>>{};
-  for (final e in lib.available(p.have, p.avoid)) {
+  for (final e in lib.available(p.have, p.avoid, items: p.items)) {
     (by[e.primary.first.replaceAll('_', ' ')] ??= []).add(e.id);
   }
   return [for (final m in by.entries) '${m.key}: ${m.value.join(', ')}'].join('\n');
+}
+
+/// The on-phone model's answer for "Ask AI": a SAY line, then only real tools with real values.
+/// Exercises: only this gym's, never ones that load a sore joint.
+/// [mustAct]: the person asked for a change, so the answer starts with at least one tool call
+/// (a small model otherwise just talks about it).
+String toolGrammar(Library lib, Profile p, int planDays, {bool mustAct = false}) {
+  final ids = _alt(lib.available(p.have, p.avoid, items: p.items).toList());
+  final cap = capFor(p.minutes);
+  final dayN = planDays < 1 ? '"1"' : [for (var i = 1; i <= planDays && i <= 9; i++) '"$i"'].join(' | ');
+  return '''
+root ::= ${mustAct ? 'act{1,6} ' : ''}"SAY: " say "\\n"
+say ::= [^\\n]{1,250}
+act ::= "DO: " (today | swap | add | remove | change | style | pick | skip | start | setting | profile) "\\n"
+today ::= "today\\nDAY: " name "\\n" item{2,$cap}
+item ::= ex " | " sets " | " reps " | " rest "\\n"
+swap ::= "swap " ex " -> " ex " " scope
+add ::= "add " ex " " sets " " reps " " rest " " scope
+remove ::= "remove " ex " " scope
+change ::= "change " ex (" sets=" sets)? (" reps=" reps)? (" rest=" rest)? " " scope
+style ::= "style " ex " " ("drop" | "amrap" | "failure" | "restpause" | "normal") " " scope
+pick ::= "pick day " ($dayN)
+skip ::= "skip day"
+start ::= "start workout"
+setting ::= "setting " ("rest " (rest | "plan") | "smart_rest " onoff | "sound " ("cute" | "simple" | "off") | "keep_awake " onoff | "reminders " ("off" | wd ("," wd){0,6}) | "reminder_time " [0-2] [0-9] ":" [0-5] [0-9])
+profile ::= "profile " ("goal " ("strength" | "size" | "both") | "days " [1-7] | "unit " ("kg" | "lb"))
+wd ::= "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"
+onoff ::= "on" | "off"
+scope ::= "today" | "always"
+ex ::= $ids
+$_common''';
 }

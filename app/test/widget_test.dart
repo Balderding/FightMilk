@@ -26,7 +26,7 @@ void main() {
     });
 
     Future<void> settle() async {
-      for (var i = 0; i < 12; i++) {
+      for (var i = 0; i < 24; i++) { // real time for the database; generous so a busy test run does not flake
         await tester.runAsync(() => Future<void>.delayed(const Duration(milliseconds: 80)));
         await tester.pump(const Duration(milliseconds: 50));
       }

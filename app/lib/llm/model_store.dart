@@ -147,6 +147,12 @@ class ModelStore {
     onProgress?.call(1.0);
   }
 
+  /// Every downloaded or imported model (Delete all data).
+  void deleteAll() {
+    final d = Directory(dir);
+    if (d.existsSync()) d.deleteSync(recursive: true);
+  }
+
   void delete(ModelInfo m) {
     for (final f in [File(pathOf(m)), File('${pathOf(m)}.part')]) {
       if (f.existsSync()) f.deleteSync();

@@ -6,8 +6,13 @@ A free Android app for people who lift heavy: machines, barbells, dumbbells. It 
 - **Designs the workout for you.** Pick a split (push/pull/legs, upper/lower, full body, one muscle a day) or let the app choose. A built-in plan maker works with no AI at all; it adds weight when you hit your reps and backs off when you miss twice.
 - **One-tap logging.** Weight and reps are already filled in. Smart rest times based on how heavy the set was and how hard it felt. The rest timer buzzes with the screen off.
 - **296 exercises** with how-to explanations and animations showing each movement, swaps for the same muscles with what your gym has, and full plan editing.
+- **Your gym, exactly.** Gym profiles list the machines and equipment each gym really has (start from a Planet Fitness, big gym, home or hotel template and tick what you see). Plans, swaps and the AI only use what is there; mark a machine "taken today" and it is left out until tomorrow.
+- **Real training tools.** Warm-up, drop, failure, AMRAP and rest-pause sets; supersets; plates per side from your gym's bar and plates; warm-up sets worked out for you; a hold timer, EMOM, Tabata and stopwatch; calculators for 1RM, rep maxes and RPE.
+- **Progression you can tune.** Slow, steady or fast; your Easy/Hard taps change the next jump; linear or reps-first per lift; deload weeks; a quick "how do you feel?" that lightens a rough day; a "bad day" option so one off session doesn't drop your weights.
+- **Your own exercises, favourites and never-use list**, body weight log, pinned notes per exercise (seat height, grip), history search, and a summary with records when you finish.
 - **A coach that guides you** through the workout, cute reward sounds (or simple ones, or none), and training reminders.
-- **Optional AI coach**, off by default. See [What the AI can do](#what-the-ai-can-do).
+- **Optional AI coach**, off by default. See [What the AI can do](#what-the-ai-can-do). Even with it off, Ask AI understands everyday requests by itself ("chest and arms with drop sets", "remind me Mon, Wed, Fri at 6 pm", "the bench is taken").
+- **Your data out, any time.** A full backup file, and every set as a CSV in the layout Strong uses, which Hevy, Liftosaur and spreadsheets can import.
 
 ## What the AI can do
 
@@ -18,7 +23,8 @@ The app works fully without AI. Turn it on in Settings → AI coach when you wan
 - **Make your plan.** From your setup (goal, days a week, session length, equipment, sore joints, split) it builds a whole week, or improves the built-in plan. Plan → Make a new plan → Make my plan with AI.
 - **Adjust today.** Tell it how today is going ("short on time", "shoulder is sore", "benches are taken", "feeling great") and it reworks just today's workout from your recent sets. Today → Ask AI to adjust today.
 - **Today's guide.** A short brief before you start: what to aim for on each lift based on last time, warm-up weights, and a form cue or two.
-- **Ask the coach.** Free questions about form, plateaus, rest, soreness, splits, swaps. It sees your plan and recent sets, so the answers are about your training.
+- **Ask AI.** Free questions about form, plateaus, rest, soreness, splits, swaps. It sees your plan and recent sets, so the answers are about your training.
+- **It can change the app for you.** "Set me up a shoulders, arms and chest workout with drop sets", "swap the bench, it's taken", "I'm at Planet Fitness", "deload this week", "remind me Monday and Thursday at 6 pm": it uses the same tools as the buttons (today's workout, the plan, sets and reps, gyms, reminders, settings). Choose **Ask me first** (it shows what it wants to change and waits for Apply) or **Auto** (it just does it). Every change is listed under AI changes with Undo. It can never touch its own setup (which AI, keys, server) and cannot make the app send anything anywhere. There is no server or open port: the tools live inside the app.
 
 Every plan or day the AI makes is checked before it is used: only your gym's exercises, nothing that loads a sore joint, sane sets, reps and rest. A bad answer is shown with the reasons and nothing changes.
 

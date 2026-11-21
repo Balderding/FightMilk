@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../domain/exercise.dart';
 import '../domain/units.dart';
 import 'app_state.dart';
+import 'calculators_screen.dart';
 import 'history_screen.dart';
 import 'theme.dart';
 import 'widgets.dart';
@@ -29,10 +30,18 @@ class _ProgressScreenState extends State<ProgressScreen> {
         builder: (c, snap) {
           final ids = (snap.data ?? const []).where((id) => s.lib.byId(id) != null).toList();
           if (snap.data == null) return const Center(child: CircularProgressIndicator());
-          if (ids.isEmpty) return const Center(child: Dim('Finish a workout and your progress shows up here.', size: 15));
+          if (ids.isEmpty) {
+            return ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 24), children: [
+              Row(children: [const Expanded(child: Text('Progress', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700))), TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CalculatorsScreen(s: s))), icon: const Icon(Icons.calculate_outlined), label: const Text('Calculators'))]),
+              const SizedBox(height: 30),
+              const Center(child: Dim('Finish a workout and your lifts show up here.', size: 15)),
+              const SizedBox(height: 30),
+              BodyCard(s: s),
+            ]);
+          }
           final cur = ids.contains(pick) ? pick! : ids.first;
           return ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 24), children: [
-            const Text('Progress', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+            Row(children: [const Expanded(child: Text('Progress', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700))), TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CalculatorsScreen(s: s))), icon: const Icon(Icons.calculate_outlined), label: const Text('Calculators'))]),
             const SizedBox(height: 8),
             SizedBox(
               height: 44,
@@ -52,6 +61,7 @@ class _ProgressScreenState extends State<ProgressScreen> {
             const SizedBox(height: 8),
             _Lift(s: s, e: s.lib.byId(cur)!),
             _Week(s: s),
+            BodyCard(s: s),
           ]);
         },
       ),
@@ -70,7 +80,7 @@ class _Lift extends StatelessWidget {
     return FutureBuilder<List<SetLog>>(
       future: s.repo.setsOf(e.id),
       builder: (c, snap) {
-        final sets = snap.data ?? const [];
+        final sets = [for (final x in snap.data ?? const <SetLog>[]) if (x.counts) x]; // no warm-ups or drop sets in records
         if (sets.isEmpty) return const SizedBox(height: 160);
         // best estimated 1-rep max per workout
         final per = <String, (DateTime, double)>{};
@@ -134,7 +144,7 @@ class _Week extends StatelessWidget {
         final workouts = sets.map((x) => x.sessionId).toSet().length;
         final vol = sets.fold<double>(0, (a, x) => a + volumeOf(x, s.lib.byId(x.exerciseId)));
         final muscles = <String, int>{};
-        for (final x in sets) {
+        for (final x in sets.where((x) => x.counts)) {
           for (final m in s.lib.byId(x.exerciseId)?.primary ?? const <String>[]) {
             muscles[m] = (muscles[m] ?? 0) + 1;
           }
@@ -191,4 +201,76 @@ class _Chart extends CustomPainter {
 
   @override
   bool shouldRepaint(_Chart old) => old.v != v;
+}
+
+/// Body weight: weigh in with one tap; the last few and the 7-day average.
+class BodyCard extends StatefulWidget {
+  final AppState s;
+  const BodyCard({super.key, required this.s});
+  @override
+  State<BodyCard> createState() => _BodyCardState();
+}
+
+class _BodyCardState extends State<BodyCard> {
+  Future<void> _add() async {
+    final s = widget.s;
+    final c = TextEditingController();
+    final v = await showDialog<String>(
+      context: context,
+      builder: (d) => AlertDialog(
+        backgroundColor: C.card,
+        title: const Text('Weigh in'),
+        content: TextField(enableIMEPersonalizedLearning: false, controller: c, autofocus: true, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(suffixText: unitLabel(s.unit))),
+        actions: [TextButton(onPressed: () => Navigator.pop(d), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(d, c.text), child: const Text('Save'))],
+      ),
+    );
+    final n = double.tryParse((v ?? '').replaceAll(',', '.'));
+    if (n == null || n <= 0) return;
+    await s.repo.logBody(fromUnit(n, s.unit));
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.s;
+    final u = s.unit;
+    return FutureBuilder<List<(String, DateTime, double?, double?)>>(
+      future: s.repo.bodyLog(),
+      builder: (c, snap) {
+        final l = [for (final x in snap.data ?? const <(String, DateTime, double?, double?)>[]) if (x.$3 != null) x];
+        final week = l.where((x) => x.$2.isAfter(DateTime.now().subtract(const Duration(days: 7)))).toList();
+        final avg = week.isEmpty ? null : week.map((x) => x.$3!).reduce((a, b) => a + b) / week.length;
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Row(children: [
+                const Expanded(child: Text('Body weight', style: TextStyle(fontWeight: FontWeight.w600))),
+                FilledButton.tonalIcon(onPressed: _add, icon: const Icon(Icons.monitor_weight_outlined), label: const Text('Weigh in')),
+              ]),
+              if (l.isEmpty) const Dim('No weigh-ins yet. Stays on this phone.', size: 12),
+              if (l.isNotEmpty) ...[
+                Text('${fmtWeight(l.first.$3!, u)} ${unitLabel(u)}', style: const TextStyle(fontSize: 26, fontWeight: FontWeight.w700)),
+                if (avg != null && week.length > 1) Dim('7-day average ${fmtWeight(avg, u)} ${unitLabel(u)} (${week.length} weigh-ins)', size: 12),
+                const SizedBox(height: 4),
+                for (final x in l.take(5))
+                  Row(children: [
+                    Expanded(child: Dim('${x.$2.year}-${x.$2.month.toString().padLeft(2, '0')}-${x.$2.day.toString().padLeft(2, '0')}', size: 13)),
+                    Text('${fmtWeight(x.$3!, u)} ${unitLabel(u)}'),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      icon: const Icon(Icons.close, size: 16, color: C.dim),
+                      onPressed: () async {
+                        await s.repo.deleteBody(x.$1);
+                        if (mounted) setState(() {});
+                      },
+                    ),
+                  ]),
+              ],
+            ]),
+          ),
+        );
+      },
+    );
+  }
 }

@@ -28,6 +28,12 @@ void main() {
       expect(isPrivateHost('192.168.1.20'), isTrue);
       expect(isPrivateHost('8.8.8.8'), isFalse);
       expect(isPrivateHost('api.openai.com'), isFalse);
+      expect(isPrivateHost('100.101.102.103'), isTrue, reason: 'Tailscale');
+      expect(isPrivateHost('100.128.0.1'), isFalse);
+      expect(isPrivateHost('169.254.10.2'), isTrue);
+      expect(isPrivateHost('fd7a:115c:a1e0::1'), isTrue);
+      expect(isPrivateHost('fe80::1'), isTrue);
+      expect(isPrivateHost('2606:4700::1111'), isFalse);
     });
     test('allow list', () {
       final g = NetGuard(aiHost: 'api.anthropic.com');

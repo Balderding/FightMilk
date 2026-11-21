@@ -1,4 +1,5 @@
 import '../domain/exercise.dart';
+import '../domain/gym.dart';
 import '../domain/library.dart';
 import '../domain/plan.dart';
 import '../domain/units.dart';
@@ -31,7 +32,7 @@ bench_press | 4 | 5-8 | 150
 lat_pulldown | 3 | 8-12 | 90''';
 
 String _exerciseList(Library lib, Profile p) => lib
-    .available(p.have, p.avoid)
+    .available(p.have, p.avoid, items: p.items)
     .map((e) => '${e.id} | ${e.name} | ${e.equipment.name} | ${e.primary.join("/")}${e.compound ? " | compound" : ""}')
     .join('\n');
 
@@ -80,7 +81,7 @@ Exercise list (id | name | equipment | muscles):
 ${_exerciseList(lib, p)}
 ''';
   }
-  final ex = lib.available(p.have, p.avoid);
+  final ex = lib.available(p.have, p.avoid, items: p.items);
   final list = ex.map((e) => '${e.id} | ${e.name} | ${e.equipment.name} | ${e.primary.join("/")}${e.compound ? " | compound" : ""}').join('\n');
   final shape = wholePlan
       ? '{"name": "<short plan name>", "days": [{"name": "<day name>", "items": [{"exercise": "<exercise id>", "sets": 3, "repLow": 8, "repHigh": 12, "rest": 90}]}]}'
@@ -106,7 +107,7 @@ $list
 Map<String, dynamic> _itemSchema(Library lib, Profile p) => {
       'type': 'object',
       'properties': {
-        'exercise': {'type': 'string', 'enum': [for (final e in lib.available(p.have, p.avoid)) e.id]},
+        'exercise': {'type': 'string', 'enum': [for (final e in lib.available(p.have, p.avoid, items: p.items)) e.id]},
         'sets': {'type': 'integer'},
         'repLow': {'type': 'integer'},
         'repHigh': {'type': 'integer'},
@@ -161,6 +162,7 @@ String buildRequest(Profile p, Object? planOrDay, List<SetLog> recent, Library l
     ..writeln('Days per week: ${p.days}')
     ..writeln('Session length: ${p.minutes} minutes')
     ..writeln('Equipment: ${p.have.map((e) => e.name).join(", ")}')
+    ..write(p.items == null ? '' : 'Gym has: ${[for (final i in p.items!) gymItemById[i]?.label ?? i].join(", ")}${String.fromCharCode(10)}')
     ..writeln('Go easy on: ${p.avoid.isEmpty ? "nothing" : p.avoid.map(_joint).join(", ")}')
     ..writeln('Weights in: ${unitLabel(u)}');
   if (p.split != null) b.writeln('Wanted split: ${p.split}');

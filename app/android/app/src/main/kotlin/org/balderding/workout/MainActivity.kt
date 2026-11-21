@@ -8,6 +8,13 @@ import android.provider.Settings
 import androidx.core.content.FileProvider
 import java.io.File
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipDescription
+import android.content.ClipboardManager
+import android.os.Handler
+import android.os.Looper
+import android.os.PersistableBundle
+import android.view.WindowManager
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodChannel
@@ -58,6 +65,12 @@ class MainActivity : FlutterActivity() {
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "workout/system").setMethodCallHandler { call, result ->
             when (call.method) {
                 "abi" -> result.success(Build.SUPPORTED_ABIS.firstOrNull() ?: "")
+                // Hide the app in the recent-apps view and block screenshots (Settings, off by default).
+                "secure" -> {
+                    if (call.argument<Boolean>("on") == true) window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    else window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    result.success(true)
+                }
                 "pickFile" -> {
                     if (pickResult != null) {
                         result.error("busy", "already picking", null)
@@ -92,6 +105,29 @@ class MainActivity : FlutterActivity() {
             }
         }
         MethodChannel(flutterEngine.dartExecutor.binaryMessenger, "workout/handoff").setMethodCallHandler { call, result ->
+            if (call.method == "copy") {
+                // Marked sensitive (keyboards' clipboard history and previews leave it out) and
+                // cleared after a few minutes if it is still what this app put there.
+                val text = call.argument<String>("text") ?: ""
+                val cm = getSystemService(CLIPBOARD_SERVICE) as ClipboardManager
+                val clip = ClipData.newPlainText("FightMilk", text)
+                if (Build.VERSION.SDK_INT >= 24) {
+                    clip.description.extras = PersistableBundle().apply {
+                        putBoolean(if (Build.VERSION.SDK_INT >= 33) ClipDescription.EXTRA_IS_SENSITIVE else "android.content.extra.IS_SENSITIVE", true)
+                    }
+                }
+                cm.setPrimaryClip(clip)
+                Handler(Looper.getMainLooper()).postDelayed({
+                    try {
+                        val now = cm.primaryClip
+                        if (now != null && now.itemCount > 0 && now.getItemAt(0).text?.toString() == text) {
+                            if (Build.VERSION.SDK_INT >= 28) cm.clearPrimaryClip() else cm.setPrimaryClip(ClipData.newPlainText("", ""))
+                        }
+                    } catch (e: Exception) {}
+                }, 3 * 60 * 1000L)
+                result.success(true)
+                return@setMethodCallHandler
+            }
             if (call.method != "send") {
                 result.notImplemented()
                 return@setMethodCallHandler

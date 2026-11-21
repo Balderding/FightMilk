@@ -7,6 +7,7 @@ import 'package:cryptography/cryptography.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:workout/data/backup.dart';
+import 'package:workout/data/csv_export.dart';
 import 'package:workout/data/repo.dart';
 import 'package:workout/domain/exercise.dart';
 import 'package:workout/domain/library.dart';
@@ -139,6 +140,42 @@ void main() {
       expect(await store.install(await verifyPack(await makeZip(kp, 2, {'icons/x.svg': icon}), pub)), isFalse);
       expect(store.iconPath('x'), isNull);
       dir.deleteSync(recursive: true);
+    });
+  });
+  group('csv export', () {
+    test('every set as a Strong-style row, in the user unit, quotes escaped', () async {
+      final dir = Directory.systemTemp.createTempSync('csv');
+      final r = await Repo.open('${dir.path}/c.db', factory: databaseFactoryFfi);
+      await r.saveProfile(profile);
+      final plan = makePlan(profile, lib);
+      await r.savePlan(plan);
+      final s = await r.startSession(plan, 0, plan.days[0]);
+      await r.logSet(s.id, 'bench_press', 100, 10);
+      await r.logSet(s.id, 'bench_press', 100, 9);
+      await r.setSessionNote(s.id, 'felt "great", short');
+      await r.finishSession(s.id, lib, Unit.lb);
+      await r.startSession(plan, 1, plan.days[1]); // no sets: left out
+      final text = await exportCsv(r, lib, Unit.lb);
+      final lines = text.trim().split(String.fromCharCodes([13, 10]));
+      expect(lines.first, csvHeader.map((h) => '"$h"').join(','));
+      expect(lines.length, 3);
+      final bench = lib.byId('bench_press')!.name;
+      expect(lines[1], contains('"$bench","1","220.46","10"'));
+      expect(lines[2], contains('"$bench","2","220.46","9"'));
+      expect(lines[1], contains('"felt ""great"", short"'));
+      expect(lines[1], contains('"${plan.days[0].name}"'));
+      expect(await exportCsv(r, lib, Unit.kg), contains('"$bench","1","100","10"'));
+      await r.close();
+      dir.deleteSync(recursive: true);
+    });
+
+    test('number and duration formats', () {
+      expect(csvNum(100), '100');
+      expect(csvNum(102.5), '102.5');
+      expect(csvNum(1 / 3), '0.33');
+      expect(csvDuration(const Duration(minutes: 45)), '45m');
+      expect(csvDuration(const Duration(minutes: 65)), '1h 5m');
+      expect(csvDate(DateTime(2026, 1, 2, 3, 4, 5)), '2026-01-02 03:04:05');
     });
   });
 }

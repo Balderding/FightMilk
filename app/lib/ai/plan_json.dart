@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../domain/exercise.dart';
+import '../domain/gym.dart';
 import '../domain/library.dart';
 import '../domain/plan.dart';
 
@@ -103,8 +104,8 @@ PlanDay? _day(Object? d, Library lib, List<String> err, String where, Profile? p
       continue;
     }
     if (p != null) {
-      if (ex.equipment != Equipment.bodyweight && !p.have.contains(ex.equipment)) {
-        err.add('$w: ${ex.name} needs ${equipmentLabel[ex.equipment]!.toLowerCase()}, which your gym does not have.');
+      if (p.items != null ? !gymAllows(ex, p.items!) : (ex.equipment != Equipment.bodyweight && !p.have.contains(ex.equipment))) {
+        err.add('$w: ${ex.name} needs ${p.items != null ? missingFor(ex, p.items!) : equipmentLabel[ex.equipment]!.toLowerCase()}, which your gym does not have.');
         continue;
       }
       final sore = ex.joints.intersection(p.avoid);

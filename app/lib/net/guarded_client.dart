@@ -34,12 +34,19 @@ class NetGuard {
 bool isPrivateHost(String host) {
   final h = host.toLowerCase();
   if (h == 'localhost' || h == '::1' || h.endsWith('.local')) return true;
+  if (h.contains(':')) {
+    // IPv6: unique-local fc00::/7 and link-local fe80::/10
+    final f = h.replaceAll(RegExp(r'^\[|\]$'), '');
+    return RegExp(r'^f[cd][0-9a-f]{0,2}:').hasMatch(f) || RegExp(r'^fe[89ab][0-9a-f]?:').hasMatch(f);
+  }
   final p = h.split('.');
   if (p.length != 4) return false;
   final n = p.map(int.tryParse).toList();
   if (n.any((x) => x == null || x < 0 || x > 255)) return false;
   final a = n[0]!, b = n[1]!;
-  return a == 127 || a == 10 || (a == 172 && b >= 16 && b <= 31) || (a == 192 && b == 168);
+  return a == 127 || a == 10 || (a == 172 && b >= 16 && b <= 31) || (a == 192 && b == 168) ||
+      (a == 100 && b >= 64 && b <= 127) || // Tailscale / carrier-grade NAT
+      (a == 169 && b == 254); // link-local
 }
 
 class NetBlocked implements Exception {
@@ -62,7 +69,7 @@ class GuardedClient extends http.BaseClient {
     var req = request;
     for (var hop = 0; hop < 6; hop++) {
       if (!guard.allows(req.url)) throw NetBlocked(req.url);
-      final copy = _copy(req);
+      final copy = _copy(req)..headers['user-agent'] = 'FightMilk'; // not the Dart version string
       final res = await _inner.send(copy);
       final loc = res.headers['location'];
       if (res.statusCode >= 300 && res.statusCode < 400 && loc != null && (req.method == 'GET' || req.method == 'HEAD')) {

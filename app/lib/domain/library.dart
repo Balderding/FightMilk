@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/services.dart' show rootBundle;
 
 import 'exercise.dart';
+import 'gym.dart';
 
 /// The exercise library: the bundled list plus anything a signed pack added.
 class Library {
@@ -46,15 +47,20 @@ class Library {
   }
 
   /// Bodyweight work is assumed possible in any gym.
-  bool usable(Exercise e, Set<Equipment> have, Set<Joint> avoid) =>
-      (have.contains(e.equipment) || e.equipment == Equipment.bodyweight) && e.joints.intersection(avoid).isEmpty;
+  /// Exercises you hid (never in plans, swaps or the picker's gym list) and favourites (first).
+  final Set<String> hidden = {};
+  final Set<String> favs = {};
 
-  List<Exercise> available(Set<Equipment> have, Set<Joint> avoid) => [for (final e in all) if (usable(e, have, avoid)) e];
+  /// With [items] (a gym profile) the gym's real equipment decides; without, the 8 kinds do.
+  bool usable(Exercise e, Set<Equipment> have, Set<Joint> avoid, {Set<String>? items}) =>
+      !hidden.contains(e.id) && (items != null ? gymAllows(e, items) : (have.contains(e.equipment) || e.equipment == Equipment.bodyweight)) && e.joints.intersection(avoid).isEmpty;
+
+  List<Exercise> available(Set<Equipment> have, Set<Joint> avoid, {Set<String>? items}) => [for (final e in all) if (usable(e, have, avoid, items: items)) e];
 
   /// Other exercises for the same muscles that this gym has. Ones that avoid sore joints come first.
-  List<Exercise> swapsFor(Exercise e, Set<Equipment> have, Set<Joint> avoid) => [
+  List<Exercise> swapsFor(Exercise e, Set<Equipment> have, Set<Joint> avoid, {Set<String>? items}) => [
         for (final x in all)
-          if (x.swap == e.swap && x.id != e.id && usable(x, have, avoid)) x
+          if (x.swap == e.swap && x.id != e.id && usable(x, have, avoid, items: items)) x
       ];
 
   List<Exercise> search(String q) {

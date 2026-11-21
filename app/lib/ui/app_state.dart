@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io' show Directory;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show MethodChannel, PlatformException;
@@ -10,12 +11,15 @@ import '../ai/ai.dart';
 import '../ai/grammar.dart';
 import '../ai/plan_json.dart';
 import '../ai/prompt.dart';
+import '../ai/tools.dart';
 import '../data/repo.dart';
 import '../domain/exercise.dart';
+import '../domain/gym.dart';
+import '../domain/plates.dart';
+import '../domain/progression.dart';
 import '../domain/library.dart';
 import '../domain/plan.dart';
 import '../domain/plan_maker.dart';
-import '../domain/progression.dart';
 import '../domain/units.dart';
 import '../llm/model_store.dart';
 import '../llm/native.dart';
@@ -40,6 +44,17 @@ class Settings {
   final List<int> remindDays; // weekdays 1-7 (Monday = 1) to get a "time to train" reminder
   final int remindAt; // minutes after midnight
   final bool autoUpdate; // check GitHub for a new app version when the app opens
+  final bool restOff; // no rest timer at all
+  final bool checkin; // 'How do you feel?' before a workout
+  final int deloadEvery; // weeks; 0 = only when you ask or the app suggests
+  final String formula; // 1RM: 'epley' | 'brzycki'
+  final bool effortDrives; // Easy/Hard taps change the next weight
+  final int dropPct; // percent
+  final int missesToDrop;
+  final String progSpeed; // 'slow' | 'steady' | 'fast'
+  final bool warmups; // warm-up rows worked out for the first big lift of each muscle
+  final bool hideRecents; // blank thumbnail in recent apps, no screenshots
+  final bool aiAuto; // Ask AI: true = the AI just makes the changes (undo stays), false = ask first
 
   const Settings({
     this.aiOn = false,
@@ -55,9 +70,20 @@ class Settings {
     this.remindDays = const [],
     this.remindAt = 17 * 60 + 30,
     this.autoUpdate = false,
+    this.aiAuto = false,
+    this.hideRecents = false,
+    this.warmups = true,
+    this.restOff = false,
+    this.checkin = true,
+    this.deloadEvery = 0,
+    this.formula = 'epley',
+    this.effortDrives = true,
+    this.dropPct = 10,
+    this.missesToDrop = 2,
+    this.progSpeed = 'steady',
   });
 
-  Settings copyWith({bool? aiOn, AiConfig? ai, bool? preview, bool? autoPacks, bool? keepAwake, int? rest, bool planRest = false, Map<String, double>? steps, bool? chatProject, bool? smartRest, String? sound, List<int>? remindDays, int? remindAt, bool? autoUpdate}) => Settings(
+  Settings copyWith({bool? aiOn, AiConfig? ai, bool? preview, bool? autoPacks, bool? keepAwake, int? rest, bool planRest = false, Map<String, double>? steps, bool? chatProject, bool? smartRest, String? sound, List<int>? remindDays, int? remindAt, bool? autoUpdate, bool? aiAuto, bool? hideRecents, bool? warmups, bool? restOff, bool? checkin, int? deloadEvery, String? formula, bool? effortDrives, int? dropPct, int? missesToDrop, String? progSpeed}) => Settings(
         aiOn: aiOn ?? this.aiOn,
         ai: ai ?? this.ai,
         preview: preview ?? this.preview,
@@ -71,9 +97,20 @@ class Settings {
         remindDays: remindDays ?? this.remindDays,
         remindAt: remindAt ?? this.remindAt,
         autoUpdate: autoUpdate ?? this.autoUpdate,
+        aiAuto: aiAuto ?? this.aiAuto,
+        hideRecents: hideRecents ?? this.hideRecents,
+        warmups: warmups ?? this.warmups,
+        restOff: restOff ?? this.restOff,
+        checkin: checkin ?? this.checkin,
+        deloadEvery: deloadEvery ?? this.deloadEvery,
+        formula: formula ?? this.formula,
+        effortDrives: effortDrives ?? this.effortDrives,
+        dropPct: dropPct ?? this.dropPct,
+        missesToDrop: missesToDrop ?? this.missesToDrop,
+        progSpeed: progSpeed ?? this.progSpeed,
       );
 
-  Map<String, dynamic> toJson() => {'aiOn': aiOn, 'ai': ai.toJson(), 'preview': preview, 'autoPacks': autoPacks, 'keepAwake': keepAwake, 'rest': rest, 'steps': steps, 'chatProject': chatProject, 'smartRest': smartRest, 'sound': sound, 'remindDays': remindDays, 'remindAt': remindAt, 'autoUpdate': autoUpdate};
+  Map<String, dynamic> toJson() => {'aiOn': aiOn, 'ai': ai.toJson(), 'preview': preview, 'autoPacks': autoPacks, 'keepAwake': keepAwake, 'rest': rest, 'steps': steps, 'chatProject': chatProject, 'smartRest': smartRest, 'sound': sound, 'remindDays': remindDays, 'remindAt': remindAt, 'autoUpdate': autoUpdate, 'aiAuto': aiAuto, 'hideRecents': hideRecents, 'warmups': warmups, 'restOff': restOff, 'checkin': checkin, 'deloadEvery': deloadEvery, 'formula': formula, 'effortDrives': effortDrives, 'dropPct': dropPct, 'missesToDrop': missesToDrop, 'progSpeed': progSpeed};
 
   factory Settings.fromJson(Map<String, dynamic> j) => Settings(
         aiOn: (j['aiOn'] ?? false) as bool,
@@ -89,6 +126,17 @@ class Settings {
         remindDays: [for (final d in (j['remindDays'] ?? const []) as List) d as int],
         remindAt: (j['remindAt'] ?? 17 * 60 + 30) as int,
         autoUpdate: (j['autoUpdate'] ?? false) as bool,
+        aiAuto: (j['aiAuto'] ?? false) as bool,
+        hideRecents: (j['hideRecents'] ?? false) as bool,
+        warmups: (j['warmups'] ?? true) as bool,
+        restOff: (j['restOff'] ?? false) as bool,
+        checkin: (j['checkin'] ?? true) as bool,
+        deloadEvery: (j['deloadEvery'] ?? 0) as int,
+        formula: (j['formula'] ?? 'epley') as String,
+        effortDrives: (j['effortDrives'] ?? true) as bool,
+        dropPct: (j['dropPct'] ?? 10) as int,
+        missesToDrop: (j['missesToDrop'] ?? 2) as int,
+        progSpeed: (j['progSpeed'] ?? 'steady') as String,
       );
 }
 
@@ -97,11 +145,12 @@ class Target {
   final double? kg; // null = no history yet; the user fills in the first set
   final int reps;
   final bool up; // weight (or reps) went up since last time
-  const Target(this.kg, this.reps, this.up);
+  final String? why; // a lighter target and why (deload, rough day, time off)
+  const Target(this.kg, this.reps, this.up, {this.why});
 }
 
 /// An AI request ready to send: the exact texts and where they go.
-enum AiTask { plan, today, ask, guide }
+enum AiTask { plan, today, ask, guide, tools }
 
 class AiRequest {
   final String host;
@@ -168,27 +217,46 @@ class AppState extends ChangeNotifier {
 
   /// In the app: the screen counts down and beeps. Locked or in the background: a scheduled
   /// notification buzzes instead. Never both.
+  /// How long ago the rest ran out (the timer counts up after zero), or null.
+  Duration? get restOver {
+    if (restEnd == null) return null;
+    final d = DateTime.now().difference(restEnd!);
+    return d.isNegative ? null : d;
+  }
+
+  /// Name of the next exercise, for the rest notice.
+  String restNext = '';
+
   void startRest(Duration d) {
+    if (settings.restOff) return;
     restEnd = DateTime.now().add(d);
-    if (_background) notifier.restDone(d);
+    if (_background) {
+      notifier.restDone(d);
+      notifier.restOngoing(restEnd!, restNext);
+    }
     notifyListeners();
   }
 
   void stopRest() {
     restEnd = null;
     notifier.cancel();
+    notifier.cancelOngoing();
     notifyListeners();
   }
 
   void appPaused() {
     _background = true;
     final left = restLeft;
-    if (left != null && left > Duration.zero) notifier.restDone(left);
+    if (left != null && left > Duration.zero) {
+      notifier.restDone(left);
+      notifier.restOngoing(restEnd!, restNext);
+    }
   }
 
   void appResumed() {
     _background = false;
     notifier.cancel();
+    notifier.cancelOngoing();
     notifyListeners();
   }
 
@@ -210,7 +278,7 @@ class AppState extends ChangeNotifier {
     final notifier = Notifier();
     await notifier.init();
     final s = AppState._(repo, packs, base, Secrets(), notifier);
-    s.lib = base.merged(packs.exercises());
+    await s.rebuildLib();
     await s.reload();
     if (s.settings.autoPacks) {
       s.checkPacks().ignore();
@@ -222,11 +290,99 @@ class AppState extends ChangeNotifier {
     return s;
   }
 
+  // ---------- your exercises ----------
+  List<Exercise> customExercises = [];
+  Map<String, String> renames = {};
+  Map<String, String> exScheme = {}; // per-exercise progression: 'linear'
+  Map<String, double> exStep = {}; // per-exercise weight step (kg)
+
+  /// 'double' (default) or 'linear' for one exercise.
+  Future<void> setScheme(String id, String scheme) async {
+    scheme == 'double' ? exScheme.remove(id) : exScheme[id] = scheme;
+    await _savePrefs();
+    applySteps();
+  }
+
+  /// This lift's own weight step (kg); null = the usual for its equipment.
+  Future<void> setExStep(String id, double? kg) async {
+    kg == null ? exStep.remove(id) : exStep[id] = kg;
+    await _savePrefs();
+    applySteps();
+  }
+
+  /// The library: built in + icon packs + your own, with your names, favourites and hidden ones.
+  Future<void> rebuildLib() async {
+    final c = await repo.kvGet('custom_ex');
+    customExercises = [];
+    customNeeds.clear();
+    if (c != null) {
+      for (final j in (jsonDecode(c) as List).cast<Map<String, dynamic>>()) {
+        try {
+          customExercises.add(Exercise.fromJson(j['ex'] as Map<String, dynamic>));
+          final needs = [for (final n in (j['needs'] ?? const []) as List) (n as List).cast<String>().toSet()];
+          customNeeds[j['ex']['id'] as String] = needs;
+        } catch (_) {}
+      }
+    }
+    final pj = await repo.kvGet('ex_prefs');
+    final prefs = pj == null ? const <String, dynamic>{} : jsonDecode(pj) as Map<String, dynamic>;
+    renames = {for (final e in ((prefs['names'] ?? const {}) as Map).entries) e.key as String: e.value as String};
+    exScheme = {for (final e in ((prefs['scheme'] ?? const {}) as Map).entries) e.key as String: e.value as String};
+    exStep = {for (final e in ((prefs['step'] ?? const {}) as Map).entries) e.key as String: (e.value as num).toDouble()};
+    final base = baseLib.merged([...packs.exercises(), ...customExercises]);
+    final l = base.merged([for (final e in renames.entries) if (base.byId(e.key) != null) base.byId(e.key)!.copyWith(name: e.value)]);
+    l.hidden.addAll([for (final x in (prefs['hide'] ?? const []) as List) x as String]);
+    l.favs.addAll([for (final x in (prefs['fav'] ?? const []) as List) x as String]);
+    lib = l;
+  }
+
+  Future<void> _savePrefs() async {
+    await repo.kvSet('ex_prefs', jsonEncode({'fav': lib.favs.toList(), 'hide': lib.hidden.toList(), 'names': renames, 'scheme': exScheme, 'step': exStep}));
+    await rebuildLib();
+    notifyListeners();
+  }
+
+  Future<void> setFavourite(String id, bool on) async {
+    on ? lib.favs.add(id) : lib.favs.remove(id);
+    await _savePrefs();
+  }
+
+  Future<void> setHidden(String id, bool on) async {
+    on ? lib.hidden.add(id) : lib.hidden.remove(id);
+    await _savePrefs();
+  }
+
+  /// Your own name for an exercise ('' = back to the library name).
+  Future<void> renameExercise(String id, String name) async {
+    name.trim().isEmpty ? renames.remove(id) : renames[id] = name.trim();
+    await _savePrefs();
+  }
+
+  /// Save one of your own exercises ([needs]: gym items, any one set of them is enough).
+  Future<void> saveCustomExercise(Exercise e, List<Set<String>> needs) async {
+    final l = [for (final x in customExercises) if (x.id != e.id) {'ex': x.toJson(), 'needs': [for (final n in customNeeds[x.id] ?? const <Set<String>>[]) n.toList()]}];
+    l.add({'ex': e.toJson(), 'needs': [for (final n in needs) n.toList()]});
+    await repo.kvSet('custom_ex', jsonEncode(l));
+    await rebuildLib();
+    notifyListeners();
+  }
+
+  Future<void> deleteCustomExercise(String id) async {
+    final l = [for (final x in customExercises) if (x.id != id) {'ex': x.toJson(), 'needs': [for (final n in customNeeds[x.id] ?? const <Set<String>>[]) n.toList()]}];
+    await repo.kvSet('custom_ex', jsonEncode(l));
+    await rebuildLib();
+    notifyListeners();
+  }
+
   Future<void> reload() async {
+    await rebuildLib();
     final st = await repo.kvGet('settings');
     settings = st == null ? const Settings() : Settings.fromJson(jsonDecode(st) as Map<String, dynamic>);
     applySteps();
     profile = await repo.profile();
+    await _loadGyms();
+    await _loadDeload();
+    profile = _withGym(profile);
     plan = await repo.activePlan();
     session = await repo.openSession();
     if (session != null && session!.day.items.any((it) => lib.byId(it.exerciseId) == null)) {
@@ -247,6 +403,7 @@ class AppState extends ChangeNotifier {
       final j = jsonDecode(o) as Map<String, dynamic>;
       if (j['plan'] == plan!.id && j['day'] == todayIndex) override = PlanDay.fromJson(j['data'] as Map<String, dynamic>);
     }
+    await _loadChanges();
     notifyListeners();
   }
 
@@ -260,9 +417,9 @@ class AppState extends ChangeNotifier {
 
   PlanDay? get today {
     if (session != null) return session!.day;
-    if (override != null) return override;
+    if (override != null) return _adjusted(override);
     if (plan == null || plan!.days.isEmpty) return null;
-    return plan!.days[todayIndex];
+    return _adjusted(plan!.days[todayIndex]);
   }
 
   /// "Week 3": one pass through the rotation = one week.
@@ -275,11 +432,21 @@ class AppState extends ChangeNotifier {
   /// Sound mode and reminders follow the settings.
   void applyPrefs() {
     sounds.mode = settings.sound;
+    _sys.invokeMethod('secure', {'on': settings.hideRecents}).catchError((_) => null);
     final d = today;
     notifier.scheduleReminders(settings.remindDays.toSet(), settings.remindAt, d?.name ?? 'your workout').ignore();
   }
 
   void applySteps() {
+    e1rmFormula = settings.formula;
+    progressRules = ProgressRules(
+      speed: settings.progSpeed,
+      missesToDrop: settings.missesToDrop,
+      dropPct: settings.dropPct / 100,
+      effort: settings.effortDrives,
+      scheme: exScheme,
+      stepKg: exStep,
+    );
     stepOverrides.clear();
     settings.steps.forEach((k, v) {
       final p = k.split('_');
@@ -298,7 +465,7 @@ class AppState extends ChangeNotifier {
   }
 
   Future<void> saveProfile(Profile pr) async {
-    profile = pr;
+    profile = _withGym(pr);
     await repo.saveProfile(pr);
     notifyListeners();
   }
@@ -367,18 +534,88 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  // ---------- deloads and how you feel ----------
+  DateTime? deloadUntil; // "Deload this week"
+  int? feeling; // today's check-in: 1 rough, 2 ok, 3 great
+
+  /// A lighter week: asked for, or every N weeks of the plan (Settings → Progression).
+  bool get inDeload {
+    if (session != null) return sessionDeload;
+    if (deloadUntil != null && DateTime.now().isBefore(deloadUntil!)) return true;
+    final n = settings.deloadEvery;
+    return n > 0 && plan != null && week % n == 0;
+  }
+
+  bool sessionDeload = false; // the workout going was started in a deload week
+
+  Future<void> setDeload(bool on) async {
+    deloadUntil = on ? DateTime.now().add(const Duration(days: 7)) : DateTime.now().subtract(const Duration(seconds: 1));
+    await repo.kvSet('deload_until', '${deloadUntil!.millisecondsSinceEpoch}');
+    notifyListeners();
+  }
+
+  Future<void> setFeeling(int? f) async {
+    feeling = f;
+    await repo.kvSet('feeling', f == null ? '{}' : jsonEncode({'date': _day(DateTime.now()), 'f': f}));
+    notifyListeners();
+  }
+
+  Future<void> _loadDeload() async {
+    final d = await repo.kvGet('deload_until');
+    deloadUntil = d == null ? null : DateTime.fromMillisecondsSinceEpoch(int.tryParse(d) ?? 0);
+    final f = await repo.kvGet('feeling');
+    feeling = null;
+    if (f != null && f.startsWith('{')) {
+      final j = jsonDecode(f) as Map<String, dynamic>;
+      if (j['date'] == _day(DateTime.now())) feeling = j['f'] as int?;
+    }
+    final sd = session == null ? null : await repo.kvGet('flags:${session!.id}');
+    sessionDeload = sd != null && (jsonDecode(sd) as Map<String, dynamic>)['deload'] == true;
+  }
+
+  /// Lifts that missed reps last time: 3 or more and the app suggests a deload.
+  Future<int> stalling() async => (await repo.allLifts()).where((l) => l.misses > 0).length;
+
+  /// Today's sets as they will be done: fewer in a deload week or on a rough day.
+  PlanDay? _adjusted(PlanDay? d) {
+    if (d == null) return null;
+    final rough = feeling == 1;
+    if (!inDeload && !rough) return d;
+    return d.copyWith(items: [
+      for (var i = 0; i < d.items.length; i++)
+        d.items[i].copyWith(sets: inDeload ? (d.items[i].sets * 0.6).ceil().clamp(1, 10) : (i == 0 ? d.items[i].sets : (d.items[i].sets - 1).clamp(1, 10)))
+    ]);
+  }
+
   // ---------- targets ----------
   Future<Target> targetFor(PlanItem it) async {
     final e = lib.byId(it.exerciseId);
     if (e == null) return Target(null, it.repLow, false);
     final st = await repo.lift(e.id);
     final last = await repo.lastTime(e.id);
-    final lastMax = last.isEmpty ? null : last.map((s) => s.kg).reduce((a, b) => a > b ? a : b);
+    final lastMax = last.isEmpty ? null : last.where((s) => s.counts).fold<double?>(null, (a, s) => a == null || s.kg > a ? s.kg : a);
     if (st == null) return Target(lastMax == null ? null : (e.bodyweight ? lastMax : roundToStep(lastMax, e.step, unit)), it.repLow, false);
-    final kg = e.bodyweight ? st.workKg : roundToStep(st.workKg, e.step, unit);
+    var f = 1.0;
+    String? why;
+    final away = st.updated == null ? 0 : DateTime.now().difference(st.updated!).inDays;
+    if (away >= 28) {
+      f = 0.8;
+      why = 'Back after $away days: 20% lighter to start';
+    } else if (away >= 14) {
+      f = 0.9;
+      why = 'Back after $away days: 10% lighter to start';
+    }
+    if (inDeload) {
+      f *= 0.9;
+      why = 'Deload week: lighter and fewer sets';
+    } else if (feeling == 1) {
+      f *= 0.95;
+      why = 'Rough day: a bit lighter, one set fewer';
+    }
+    final kg = e.bodyweight ? st.workKg : roundToStep(st.workKg * f, e.step, unit);
     final reps = e.bodyweight ? (st.workReps ?? it.repLow).clamp(it.repLow, it.repHigh) : it.repLow;
-    final up = lastMax != null && (kg > lastMax + 0.01 || (e.bodyweight && reps > (last.map((s) => s.reps).reduce((a, b) => a < b ? a : b))));
-    return Target(kg, reps, up);
+    final up = lastMax != null && (kg > lastMax + 0.01 || (e.bodyweight && last.isNotEmpty && reps > (last.map((s) => s.reps).reduce((a, b) => a < b ? a : b))));
+    return Target(kg, reps, up, why: why);
   }
 
   // ---------- today / workout ----------
@@ -417,7 +654,10 @@ class AppState extends ChangeNotifier {
   Future<Session> startWorkout() async {
     if (session != null) return session!;
     final d = today!;
+    final deload = inDeload;
     session = await repo.startSession(plan!, todayIndex, d.copyWith(items: [for (final it in d.items) if (lib.byId(it.exerciseId) != null) it]));
+    sessionDeload = deload;
+    if (deload) await repo.kvSet('flags:${session!.id}', jsonEncode({'deload': true}));
     override = null;
     await repo.kvSet('override', '{}');
     notifier.askOnce().ignore();
@@ -425,11 +665,17 @@ class AppState extends ChangeNotifier {
     return session!;
   }
 
-  Future<void> finishWorkout() async {
+  /// [excuse]: a bad day; misses don't count and weights don't drop. [rating]: 1-5 stars.
+  Future<void> finishWorkout({bool excuse = false, int? rating}) async {
     if (session == null) return;
     restEnd = null;
     await notifier.cancel();
-    await repo.finishSession(session!.id, lib, unit);
+    final fk = 'flags:${session!.id}';
+    final old = await repo.kvGet(fk);
+    final flags = {...(old == null ? const <String, dynamic>{} : jsonDecode(old) as Map<String, dynamic>), if (excuse) 'excuse': true, if (rating != null) 'rating': rating};
+    if (flags.isNotEmpty) await repo.kvSet(fk, jsonEncode(flags));
+    await repo.finishSession(session!.id, lib, unit, excuse: excuse, deload: flags['deload'] == true);
+    sessionDeload = false;
     pickedDay = null;
     await reload();
     applyPrefs(); // reminders now name the next day
@@ -503,6 +749,152 @@ class AppState extends ChangeNotifier {
     return AiRequest(_where, coachPrompt(), buildRequest(profile!, plan, recent, lib, b.toString()), AiTask.ask);
   }
 
+  /// "Ask AI": a question or a request to change something. The AI may answer with app tools.
+  Future<AiRequest> aiToolRequest(String question, List<(String, String)> earlier) async {
+    final recent = await repo.setsSince(DateTime.now().subtract(const Duration(days: 14)));
+    final b = StringBuffer();
+    for (final (q, a) in earlier.reversed.take(4).toList().reversed) {
+      b.writeln('Earlier question: $q');
+      b.writeln('Your earlier answer: $a');
+      b.writeln();
+    }
+    if (plan != null) {
+      b.writeln('Days of the plan: ${[for (var i = 0; i < plan!.days.length; i++) '${i + 1} ${plan!.days[i].name}'].join(', ')}. Today is day ${(session?.dayIndex ?? todayIndex) + 1}${session != null ? ' (workout already started)' : ''}.');
+    }
+    b.write(question.trim());
+    final phone = settings.ai.isOnDevice;
+    final sys = [
+      phone ? 'You are a strength coach inside a workout app. Answer briefly in plain words.' : coachPrompt(),
+      phone ? toolHelpShort() : toolHelp(lib),
+      'Exercise ids you may use, by muscle:',
+      compactExerciseList(lib, profile!),
+      '',
+    ].join('\n');
+    return AiRequest(_where, sys, buildRequest(profile!, today, recent, lib, b.toString()), AiTask.tools,
+        grammar: phone ? toolGrammar(lib, profile!, plan?.days.length ?? 0, mustAct: looksLikeChange(question)) : null);
+  }
+
+  // ---------- gyms ----------
+  List<Gym> gyms = [];
+  String? gymId;
+  Set<String> takenToday = {};
+
+  Gym? get activeGym => gyms.where((g) => g.id == gymId).firstOrNull;
+
+  static String _day(DateTime d) => '${d.year}-${d.month}-${d.day}';
+
+  Future<void> _loadGyms() async {
+    final g = await repo.kvGet('gyms');
+    gyms = g == null ? [] : [for (final x in jsonDecode(g) as List) Gym.fromJson(x as Map<String, dynamic>)];
+    gymId = await repo.kvGet('gym_active');
+    if (activeGym == null) gymId = null;
+    final t = await repo.kvGet('taken');
+    takenToday = {};
+    if (t != null) {
+      final j = jsonDecode(t) as Map<String, dynamic>;
+      if (j['date'] == _day(DateTime.now())) takenToday = {for (final i in j['items'] as List) i as String};
+    }
+  }
+
+  /// The setup answers with the active gym's real equipment (minus anything taken today).
+  Profile? _withGym(Profile? pr) {
+    if (pr == null) return null;
+    final g = activeGym;
+    if (g == null) return pr.copyWith(clearItems: true);
+    final items = g.items.difference(takenToday);
+    return pr.copyWith(have: kindsOf(items), items: items);
+  }
+
+  Future<void> _saveGyms() async {
+    await repo.kvSet('gyms', jsonEncode([for (final g in gyms) g.toJson()]));
+    await repo.kvSet('gym_active', gymId ?? '');
+    profile = _withGym(profile);
+    if (profile != null) await repo.saveProfile(profile!);
+    notifyListeners();
+  }
+
+  /// Adds or updates [g]. The first gym (or [use]) becomes the one you are at.
+  Future<void> saveGym(Gym g, {bool use = false}) async {
+    final i = gyms.indexWhere((x) => x.id == g.id);
+    if (i >= 0) {
+      gyms[i] = g;
+    } else {
+      gyms.add(g);
+    }
+    if (use || gymId == null) gymId = g.id;
+    await _saveGyms();
+  }
+
+  /// Switch gyms (null = none: the setup's equipment kinds decide again).
+  Future<void> useGym(String? id) async {
+    gymId = id;
+    await _saveGyms();
+  }
+
+  Future<void> deleteGym(String id) async {
+    gyms.removeWhere((g) => g.id == id);
+    if (gymId == id) gymId = gyms.isEmpty ? null : gyms.first.id;
+    await _saveGyms();
+  }
+
+  /// Bar, Smith bar and plates for plate maths: the gym's, or the standard set for the unit.
+  ({double bar, double smith, List<double> plates}) get plateSetup {
+    final g = activeGym;
+    final u = unit;
+    final std = u == Unit.lb ? defaultPlatesLb : defaultPlatesKg;
+    List<double> pl = std;
+    if (g?.plates != null && g!.plates!.isNotEmpty) {
+      final from = g.platesUnit == 'kg' ? Unit.kg : Unit.lb;
+      pl = [for (final x in g.plates!) toUnit(fromUnit(x, from), u)];
+    }
+    return (bar: g?.barKg ?? defaultBarKg(u), smith: g?.smithKg ?? 0, plates: pl);
+  }
+
+  bool get warmupsOn => settings.warmups;
+
+  /// "Taken today": that item is left out until tomorrow.
+  Future<void> setTaken(String item, bool taken) async {
+    taken ? takenToday.add(item) : takenToday.remove(item);
+    await repo.kvSet('taken', jsonEncode({'date': _day(DateTime.now()), 'items': takenToday.toList()}));
+    profile = _withGym(profile);
+    notifyListeners();
+  }
+
+  // ---------- AI changes (undo) ----------
+  List<AiChange> aiChanges = [];
+
+  Future<void> _loadChanges() async => aiChanges = decodeChanges(await repo.kvGet('ai_changes'));
+
+  /// Runs checked tool actions. Everything they touch is saved first, so it can be put back.
+  Future<List<String>> runActions(String asked, List<AppAction> acts) async {
+    if (acts.isEmpty) return const [];
+    final before = await snapshot(repo.db);
+    final did = <String>[];
+    for (final a in acts) {
+      await a.run(this);
+      did.add(a.says);
+    }
+    await _loadChanges();
+    aiChanges = [AiChange(DateTime.now(), asked, did, before), ...aiChanges].take(30).toList();
+    await repo.kvSet('ai_changes', encodeChanges(aiChanges));
+    notifyListeners();
+    return did;
+  }
+
+  /// Puts the app back to how it was before change [i] (and so also undoes every later change).
+  Future<void> undoChange(int i) async {
+    await _loadChanges();
+    if (i < 0 || i >= aiChanges.length || aiChanges[i].undone) return;
+    await restoreSnapshot(repo.db, aiChanges[i].before);
+    aiChanges = [
+      for (var k = 0; k < aiChanges.length; k++)
+        k <= i ? AiChange(aiChanges[k].at, aiChanges[k].asked, aiChanges[k].did, aiChanges[k].before, undone: true) : aiChanges[k]
+    ];
+    await repo.kvSet('ai_changes', encodeChanges(aiChanges));
+    await reload();
+    applyPrefs();
+  }
+
   Future<String> aiSend(AiRequest r, {int seed = 0}) async {
     if (settings.ai.isOnDevice) return _onPhone(r, seed);
     final key = await secrets.key(settings.ai.kind) ?? '';
@@ -522,8 +914,8 @@ class AppState extends ChangeNotifier {
       system: r.system,
       user: r.user,
       grammar: r.grammar,
-      maxTokens: switch (r.task) { AiTask.plan => 900, AiTask.today => 400, AiTask.ask => 800, AiTask.guide => 400 },
-      temperature: (r.task == AiTask.ask || r.task == AiTask.guide) ? 0.7 : 0.4,
+      maxTokens: switch (r.task) { AiTask.plan => 900, AiTask.today => 400, AiTask.ask => 800, AiTask.guide => 400, AiTask.tools => 700 },
+      temperature: (r.task == AiTask.ask || r.task == AiTask.guide) ? 0.7 : (r.task == AiTask.tools ? 0.5 : 0.4),
       seed: 42 + seed,
     );
     return switch (res.status) {
@@ -698,7 +1090,7 @@ class AppState extends ChangeNotifier {
     final c = client;
     try {
       final msg = await checkForPack(c, packs);
-      lib = baseLib.merged(packs.exercises());
+      await rebuildLib();
       notifyListeners();
       return msg;
     } finally {
@@ -708,8 +1100,13 @@ class AppState extends ChangeNotifier {
 
   // ---------- data ----------
   Future<void> wipeEverything() async {
-    await notifier.cancel();
+    await notifier.cancelAll();
     await repo.wipe();
+    models.deleteAll();
+    try {
+      final u = Directory(p.join((await getTemporaryDirectory()).path, 'updates'));
+      if (u.existsSync()) u.deleteSync(recursive: true);
+    } catch (_) {}
     await secrets.wipe();
     packs.remove();
     lib = baseLib;

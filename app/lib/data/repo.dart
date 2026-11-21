@@ -54,7 +54,10 @@ class Repo {
     final f = factory ?? databaseFactory;
     final db = await f.openDatabase(path,
         options: OpenDatabaseOptions(
-          version: 1,
+          version: 2,
+          onUpgrade: (db, from, to) async {
+            if (from < 2) await _v2(db);
+          },
           onCreate: (db, v) async {
             await db.execute('CREATE TABLE kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)');
             await db.execute('CREATE TABLE plan (id TEXT PRIMARY KEY, json TEXT NOT NULL, active INTEGER NOT NULL, created INTEGER NOT NULL)');
@@ -65,9 +68,29 @@ class Repo {
                 'reps INTEGER NOT NULL, ord INTEGER NOT NULL, at INTEGER NOT NULL)');
             await db.execute('CREATE INDEX set_by_session ON set_log(session_id)');
             await db.execute('CREATE INDEX set_by_ex ON set_log(exercise_id)');
+            await _v2(db);
           },
         ));
     return Repo._(db);
+  }
+
+  /// Version 2: set types, effort, RPE, notes, rest, sides, time/distance; body weight log;
+  /// pinned notes per exercise. Old rows keep working (everything new has a default).
+  static Future<void> _v2(Database db) async {
+    for (final c in [
+      "type TEXT NOT NULL DEFAULT 'work'",
+      'effort INTEGER',
+      'rpe REAL',
+      "note TEXT NOT NULL DEFAULT ''",
+      'rest INTEGER',
+      "side TEXT NOT NULL DEFAULT ''",
+      'secs INTEGER',
+      'meters REAL',
+    ]) {
+      await db.execute('ALTER TABLE set_log ADD COLUMN $c');
+    }
+    await db.execute("CREATE TABLE body (id TEXT PRIMARY KEY, at INTEGER NOT NULL, kg REAL, fat REAL, json TEXT NOT NULL DEFAULT '{}')");
+    await db.execute('CREATE TABLE ex_note (exercise_id TEXT PRIMARY KEY, note TEXT NOT NULL)');
   }
 
   Future<void> close() => db.close();
@@ -152,14 +175,17 @@ class Repo {
 
   /// Ends a workout: applies progression to each exercise done and moves the rotation on.
   /// A workout with no sets is thrown away and the rotation stays where it was.
-  Future<void> finishSession(String id, Library lib, Unit unit) async {
+  /// [excuse]: a bad day: lifts that would miss or drop stay where they were.
+  /// [deload]: a lighter week: nothing moves.
+  Future<void> finishSession(String id, Library lib, Unit unit, {bool excuse = false, bool deload = false}) async {
     final s = await session(id);
     if (s == null || s.finished != null) return; // finishing twice changes nothing
-    final sets = await setsFor(id);
-    if (sets.isEmpty) {
+    final all = await setsFor(id);
+    if (all.isEmpty) {
       await discardSession(id);
       return;
     }
+    final sets = [for (final x in all) if (x.counts) x]; // warm-ups and drop sets don't move the weights
     final byEx = <String, List<SetLog>>{};
     for (final x in sets) {
       (byEx[x.exerciseId] ??= []).add(x);
@@ -171,7 +197,13 @@ class Repo {
       final item = s.day.items.where((i) => i.exerciseId == e.id).firstOrNull;
       final prev = await lift(e.id) ??
           LiftState(exerciseId: e.id, workKg: entry.value.map((x) => x.kg).reduce((a, b) => a > b ? a : b), workReps: e.bodyweight ? (item?.repLow ?? e.repLow) : null);
-      updates.add(nextLift(prev, e, entry.value, unit, repLow: item?.repLow, repHigh: item?.repHigh));
+      final nx = nextLift(prev, e, entry.value, unit, repLow: item?.repLow, repHigh: item?.repHigh);
+      if (deload) {
+        // the deload week does not move the weights; a lift seen first in a deload starts at the real weight
+        if (await lift(e.id) == null && !e.bodyweight) updates.add(prev.copyWith(workKg: roundToStep(prev.workKg / 0.9, e.step, unit)));
+        continue;
+      }
+      updates.add(excuse && (nx.misses > prev.misses || nx.workKg < prev.workKg - 0.01) ? prev : nx);
     }
     // all or nothing: a kill half-way can't progress some lifts and leave the workout open
     await db.transaction((t) async {
@@ -191,14 +223,54 @@ class Repo {
   Future<void> deleteSession(String id) => discardSession(id);
 
   // ---- sets ----
-  Future<SetLog> logSet(String sessionId, String exerciseId, double kg, int reps) async {
+  Future<SetLog> logSet(String sessionId, String exerciseId, double kg, int reps,
+      {SetType type = SetType.work, int? rest, String side = '', int? secs, double? meters, String note = ''}) async {
     final n = Sqflite.firstIntValue(await db.rawQuery('SELECT COALESCE(MAX(ord), -1) + 1 FROM set_log WHERE session_id = ?', [sessionId])) ?? 0;
-    final s = SetLog(id: _uuid.v4(), sessionId: sessionId, exerciseId: exerciseId, kg: kg, reps: reps, ord: n, at: DateTime.now());
+    final s = SetLog(
+        id: _uuid.v4(), sessionId: sessionId, exerciseId: exerciseId, kg: kg, reps: reps, ord: n, at: DateTime.now(), type: type, rest: rest, side: side, secs: secs, meters: meters, note: note);
     await db.insert('set_log', {...s.toJson(), 'at': s.at!.millisecondsSinceEpoch});
     return s;
   }
 
   Future<void> updateSet(String id, double kg, int reps) => db.update('set_log', {'kg': kg, 'reps': reps}, where: 'id = ?', whereArgs: [id]);
+
+  /// Type, effort, RPE, note or side of a set already logged.
+  Future<void> updateSetInfo(String id, {SetType? type, int? effort, bool clearEffort = false, double? rpe, bool clearRpe = false, String? note, String? side}) => db.update(
+      'set_log',
+      {
+        if (type != null) 'type': type.name,
+        if (effort != null || clearEffort) 'effort': effort,
+        if (rpe != null || clearRpe) 'rpe': rpe,
+        if (note != null) 'note': note,
+        if (side != null) 'side': side,
+      },
+      where: 'id = ?',
+      whereArgs: [id]);
+
+  // ---- body weight ----
+  Future<void> logBody(double kg, {double? fat, DateTime? at}) =>
+      db.insert('body', {'id': _uuid.v4(), 'at': (at ?? DateTime.now()).millisecondsSinceEpoch, 'kg': kg, 'fat': fat});
+
+  /// Weigh-ins, newest first: (id, when, kg, body fat %).
+  Future<List<(String, DateTime, double?, double?)>> bodyLog() async => [
+        for (final r in await db.query('body', orderBy: 'at DESC'))
+          (r['id'] as String, DateTime.fromMillisecondsSinceEpoch(r['at'] as int), (r['kg'] as num?)?.toDouble(), (r['fat'] as num?)?.toDouble())
+      ];
+
+  Future<void> deleteBody(String id) => db.delete('body', where: 'id = ?', whereArgs: [id]);
+
+  // ---- pinned exercise notes ----
+  Future<String> exNote(String exerciseId) async {
+    final r = await db.query('ex_note', where: 'exercise_id = ?', whereArgs: [exerciseId]);
+    return r.isEmpty ? '' : r.first['note'] as String;
+  }
+
+  Future<void> setExNote(String exerciseId, String note) => note.trim().isEmpty
+      ? db.delete('ex_note', where: 'exercise_id = ?', whereArgs: [exerciseId])
+      : db.insert('ex_note', {'exercise_id': exerciseId, 'note': note.trim()}, conflictAlgorithm: ConflictAlgorithm.replace);
+
+  /// Undo a delete: the same set back, with its id and order.
+  Future<void> restoreSet(SetLog s) => db.insert('set_log', {...s.toJson(), 'at': (s.at ?? DateTime.now()).millisecondsSinceEpoch}, conflictAlgorithm: ConflictAlgorithm.replace);
 
   Future<void> deleteSet(String id) => db.delete('set_log', where: 'id = ?', whereArgs: [id]);
 
@@ -254,11 +326,20 @@ class Repo {
       LiftState? st;
       for (final row in rows) {
         final ses = Session.fromRow(row);
-        final sets = [for (final x in await setsFor(ses.id)) if (x.exerciseId == id) x];
+        final sets = [for (final x in await setsFor(ses.id)) if (x.exerciseId == id && x.counts) x];
         if (sets.isEmpty) continue;
         final item = ses.day.items.where((i) => i.exerciseId == id).firstOrNull;
-        st ??= LiftState(exerciseId: id, workKg: sets.map((x) => x.kg).reduce((a, b) => a > b ? a : b), workReps: e.bodyweight ? (item?.repLow ?? e.repLow) : null);
-        st = nextLift(st, e, sets, unit, repLow: item?.repLow, repHigh: item?.repHigh);
+        final fl = await kvGet('flags:${ses.id}');
+        final flags = fl == null ? const <String, dynamic>{} : jsonDecode(fl) as Map<String, dynamic>;
+        final top = sets.map((x) => x.kg).reduce((a, b) => a > b ? a : b);
+        if (flags['deload'] == true) {
+          // a deload was done at about 90%: it starts the lift at the real weight and moves nothing
+          st ??= LiftState(exerciseId: id, workKg: e.bodyweight ? top : roundToStep(top / 0.9, e.step, unit), workReps: e.bodyweight ? (item?.repLow ?? e.repLow) : null);
+          continue;
+        }
+        st ??= LiftState(exerciseId: id, workKg: top, workReps: e.bodyweight ? (item?.repLow ?? e.repLow) : null);
+        final nx = nextLift(st, e, sets, unit, repLow: item?.repLow, repHigh: item?.repHigh);
+        st = flags['excuse'] == true && (nx.misses > st.misses || nx.workKg < st.workKg - 0.01) ? st : nx;
       }
       if (st != null) await saveLift(st);
     }
@@ -281,7 +362,7 @@ class Repo {
 
   // ---- everything ----
   Future<void> wipe() => db.transaction((t) async {
-        for (final tb in ['kv', 'plan', 'lift_state', 'session', 'set_log']) {
+        for (final tb in ['kv', 'plan', 'lift_state', 'session', 'set_log', 'body', 'ex_note']) {
           await t.delete(tb);
         }
       });

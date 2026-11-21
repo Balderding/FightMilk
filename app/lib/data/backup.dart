@@ -13,14 +13,17 @@ class BackupError implements Exception {
 
 const _tables = ['plan', 'lift_state', 'session', 'set_log'];
 
+/// Added in app 0.8 (database v2); older backups simply don't have them.
+const _optional = ['body', 'ex_note'];
+
 /// Only these settings travel in a backup. API keys live in secure storage and never do.
-bool _exportable(String k) => k == 'profile' || k == 'settings' || k.startsWith('last_day:');
+bool _exportable(String k) => k == 'profile' || k == 'settings' || k == 'custom_ex' || k == 'ex_prefs' || k == 'gyms' || k == 'gym_active' || k.startsWith('last_day:');
 
 /// Everything on the phone as one JSON file the user saves wherever they like.
 Future<String> exportBackup(Repo r) async {
   final out = <String, dynamic>{'format': 1, 'app': 'workout', 'exported': DateTime.now().toIso8601String()};
   out['kv'] = [for (final row in await r.db.query('kv')) if (_exportable(row['k'] as String)) row];
-  for (final t in _tables) {
+  for (final t in [..._tables, ..._optional]) {
     out[t] = await r.db.query(t);
   }
   return const JsonEncoder.withIndent(' ').convert(out);
@@ -52,7 +55,7 @@ Future<void> _apply(Repo r, Map<String, dynamic> j, bool replace) async {
   await r.db.transaction((tx) async {
     final hadPlan = (await tx.query('plan', where: 'active = 1', limit: 1)).isNotEmpty;
     if (replace) {
-      for (final t in [..._tables, 'kv']) {
+      for (final t in [..._tables, ..._optional, 'kv']) {
         await tx.delete(t);
       }
     }
@@ -73,6 +76,12 @@ Future<void> _apply(Repo r, Map<String, dynamic> j, bool replace) async {
         if (t == 'session' && skip.contains(r2['id'])) continue;
         if (t == 'set_log' && skip.contains(r2['session_id'])) continue;
         await tx.insert(t, r2, conflictAlgorithm: mode);
+      }
+    }
+    for (final t in _optional) {
+      if (j[t] is! List) continue;
+      for (final row in (j[t] as List).cast<Map<String, dynamic>>()) {
+        await tx.insert(t, row, conflictAlgorithm: mode);
       }
     }
   });

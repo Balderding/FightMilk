@@ -14,11 +14,21 @@ const _ch = MethodChannel('workout/handoff');
 /// Copies [text] to the clipboard and opens [package] with it (or the share menu).
 /// Returns 'app', 'chooser', 'missing' (that app isn't installed, share menu shown) or 'failed'.
 Future<String> handOff(String text, String package) async {
-  await Clipboard.setData(ClipboardData(text: text));
+  await copySensitive(text);
   try {
     return (await _ch.invokeMethod<String>('send', {'text': text, 'package': package})) ?? 'failed';
   } catch (_) {
     return 'failed';
+  }
+}
+
+/// Copies [text] marked as sensitive, so keyboards' clipboard history leaves it out; Android
+/// clears it after 3 minutes if it is still there. Falls back to a plain copy.
+Future<void> copySensitive(String text) async {
+  try {
+    await _ch.invokeMethod('copy', {'text': text});
+  } catch (_) {
+    await Clipboard.setData(ClipboardData(text: text));
   }
 }
 

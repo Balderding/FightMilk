@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../domain/exercise.dart';
 import '../domain/plan.dart';
+import '../domain/superset.dart';
+import '../domain/units.dart';
 import 'app_state.dart';
 import 'pickers.dart';
 import 'setup_screen.dart';
@@ -19,7 +21,7 @@ class PlanScreen extends StatelessWidget {
       builder: (d) => AlertDialog(
         backgroundColor: C.card,
         title: Text(title),
-        content: TextField(controller: c, autofocus: true, textCapitalization: TextCapitalization.sentences),
+        content: TextField(enableIMEPersonalizedLearning: false, controller: c, autofocus: true, textCapitalization: TextCapitalization.sentences),
         actions: [TextButton(onPressed: () => Navigator.pop(d), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(d, c.text.trim()), child: const Text('OK'))],
       ),
     );
@@ -175,7 +177,7 @@ class _DayEditorState extends State<DayEditor> {
                 builder: (d) => AlertDialog(
                   backgroundColor: C.card,
                   title: const Text('Day name'),
-                  content: TextField(controller: c, autofocus: true),
+                  content: TextField(enableIMEPersonalizedLearning: false, controller: c, autofocus: true),
                   actions: [TextButton(onPressed: () => Navigator.pop(d), child: const Text('Cancel')), FilledButton(onPressed: () => Navigator.pop(d, c.text.trim()), child: const Text('OK'))],
                 ),
               );
@@ -208,6 +210,18 @@ class _DayEditorState extends State<DayEditor> {
               ],
             ),
           ),
+          if (day.items.length >= 3)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+              child: SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: () => _save(_withItems(plan, day.items.any((x) => x.group != null) ? [for (final x in day.items) x.copyWith(clearGroup: true)] : autoSupersets(day.items, s.lib))),
+                  icon: const Icon(Icons.link),
+                  label: Text(day.items.any((x) => x.group != null) ? 'Remove all supersets' : 'Make supersets to save time'),
+                ),
+              ),
+            ),
           Padding(
             padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
             child: SizedBox(
@@ -229,6 +243,11 @@ class _DayEditorState extends State<DayEditor> {
     );
   }
 
+  Plan _withItems(Plan plan, List<PlanItem> items) {
+    final days = [...plan.days]..[di] = plan.days[di].copyWith(items: items);
+    return Plan(id: plan.id, name: plan.name, source: plan.source, days: days, userEdited: true, created: plan.created);
+  }
+
   Widget _tile(Plan plan, PlanItem it, int i) {
     final e = s.lib.byId(it.exerciseId);
     return Card(
@@ -236,7 +255,7 @@ class _DayEditorState extends State<DayEditor> {
       child: ListTile(
         leading: ReorderableDragStartListener(index: i, child: e == null ? const Icon(Icons.help_outline) : ExIcon(s.iconFor(e), size: 40)),
         title: Text(e?.name ?? it.exerciseId),
-        subtitle: Dim('${it.sets} × ${it.repLow}-${it.repHigh} · rest ${it.restSec}s'),
+        subtitle: Dim('${groupLabel(plan.days[di].items, i).isEmpty ? '' : 'Superset ${groupLabel(plan.days[di].items, i)} · '}${it.sets} × ${it.repLow}-${it.repHigh} · rest ${it.restSec}s${it.style.isEmpty ? '' : ' · last set ${lastSetStyles[it.style]!.toLowerCase()}'}'),
         onTap: () async {
           final v = await itemEditor(context, e?.name ?? it.exerciseId, it.sets, it.repLow, it.repHigh, it.restSec);
           if (v != null) await _save(plan.updateItem(di, i, it.copyWith(sets: v.$1, repLow: v.$2, repHigh: v.$3, restSec: v.$4)));
@@ -245,6 +264,39 @@ class _DayEditorState extends State<DayEditor> {
           onSelected: (v) async {
             if (v == 'remove') {
               await _save(plan.removeItem(di, i));
+              return;
+            }
+            if (v == 'super' || v == 'unsuper') {
+              final items = v == 'super' ? supersetWithNext(plan.days[di].items, i) : ungroup(plan.days[di].items, i);
+              await _save(_withItems(plan, items));
+              return;
+            }
+            if (v == 'linear' || v == 'double') {
+              await s.setScheme(it.exerciseId, v);
+              setState(() {});
+              return;
+            }
+            if (v == 'step' && e != null) {
+              final u = s.unit;
+              final opts = u == Unit.lb ? const [1.25, 2.5, 5.0, 10.0] : const [0.5, 1.0, 1.25, 2.5, 5.0];
+              if (!mounted) return;
+              final pick = await showModalBottomSheet<double>(
+                context: context,
+                backgroundColor: C.card,
+                builder: (c) => SafeArea(
+                  child: Wrap(spacing: 8, runSpacing: 8, children: [
+                    const ListTile(title: Text('Weight step for this lift')),
+                    for (final o in opts) Padding(padding: const EdgeInsets.all(6), child: ActionChip(label: Text('${fmtNum(o)} ${unitLabel(u)}'), onPressed: () => Navigator.pop(c, fromUnit(o, u)))),
+                    Padding(padding: const EdgeInsets.all(6), child: ActionChip(label: const Text('The usual'), onPressed: () => Navigator.pop(c, -1))),
+                  ]),
+                ),
+              );
+              if (pick != null) await s.setExStep(it.exerciseId, pick < 0 ? null : pick);
+              setState(() {});
+              return;
+            }
+            if (v.startsWith('style:')) {
+              await _save(plan.updateItem(di, i, it.copyWith(style: v.substring(6))));
               return;
             }
             if (v == 'info' && e != null) {
@@ -257,7 +309,17 @@ class _DayEditorState extends State<DayEditor> {
               if (r != null) await _save(plan.updateItem(di, i, it.copyWith(exerciseId: r.$1.id)));
             }
           },
-          itemBuilder: (c) => const [PopupMenuItem(value: 'info', child: Text('How to do it')), PopupMenuItem(value: 'swap', child: Text('Swap')), PopupMenuItem(value: 'remove', child: Text('Remove'))],
+          itemBuilder: (c) => [
+            const PopupMenuItem(value: 'info', child: Text('How to do it')),
+            const PopupMenuItem(value: 'swap', child: Text('Swap')),
+            if (i + 1 < plan.days[di].items.length) const PopupMenuItem(value: 'super', child: Text('Superset with the next exercise')),
+            if (it.group != null) const PopupMenuItem(value: 'unsuper', child: Text('Take out of the superset')),
+            for (final st in lastSetStyles.entries)
+              if (st.key != it.style) PopupMenuItem(value: 'style:${st.key}', child: Text('Last set: ${st.value.toLowerCase()}')),
+            PopupMenuItem(value: s.exScheme[it.exerciseId] == 'linear' ? 'double' : 'linear', child: Text(s.exScheme[it.exerciseId] == 'linear' ? 'Progression: reps first, then weight' : 'Progression: add weight every session')),
+            const PopupMenuItem(value: 'step', child: Text('Weight step for this lift')),
+            const PopupMenuItem(value: 'remove', child: Text('Remove')),
+          ],
         ),
       ),
     );

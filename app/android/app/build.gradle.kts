@@ -13,6 +13,11 @@ val keyProps = Properties().apply {
 }
 
 android {
+    // No Google dependency-metadata block in the APK (only Google could read it; F-Droid/IzzyOnDroid flag it).
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
+    }
     namespace = "org.balderding.workout"
     // SDK platform 37 is installed as "android-37.0" (see ../build.gradle.kts)
     (this as com.android.build.gradle.BaseExtension).compileSdkVersion("android-37.0")
