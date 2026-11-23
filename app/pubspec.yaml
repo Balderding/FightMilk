@@ -1,7 +1,7 @@
 name: workout
 description: "Free, private workout app: designs heavy-lifting workouts, logs sets, shows progress."
 publish_to: 'none'
-version: 0.9.2+14
+version: 0.9.3+15
 
 environment:
   sdk: ^3.13.7

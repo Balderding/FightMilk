@@ -47,14 +47,35 @@ void main() {
     }
 
     await settle();
-    await tester.tap(find.byTooltip('One set more'));
+    // the controls are on the set rows: an × on each set not done yet, "Add a set" under them
+    // the screen's own up-and-down list (the exercise strip at the top scrolls sideways)
+    Future<void> see(Finder f) => tester.scrollUntilVisible(f, 150, scrollable: find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).first);
+    await see(find.byTooltip('Remove set 1'));
+    expect(find.byTooltip('Remove set 1'), findsOneWidget);
+    await see(find.byKey(const Key('addSet')));
+    expect(find.byTooltip('Remove set $start'), findsOneWidget);
+    await tester.drag(find.byWidgetPredicate((w) => w is Scrollable && w.axisDirection == AxisDirection.down).first, const Offset(0, -300));
+    await tester.pump();
+    await tester.tap(find.byKey(const Key('addSet')));
     await settle();
     expect(s.session!.day.items.first.sets, start + 1);
-    await tester.tap(find.byTooltip('One set fewer'));
+    expect(find.byTooltip('Remove set ${start + 1}'), findsOneWidget);
+    await see(find.byTooltip('Remove set ${start + 1}'));
+    await tester.tap(find.byTooltip('Remove set ${start + 1}'));
     await settle();
-    await tester.tap(find.byTooltip('One set fewer'));
+    await see(find.byTooltip('Remove set 1'));
+    await tester.tap(find.byTooltip('Remove set 1'));
     await settle();
     expect(s.session!.day.items.first.sets, start - 1);
+    // a logged set has no ×: it is done (swipe it away to delete it)
+    final it = s.session!.day.items.first;
+    await tester.runAsync(() => s.repo.logSet(s.session!.id, it.exerciseId, 50, 8, slot: liftKey(it)));
+    await tester.pumpWidget(const SizedBox());
+    await tester.pumpWidget(MaterialApp(theme: buildTheme(), home: LogScreen(s: s)));
+    await settle();
+    await see(find.byTooltip('Remove set 2'));
+    expect(find.byTooltip('Remove set 2'), findsOneWidget);
+    expect(find.byTooltip('Remove set 1'), findsNothing);
     expect(s.plan!.days[s.session!.dayIndex].items.first.sets, planSets, reason: 'today only: the plan stays');
     await tester.pumpWidget(const SizedBox());
     await settle();

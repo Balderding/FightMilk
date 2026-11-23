@@ -802,6 +802,18 @@ class _LogScreenState extends State<LogScreen> {
     }
   }
 
+  /// Takes planned set [i] (not done yet) out of this exercise, today only. On a program day the
+  /// set's own target goes with it.
+  Future<void> _removePlanned(int i) async {
+    if (i < counted.length || item.sets <= 1) return;
+    final ps = item.perSet;
+    final l = [...day.items];
+    l[ex] = ps == null || ps.isEmpty || i >= ps.length ? item.copyWith(sets: item.sets - 1) : item.copyWith(sets: item.sets - 1, perSet: [...ps]..removeAt(i));
+    await s.setToday(day.copyWith(items: l));
+    await _load();
+    if (mounted) toast(context, 'Set removed: ${l[ex].sets} today.');
+  }
+
   /// One planned set fewer or more of this exercise, today only. A set already logged is never
   /// taken away here (swipe it away to delete it).
   Future<void> _changeSets(int by) async {
@@ -1176,18 +1188,11 @@ class _LogScreenState extends State<LogScreen> {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(e.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                  Row(children: [
-                    Flexible(
-                      child: Text(
-                          item.perSet != null
-                              ? 'Target ${setsPlain(item.perSet!)}'
-                              : 'Target ${item.sets} × $reps${e.timed ? ' s' : ''}${item.style.isEmpty ? '' : ', last set ${lastSetStyles[item.style]!.toLowerCase()}'}',
-                          style: const TextStyle(color: C.dim, fontSize: 13)),
-                    ),
-                    // one tap: a set fewer or a set more, for today, while lifting
-                    IconButton(tooltip: 'One set fewer', icon: const Icon(Icons.remove_circle_outline, color: C.teal), onPressed: item.sets > counted.length && item.sets > 1 ? () => _changeSets(-1) : null),
-                    IconButton(tooltip: 'One set more', icon: const Icon(Icons.add_circle_outline, color: C.teal), onPressed: item.sets < 20 ? () => _changeSets(1) : null),
-                  ]),
+                  Text(
+                      item.perSet != null
+                          ? 'Target ${setsPlain(item.perSet!)}'
+                          : 'Target ${item.sets} × $reps${e.timed ? ' s' : ''}${item.style.isEmpty ? '' : ', last set ${lastSetStyles[item.style]!.toLowerCase()}'}',
+                      style: const TextStyle(color: C.dim, fontSize: 13)),
                   if (target?.tm != null && !s.settings.simple) Dim('Training max ${fmtWeight(target!.tm!, s.unit)} ${unitLabel(s.unit)} · % sets come from it', size: 12),
                   if (target?.why != null)
                     Row(children: [
@@ -1409,11 +1414,23 @@ class _LogScreenState extends State<LogScreen> {
                                 margin: const EdgeInsets.only(right: 6),
                                 decoration: BoxDecoration(shape: BoxShape.circle, color: const [C.green, C.teal, C.gold, C.sky][(m[i].effort! - 1).clamp(0, 3)]),
                               ),
-                            SizedBox(width: 20, child: Text(i < m.length ? (m[i].note.isEmpty ? '✓' : '✎') : '')),
+                            if (i < m.length)
+                              SizedBox(width: 20, child: Text(m[i].note.isEmpty ? '✓' : '✎'))
+                            else if (i < item.sets && item.sets > 1)
+                              // a set not done yet: one tap takes it out, today only
+                              IconButton(tooltip: 'Remove set ${i + 1}', icon: const Icon(Icons.close, size: 20, color: C.dim), onPressed: () => _removePlanned(i))
+                            else
+                              const SizedBox(width: 20),
                           ]),
                         ),
                       ),
                     )),
+                  // one more set, right under the last one
+                  if (item.sets < 20)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: TextButton.icon(key: const Key('addSet'), onPressed: () => _changeSets(1), icon: const Icon(Icons.add, size: 20), label: const Text('Add a set')),
+                    ),
                   if (m.any((x) => x.type != SetType.work))
                     const Padding(padding: EdgeInsets.fromLTRB(14, 2, 14, 4), child: Align(alignment: Alignment.centerLeft, child: Dim(setTypeKey, size: 12))),
                 ]),
