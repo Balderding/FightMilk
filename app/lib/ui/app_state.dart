@@ -999,6 +999,63 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Takes exercise [i] out of today (and out of the plan's day when [forever]). In a workout,
+  /// the sets already logged for it are deleted too. Returns what [undoRemoveToday] needs.
+  Future<({PlanDay day, List<SetLog> sets, Plan? plan, PlanDay? keep})> removeFromToday(int i, {bool forever = false}) async {
+    final d = today!;
+    final it = d.items[i];
+    final sets = session == null ? <SetLog>[] : [for (final x in await repo.setsFor(session!.id)) if (x.exerciseId == it.exerciseId && (x.slot == null || x.slot == liftKey(it))) x];
+    for (final x in sets) {
+      await repo.deleteSet(x.id);
+    }
+    await setToday(d.copyWith(items: [...d.items]..removeAt(i)));
+    Plan? before;
+    PlanDay? keep;
+    if (forever && plan != null) {
+      final di = session?.dayIndex ?? todayIndex;
+      if (di >= 0 && di < plan!.days.length) {
+        final items = plan!.days[di].items;
+        var pi = items.indexWhere((x) => x.exerciseId == it.exerciseId);
+        if (pi < 0 && items.length == d.items.length) pi = i;
+        if (pi >= 0) {
+          before = plan;
+          keep = session == null ? override : null;
+          await savePlanEdits(plan!.removeItem(di, pi));
+          if (keep != null) await setToday(keep); // today's other changes stay
+        }
+      }
+    }
+    if (sets.isNotEmpty) historyVersion++;
+    notifyListeners();
+    return (day: d, sets: sets, plan: before, keep: keep);
+  }
+
+  /// Undo of [removeFromToday]: the plan, today's list and the deleted sets, as they were.
+  Future<void> undoRemoveToday(({PlanDay day, List<SetLog> sets, Plan? plan, PlanDay? keep}) r) async {
+    if (r.plan != null) await savePlanEdits(r.plan!);
+    await setToday(r.day);
+    for (final x in r.sets) {
+      await repo.restoreSet(x);
+    }
+    if (r.sets.isNotEmpty) historyVersion++;
+    notifyListeners();
+  }
+
+  /// Adds [e] to the end of today (and to the plan's day when [forever]).
+  Future<void> addToToday(Exercise e, {bool forever = false}) async {
+    final d = today!;
+    final it = PlanItem(exerciseId: e.id, sets: 3, repLow: e.repLow, repHigh: e.repHigh, restSec: e.compound ? 120 : 75);
+    final nd = d.copyWith(items: [...d.items, it]);
+    await setToday(nd);
+    if (forever && plan != null) {
+      final di = session?.dayIndex ?? todayIndex;
+      if (di >= 0 && di < plan!.days.length) {
+        await savePlanEdits(plan!.addItem(di, it));
+        if (session == null) await setToday(nd); // keep today's other changes too
+      }
+    }
+  }
+
   /// Swap exercise [i] of today. [forever] also writes it into the plan.
   /// Returns false when "from now on" could not be written into the plan.
   Future<bool> swap(int i, Exercise to, {required bool forever}) async {

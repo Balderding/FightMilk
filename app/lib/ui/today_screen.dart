@@ -20,6 +20,7 @@ import 'pickers.dart';
 import 'reports_screen.dart';
 import 'setup_screen.dart';
 import 'theme.dart';
+import 'today_edit.dart';
 import 'widgets.dart';
 
 class TodayScreen extends StatelessWidget {
@@ -237,6 +238,8 @@ class TodayScreen extends StatelessWidget {
                 if (day.items.isEmpty)
                   Problem([s.profile?.pregnancy != null && s.careDropped > 0 ? 'Nothing here fits careful mode: pick another day or a Quick workout.' : 'This day has no exercises. Add some under Plan.']),
                 for (var i = 0; i < day.items.length; i++) _ExTile(s: s, item: day.items[i], index: i),
+                // one tap: add an exercise, for today or the plan too
+                Align(alignment: Alignment.centerLeft, child: TextButton.icon(onPressed: () => addTodayItem(context, s), icon: const Icon(Icons.add), label: const Text('Add exercise'))),
               ]),
             ),
             if (s.session == null) Padding(padding: const EdgeInsets.only(top: 8), child: TipCard(s: s)),
@@ -312,6 +315,7 @@ class _ExTile extends StatelessWidget {
             },
             child: const Text('Swap'),
           ),
+          IconButton(tooltip: 'Remove', icon: const Icon(Icons.close, color: C.dim), onPressed: () => removeTodayItem(context, s, index)),
         ]),
       ),
       ),

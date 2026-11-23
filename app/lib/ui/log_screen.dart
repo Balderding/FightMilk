@@ -20,6 +20,7 @@ import 'coaching_screen.dart';
 import 'pickers.dart';
 import 'theme.dart';
 import 'timers_screen.dart';
+import 'today_edit.dart';
 import 'widgets.dart';
 
 /// The screen that matters most: one tap per set, weight and reps already filled in.
@@ -802,10 +803,9 @@ class _LogScreenState extends State<LogScreen> {
   }
 
   Future<void> _addExercise() async {
-    final picked = await Navigator.push<Exercise>(context, MaterialPageRoute(builder: (_) => ExercisePicker(s: s, exclude: {for (final it in day.items) it.exerciseId})));
-    if (picked == null) return;
-    final it = PlanItem(exerciseId: picked.id, sets: 3, repLow: picked.repLow, repHigh: picked.repHigh, restSec: picked.compound ? 120 : 75);
-    await s.setToday(day.copyWith(items: [...day.items, it]));
+    // today only, or the plan too (one helper with Today)
+    if (await addTodayItem(context, s) == null) return;
+    await _load();
     _go(day.items.length - 1);
   }
 
@@ -1078,12 +1078,22 @@ class _LogScreenState extends State<LogScreen> {
           actions: [
             IconButton(tooltip: 'All exercises', icon: const Icon(Icons.list_alt), onPressed: _overview),
             PopupMenuButton<String>(
-              onSelected: (v) {
+              onSelected: (v) async {
+                if (v == 'add') await _addExercise();
+                if (v == 'remove') {
+                  final cur = ex;
+                  if (await removeTodayItem(context, s, cur)) {
+                    ex = cur.clamp(0, s.today!.items.length - 1);
+                    await _load();
+                  }
+                }
                 if (v == 'fill') _fillRest();
                 if (v == 'timers') Navigator.push(context, MaterialPageRoute(builder: (_) => TimersScreen(s: s)));
                 if (v == 'finish') _finish();
               },
               itemBuilder: (c) => [
+                const PopupMenuItem(value: 'add', child: Text('Add an exercise')),
+                PopupMenuItem(value: 'remove', child: Text('Remove ${e.name}')),
                 if (counted.length < item.sets) const PopupMenuItem(value: 'fill', child: Text('Fill the rest of this exercise')),
                 const PopupMenuItem(value: 'timers', child: Text('Timers (stopwatch, EMOM, Tabata)')),
                 const PopupMenuItem(value: 'finish', child: Text('Finish workout')),

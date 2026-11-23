@@ -357,6 +357,16 @@ class _DayEditorState extends State<DayEditor> {
     setState(() {});
   }
 
+  /// Takes exercise [i] out of this day, with Undo.
+  Future<void> _remove(Plan plan, int i) async {
+    final name = s.lib.byId(plan.days[di].items[i].exerciseId)?.name ?? 'Exercise';
+    await _save(plan.removeItem(di, i));
+    if (!mounted) return;
+    ScaffoldMessenger.of(context)
+      ..hideCurrentSnackBar()
+      ..showSnackBar(SnackBar(content: Text('$name removed from this day.'), action: SnackBarAction(label: 'Undo', onPressed: () => _save(plan))));
+  }
+
   @override
   Widget build(BuildContext context) {
     final plan = s.plan!;
@@ -463,7 +473,11 @@ class _DayEditorState extends State<DayEditor> {
         leading: ReorderableDragStartListener(index: i, child: e == null ? const Icon(Icons.help_outline) : ExIcon(s.iconFor(e), size: 40)),
         title: Text(e?.name ?? it.exerciseId),
         subtitle: Dim('${groupLabel(plan.days[di].items, i).isEmpty ? '' : 'Superset ${groupLabel(plan.days[di].items, i)} · '}${it.sets} × ${it.repLow}-${it.repHigh} · rest ${it.restSec}s${it.style.isEmpty ? '' : ' · last set ${lastSetStyles[it.style]!.toLowerCase()}'}'),
-        trailing: const Icon(Icons.edit_outlined, color: C.dim),
+        trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+          IconButton(tooltip: 'Change sets, reps, rest', icon: const Icon(Icons.edit_outlined, color: C.dim), onPressed: () => _itemSheet(plan, it, i)),
+          // one tap removes it from this day; Undo puts it back where it was
+          IconButton(tooltip: 'Remove from this day', icon: const Icon(Icons.close, color: C.dim), onPressed: () => _remove(plan, i)),
+        ]),
         onTap: () => _itemSheet(plan, it, i),
       ),
     );
@@ -588,7 +602,7 @@ class _DayEditorState extends State<DayEditor> {
         if (step != s.exStep[it.exerciseId]) await s.setExStep(it.exerciseId, step);
         if (mounted) setState(() {});
       case 'remove':
-        await _save(plan.removeItem(di, i));
+        await _remove(plan, i);
       case 'super':
         await _save(_withItems(plan, supersetWithNext(items, i)));
       case 'unsuper':

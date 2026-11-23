@@ -226,7 +226,7 @@ void main() {
       await settle();
       await tester.tap(find.text('Reports'));
       await settle();
-      expect(find.text('This week'), findsOneWidget);
+      expect(find.textContaining(RegExp(r'^This week( so far)?$')), findsOneWidget); // 'This week' on Sundays, else 'so far'
       await tester.ensureVisible(find.text('All time'));
       await tester.tap(find.text('All time'));
       await tester.pump(const Duration(milliseconds: 600));
