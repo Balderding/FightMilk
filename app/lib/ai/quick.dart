@@ -1,3 +1,5 @@
+import '../domain/body.dart';
+import '../domain/explain.dart';
 import '../domain/gym.dart';
 import '../domain/plan.dart';
 import '../domain/plan_maker.dart';
@@ -30,8 +32,8 @@ ToolReply? quickCommand(String text, AppState s) {
     return ToolReply('', [
       AppAction('Log ${fmtNum(w)} ${unit.name} × $r', (s) async {
         final sets = await s.repo.setsFor(s.session!.id);
-        final it = day.items.firstWhere((i) => sets.where((x) => x.exerciseId == i.exerciseId && x.counts).length < i.sets, orElse: () => day.items.last);
-        await s.repo.logSet(s.session!.id, it.exerciseId, fromUnit(w, unit), r);
+        final it = day.items.firstWhere((i) => sets.where((x) => x.key == liftKey(i) && x.counts).length < i.sets, orElse: () => day.items.last);
+        await s.repo.logSet(s.session!.id, it.exerciseId, fromUnit(w, unit), r, slot: liftKey(it));
       }),
     ], const []);
   }
@@ -73,8 +75,10 @@ ToolReply? quickCommand(String text, AppState s) {
     final n = double.parse(bw.group(1)!);
     final unit = (bw.group(2) ?? '').startsWith('k') ? Unit.kg : (bw.group(2) ?? '').isEmpty ? s.unit : Unit.lb;
     final kg = fromUnit(n, unit);
-    acts.add(AppAction('Weigh-in: ${fmtWeight(kg, s.unit)} ${unitLabel(s.unit)}', (s) => s.repo.logBody(kg)));
-    say.add('Saved your weigh-in (Progress → Body weight).');
+    if (validBodyKg(kg)) {
+      acts.add(AppAction('Weigh-in: ${fmtWeight(kg, s.unit)} ${unitLabel(s.unit)}', (s) => s.repo.logBody(kg)));
+      say.add('Saved your weigh-in (Progress → Body weight).');
+    }
   }
 
   // ---- reminders ----
@@ -126,6 +130,12 @@ ToolReply? quickCommand(String text, AppState s) {
     final m = t.contains('simple') ? 'simple' : (t.contains('cute') || (snd.group(2) == 'on')) ? 'cute' : 'off';
     acts.add(AppAction('Sounds: $m', (s) => s.saveSettings(s.settings.copyWith(sound: m))));
     say.add('Sounds: $m.');
+  }
+  final simple = RegExp(r'\b(simple|full|advanced)\s+mode\b').firstMatch(t);
+  if (simple != null && snd == null) {
+    final on = simple.group(1) == 'simple' && !RegExp(r'\b(off|stop|no more|turn off)\b').hasMatch(t);
+    acts.add(AppAction(on ? 'Simple mode on (extras hidden)' : 'Simple mode off (all tools shown)', (s) => s.saveSettings(s.settings.copyWith(simple: on))));
+    say.add(on ? 'Simple mode is on: the extras are hidden. Everything still works the same.' : 'All the tools are showing again.');
   }
 
   // ---- today's workout ----
@@ -190,7 +200,7 @@ ToolReply? quickCommand(String text, AppState s) {
       final from = s.lib.byId(d.items[i].exerciseId)!;
       final busy = RegExp(r'\b(barbell|bench|rack|machine|cable|smith)\b').firstMatch(what)?.group(1);
       final alts = [
-        for (final e in s.lib.swapsFor(from, s.profile!.have, s.profile!.avoid, items: s.profile!.items))
+        for (final (e, _) in rankSwaps(from, s.lib.swapsFor(from, s.profile!.have, s.profile!.avoid, items: s.profile!.items), avoid: {...s.profile!.avoid, ...s.soreToday}, favs: s.lib.favs))
           if (!d.items.any((x) => x.exerciseId == e.id) && (busy == null || !e.name.toLowerCase().contains(busy))) e
       ];
       if (alts.isNotEmpty) {
@@ -203,6 +213,15 @@ ToolReply? quickCommand(String text, AppState s) {
       } else {
         say.add('Nothing in your gym works the same muscles instead of ${from.name}.');
       }
+    }
+  }
+
+  // ---- a program from a description: "start 531 bbb", "put me on stronglifts" (F250) ----
+  if (RegExp(r'\b(start|run|begin|switch to|put me on|try|want to do|want to run)\b').hasMatch(t) && !RegExp(r'\b(workout|session|training|timer)\b').hasMatch(t)) {
+    final prog = matchProgram(text);
+    if (prog != null && s.session == null) {
+      final r = parseToolReply('SAY: ok\nDO: program start ${prog.id}', s);
+      if (r.errors.isEmpty && r.actions.isNotEmpty) return ToolReply('Starting ${prog.name}. Your current plan is kept under Saved plans.', r.actions, const []);
     }
   }
 

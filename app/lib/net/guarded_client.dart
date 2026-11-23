@@ -3,13 +3,15 @@ import 'package:http/http.dart' as http;
 /// The app's whole list of places it may talk to:
 ///  - the AI service the user set up (only once they've set it up),
 ///  - GitHub, for icon/exercise pack updates, and
-///  - Hugging Face, only while downloading an on-phone model the person asked for.
+///  - Hugging Face, only while downloading an on-phone model the person asked for, and
+///  - the person's own backup server, only while they send a backup there (https only, batch 22).
 /// Plain http is allowed only to a home-network address (the user's own AI server).
 class NetGuard {
   final String? aiHost;
   final bool models; // a model download the person started: Hugging Face and its download network
+  final String? backupHost; // "Send a backup to my server": that host, https only, for that send
 
-  const NetGuard({this.aiHost, this.models = false});
+  const NetGuard({this.aiHost, this.models = false, this.backupHost});
 
   static bool _modelHost(String h) => h == 'huggingface.co' || h.endsWith('.hf.co');
 
@@ -24,6 +26,7 @@ class NetGuard {
   bool allows(Uri u) {
     final h = u.host.toLowerCase();
     if (models && _modelHost(h)) return u.scheme == 'https';
+    if (backupHost != null && backupHost!.toLowerCase() == h) return u.scheme == 'https';
     final known = githubHosts.contains(h) || (aiHost != null && aiHost!.toLowerCase() == h);
     if (!known) return false;
     if (u.scheme == 'https') return true;

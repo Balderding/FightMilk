@@ -6,11 +6,18 @@ import 'package:uuid/uuid.dart';
 import '../domain/exercise.dart';
 import '../domain/library.dart';
 import '../domain/plan.dart';
+import '../domain/program.dart';
 import '../domain/progression.dart';
 import '../domain/units.dart';
 
 /// One workout. [day] is the day as actually worked (today-only swaps and AI tweaks live here,
 /// not in the plan).
+/// What a finished program workout changed, for the person to see.
+class FinishNotes {
+  final List<String> notes = [];
+  final List<(String, String)> climbs = []; // ladder: (from, to)
+}
+
 class Session {
   final String id;
   final String planId;
@@ -54,9 +61,10 @@ class Repo {
     final f = factory ?? databaseFactory;
     final db = await f.openDatabase(path,
         options: OpenDatabaseOptions(
-          version: 2,
+          version: 3,
           onUpgrade: (db, from, to) async {
             if (from < 2) await _v2(db);
+            if (from < 3) await _v3(db);
           },
           onCreate: (db, v) async {
             await db.execute('CREATE TABLE kv (k TEXT PRIMARY KEY, v TEXT NOT NULL)');
@@ -69,6 +77,7 @@ class Repo {
             await db.execute('CREATE INDEX set_by_session ON set_log(session_id)');
             await db.execute('CREATE INDEX set_by_ex ON set_log(exercise_id)');
             await _v2(db);
+            await _v3(db);
           },
         ));
     return Repo._(db);
@@ -92,6 +101,10 @@ class Repo {
     await db.execute("CREATE TABLE body (id TEXT PRIMARY KEY, at INTEGER NOT NULL, kg REAL, fat REAL, json TEXT NOT NULL DEFAULT '{}')");
     await db.execute('CREATE TABLE ex_note (exercise_id TEXT PRIMARY KEY, note TEXT NOT NULL)');
   }
+
+  /// Version 3: the plan slot of each set (the same exercise twice in a day). Old rows keep null,
+  /// which counts as the exercise itself, as before.
+  static Future<void> _v3(Database db) => db.execute('ALTER TABLE set_log ADD COLUMN slot TEXT');
 
   Future<void> close() => db.close();
 
@@ -177,33 +190,68 @@ class Repo {
   /// A workout with no sets is thrown away and the rotation stays where it was.
   /// [excuse]: a bad day: lifts that would miss or drop stay where they were.
   /// [deload]: a lighter week: nothing moves.
-  Future<void> finishSession(String id, Library lib, Unit unit, {bool excuse = false, bool deload = false}) async {
+  /// [program]: the rules of a program plan; its lifts move by those rules (see program.dart).
+  Future<FinishNotes> finishSession(String id, Library lib, Unit unit, {bool excuse = false, bool deload = false, ProgramInfo? program}) async {
+    final out = FinishNotes();
     final s = await session(id);
-    if (s == null || s.finished != null) return; // finishing twice changes nothing
+    if (s == null || s.finished != null) return out; // finishing twice changes nothing
     final all = await setsFor(id);
     if (all.isEmpty) {
       await discardSession(id);
-      return;
+      return out;
     }
     final sets = [for (final x in all) if (x.counts) x]; // warm-ups and drop sets don't move the weights
     final byEx = <String, List<SetLog>>{};
     for (final x in sets) {
-      (byEx[x.exerciseId] ??= []).add(x);
+      (byEx[x.key] ??= []).add(x); // by plan slot: main and supplement sets of one lift stay apart
     }
     final updates = <LiftState>[];
     for (final entry in byEx.entries) {
-      final e = lib.byId(entry.key);
+      final e = lib.byId(entry.key.split('#').first);
       if (e == null) continue;
-      final item = s.day.items.where((i) => i.exerciseId == e.id).firstOrNull;
-      final prev = await lift(e.id) ??
-          LiftState(exerciseId: e.id, workKg: entry.value.map((x) => x.kg).reduce((a, b) => a > b ? a : b), workReps: e.bodyweight ? (item?.repLow ?? e.repLow) : null);
+      if (!e.bodyweight && entry.value.every((x) => x.kg <= 0)) continue; // 0 kg on a weighted lift: no weight to start from
+      final item = s.day.items.where((i) => liftKey(i) == entry.key).firstOrNull ?? s.day.items.where((i) => i.exerciseId == e.id).firstOrNull;
+      final rule = item == null ? null : ruleFor(program, item);
+      if (rule != null && item != null) {
+        if (deload) continue;
+        final top = entry.value.map((x) => x.kg).reduce((a, b) => a > b ? a : b);
+        final key = liftKey(item);
+        final tk = item.tmOf.isNotEmpty ? item.tmOf : key;
+        if (rule.kind == 'tm') {
+          if (tk != key && item.bump.isEmpty) continue; // sets from another lift's max: nothing of its own moves
+          final prev = await lift(tk) ?? LiftState(exerciseId: tk, workKg: top);
+          final st = programNext(prev, rule, e, entry.value, item.specs, unit, bump: item.bump, basis: program?.basis ?? 'tm90');
+          final nx = st.state.copyWith(exerciseId: tk, why: st.note ?? 'Program rule (${rule.kind}): training max kept');
+          if (excuse && ((nx.tm ?? 0) < (prev.tm ?? 0) - 0.01 || nx.misses > prev.misses)) {
+            updates.add(prev);
+            continue;
+          }
+          updates.add(nx);
+          if (st.note != null) out.notes.add(st.note!);
+          continue;
+        }
+        final prev = await lift(key) ?? LiftState(exerciseId: key, workKg: top, workReps: e.bodyweight ? item.repLow : null);
+        final st = programNext(prev, rule, e, entry.value, item.specs, unit, bump: item.bump, basis: program?.basis ?? 'tm90');
+        final nx = st.state.copyWith(exerciseId: key, why: st.note ?? 'Program rule (${rule.kind}): same weight');
+        final back = st.climbTo != null && rule.ladder.indexOf(st.climbTo!) < rule.ladder.indexOf(e.id);
+        if (excuse && (nx.misses > prev.misses || nx.workKg < prev.workKg - 0.01 || nx.stage != prev.stage || back)) {
+          updates.add(prev);
+          continue;
+        }
+        updates.add(nx);
+        if (st.note != null) out.notes.add(st.note!);
+        if (st.climbTo != null) out.climbs.add((e.id, st.climbTo!));
+        continue;
+      }
+      final prev = await lift(entry.key) ??
+          LiftState(exerciseId: entry.key, workKg: entry.value.map((x) => x.kg).reduce((a, b) => a > b ? a : b), workReps: e.bodyweight ? (item?.repLow ?? e.repLow) : null);
       final nx = nextLift(prev, e, entry.value, unit, repLow: item?.repLow, repHigh: item?.repHigh);
       if (deload) {
         // the deload week does not move the weights; a lift seen first in a deload starts at the real weight
-        if (await lift(e.id) == null && !e.bodyweight) updates.add(prev.copyWith(workKg: roundToStep(prev.workKg / 0.9, e.step, unit)));
+        if (await lift(entry.key) == null && !e.bodyweight) updates.add(prev.copyWith(workKg: roundToStep(prev.workKg / 0.9, e.step, unit)));
         continue;
       }
-      updates.add(excuse && (nx.misses > prev.misses || nx.workKg < prev.workKg - 0.01) ? prev : nx);
+      updates.add(excuse && (nx.misses > prev.misses || nx.workKg < prev.workKg - 0.01) ? prev.copyWith(why: 'Bad day: kept at the same weight') : nx);
     }
     // all or nothing: a kill half-way can't progress some lifts and leave the workout open
     await db.transaction((t) async {
@@ -213,6 +261,7 @@ class Repo {
       await t.update('session', {'finished': DateTime.now().millisecondsSinceEpoch}, where: 'id = ?', whereArgs: [id]);
       await t.insert('kv', {'k': 'last_day:${s.planId}', 'v': '${s.dayIndex}'}, conflictAlgorithm: ConflictAlgorithm.replace);
     });
+    return out;
   }
 
   Future<List<Session>> history({int limit = 500}) async {
@@ -224,10 +273,10 @@ class Repo {
 
   // ---- sets ----
   Future<SetLog> logSet(String sessionId, String exerciseId, double kg, int reps,
-      {SetType type = SetType.work, int? rest, String side = '', int? secs, double? meters, String note = ''}) async {
+      {SetType type = SetType.work, int? rest, String side = '', int? secs, double? meters, String note = '', String? slot}) async {
     final n = Sqflite.firstIntValue(await db.rawQuery('SELECT COALESCE(MAX(ord), -1) + 1 FROM set_log WHERE session_id = ?', [sessionId])) ?? 0;
     final s = SetLog(
-        id: _uuid.v4(), sessionId: sessionId, exerciseId: exerciseId, kg: kg, reps: reps, ord: n, at: DateTime.now(), type: type, rest: rest, side: side, secs: secs, meters: meters, note: note);
+        id: _uuid.v4(), sessionId: sessionId, exerciseId: exerciseId, kg: kg, reps: reps, ord: n, at: DateTime.now(), type: type, rest: rest, side: side, secs: secs, meters: meters, note: note, slot: slot == exerciseId ? null : slot);
     await db.insert('set_log', {...s.toJson(), 'at': s.at!.millisecondsSinceEpoch});
     return s;
   }
@@ -279,8 +328,12 @@ class Repo {
     return [for (final x in r) SetLog.fromJson(x)];
   }
 
+  /// How many times [setsOf] ran (tests check Progress does not re-read on every rebuild).
+  static int setsOfCalls = 0;
+
   /// All finished sets of one exercise, oldest first.
   Future<List<SetLog>> setsOf(String exerciseId) async {
+    setsOfCalls++;
     final r = await db.rawQuery(
         'SELECT s.* FROM set_log s JOIN session w ON w.id = s.session_id WHERE s.exercise_id = ? AND w.finished IS NOT NULL ORDER BY s.at',
         [exerciseId]);
@@ -318,6 +371,7 @@ class Repo {
   Future<void> rebuildLifts(Iterable<String> exerciseIds, Library lib, Unit unit) async {
     for (final id in exerciseIds.toSet()) {
       final e = lib.byId(id);
+      final old = await lift(id); // a program's training max and stage are kept, the weights are worked out again
       await db.delete('lift_state', where: 'exercise_id = ?', whereArgs: [id]);
       if (e == null) continue;
       final rows = await db.rawQuery(
@@ -326,7 +380,7 @@ class Repo {
       LiftState? st;
       for (final row in rows) {
         final ses = Session.fromRow(row);
-        final sets = [for (final x in await setsFor(ses.id)) if (x.exerciseId == id && x.counts) x];
+        final sets = [for (final x in await setsFor(ses.id)) if (x.key == id && x.counts) x]; // its own slot only
         if (sets.isEmpty) continue;
         final item = ses.day.items.where((i) => i.exerciseId == id).firstOrNull;
         final fl = await kvGet('flags:${ses.id}');
@@ -341,6 +395,7 @@ class Repo {
         final nx = nextLift(st, e, sets, unit, repLow: item?.repLow, repHigh: item?.repHigh);
         st = flags['excuse'] == true && (nx.misses > st.misses || nx.workKg < st.workKg - 0.01) ? st : nx;
       }
+      if (st != null && old != null && (old.tm != null || old.stage != 0)) st = st.copyWith(tm: old.tm, stage: old.stage);
       if (st != null) await saveLift(st);
     }
   }

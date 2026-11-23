@@ -6,6 +6,7 @@ import '../services/handoff.dart';
 import 'ai_sheet.dart';
 import 'app_state.dart';
 import 'theme.dart';
+import 'today_screen.dart';
 import 'widgets.dart';
 
 /// Chat models like markdown; this screen shows plain text.
@@ -32,13 +33,14 @@ class _Turn {
 /// The conversation lives only on this screen; the list of changes is kept for Undo.
 class CoachScreen extends StatefulWidget {
   final AppState s;
-  const CoachScreen({super.key, required this.s});
+  final String? ask; // filled in for you (stall help, weekly review, summary); sent only when you tap send
+  const CoachScreen({super.key, required this.s, this.ask});
   @override
   State<CoachScreen> createState() => _CoachScreenState();
 }
 
 class _CoachScreenState extends State<CoachScreen> {
-  final q = TextEditingController();
+  late final q = TextEditingController(text: widget.ask ?? '');
   final turns = <_Turn>[];
   bool busy = false;
 
@@ -81,7 +83,8 @@ class _CoachScreenState extends State<CoachScreen> {
       }
       turn = ai.ai.isHandoff ? _Turn(t, plainText(a)) : _fromReply(t, a);
     }
-    if (turn.pending.isNotEmpty && s.settings.aiAuto) await _apply(turn);
+    // Auto never runs a step that always asks (taking out an import): it waits for Apply
+    if (turn.pending.isNotEmpty && s.settings.aiAuto && !turn.pending.any((a) => a.alwaysAsk)) await _apply(turn);
     if (!mounted) return;
     setState(() {
       busy = false;
@@ -112,10 +115,12 @@ class _CoachScreenState extends State<CoachScreen> {
     final s = widget.s;
     final i = s.aiChanges.indexWhere((c) => c.asked == t.q && !c.undone);
     if (i < 0) return;
+    final partial = s.aiChanges[i].partial;
     await s.undoChange(i);
     if (!mounted) return;
     setState(() => t.change = null);
-    toast(context, 'Undone. The app is back to how it was.');
+    // never "back to how it was" for something Undo cannot bring back
+    toast(context, partial ? 'Undone, except the import that was taken out: import the file again to bring it back.' : 'Undone. The app is back to how it was.');
   }
 
   @override
@@ -145,6 +150,12 @@ class _CoachScreenState extends State<CoachScreen> {
                   Dim(s.settings.aiAuto ? 'Auto: it makes the changes you ask for right away (undo any time).' : 'It shows what it wants to change and waits for Apply.', size: 12),
                 const SizedBox(height: 10),
               ],
+              if (turns.isEmpty && s.settings.aiOn && s.session == null && s.today != null)
+                Wrap(spacing: 6, runSpacing: 6, children: [
+                  ActionChip(avatar: const Icon(Icons.auto_awesome, size: 16, color: C.gold), label: const Text("Rework today's workout"), onPressed: () => adjustToday(context, s)),
+                  ActionChip(avatar: const Icon(Icons.auto_awesome, size: 16, color: C.gold), label: const Text("Today's guide"), onPressed: () => todaysGuide(context, s)),
+                ]),
+              if (turns.isEmpty && s.settings.aiOn && s.session == null && s.today != null) const SizedBox(height: 8),
               if (turns.isEmpty)
                 for (final i in ideas)
                   Padding(
@@ -260,6 +271,7 @@ class _AiChangesScreenState extends State<AiChangesScreen> {
                       Text('"${ch.asked}"', style: const TextStyle(fontStyle: FontStyle.italic)),
                       const SizedBox(height: 4),
                       for (final d in ch.did) Text('• $d'),
+                      if (ch.partial) const Text('Undo cannot bring back the import this took out.', style: TextStyle(color: C.gold, fontSize: 12)),
                       const SizedBox(height: 4),
                       if (ch.undone)
                         const Dim('Undone', size: 12)

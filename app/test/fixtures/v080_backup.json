@@ -1,0 +1,286 @@
+{
+ "format": 1,
+ "app": "workout",
+ "exported": "2026-11-22T22:03:23.733560",
+ "kv": [
+  {
+   "k": "settings",
+   "v": "{\"aiOn\":false,\"ai\":{\"kind\":\"claude\",\"model\":\"claude-opus-5-5\",\"baseUrl\":null},\"preview\":true,\"autoPacks\":false,\"keepAwake\":true,\"rest\":150,\"steps\":{},\"chatProject\":false,\"smartRest\":true,\"sound\":\"simple\",\"remindDays\":[1,3,5],\"remindAt\":1095,\"autoUpdate\":true,\"aiAuto\":false,\"hideRecents\":false,\"warmups\":false,\"restOff\":false,\"checkin\":true,\"deloadEvery\":0,\"formula\":\"epley\",\"effortDrives\":true,\"dropPct\":10,\"missesToDrop\":3,\"progSpeed\":\"slow\"}"
+  },
+  {
+   "k": "gyms",
+   "v": "[{\"id\":\"61d97ed0-0f69-4b79-a0c9-25a344c51a9c\",\"name\":\"Home garage\",\"items\":[\"barbell\",\"bench\",\"dumbbells\",\"rack\"],\"maxDb\":32.0,\"platesUnit\":\"lb\"}]"
+  },
+  {
+   "k": "gym_active",
+   "v": "61d97ed0-0f69-4b79-a0c9-25a344c51a9c"
+  },
+  {
+   "k": "profile",
+   "v": "{\"goal\":\"strength\",\"days\":3,\"minutes\":60,\"have\":[\"bodyweight\",\"dumbbell\",\"barbell\"],\"avoid\":[],\"unit\":\"kg\",\"split\":\"full_body\"}"
+  },
+  {
+   "k": "last_day:2c751787-06aa-478e-b506-87051f0f841d",
+   "v": "1"
+  }
+ ],
+ "plan": [
+  {
+   "id": "2c751787-06aa-478e-b506-87051f0f841d",
+   "json": "{\"id\":\"2c751787-06aa-478e-b506-87051f0f841d\",\"name\":\"Full body\",\"source\":\"built-in\",\"userEdited\":false,\"created\":1795403003549,\"days\":[{\"name\":\"Full body A\",\"items\":[{\"exercise\":\"back_squat\",\"sets\":4,\"repLow\":3,\"repHigh\":6,\"rest\":180},{\"exercise\":\"machine_chest_press\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"chest_supported_row\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"lying_leg_curl\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75},{\"exercise\":\"machine_lateral_raise\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75},{\"exercise\":\"preacher_curl_machine\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75}]},{\"name\":\"Full body B\",\"items\":[{\"exercise\":\"deadlift\",\"sets\":4,\"repLow\":3,\"repHigh\":6,\"rest\":180},{\"exercise\":\"incline_machine_press\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"machine_pulldown\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"cable_split_squat\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"reverse_pec_deck\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75},{\"exercise\":\"machine_triceps_ext\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75}]},{\"name\":\"Full body C\",\"items\":[{\"exercise\":\"bench_press\",\"sets\":4,\"repLow\":3,\"repHigh\":6,\"rest\":180},{\"exercise\":\"leg_press\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"machine_row\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"machine_hip_thrust\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"machine_shoulder_press\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"cable_curl\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75}]}]}",
+   "active": 1,
+   "created": 1795403003549
+  }
+ ],
+ "lift_state": [
+  {
+   "exercise_id": "back_squat",
+   "json": "{\"exercise_id\":\"back_squat\",\"work_kg\":62.5,\"misses\":1,\"work_reps\":null,\"updated\":1795403003711}"
+  },
+  {
+   "exercise_id": "machine_chest_press",
+   "json": "{\"exercise_id\":\"machine_chest_press\",\"work_kg\":62.5,\"misses\":1,\"work_reps\":null,\"updated\":1795403003712}"
+  }
+ ],
+ "session": [
+  {
+   "id": "40171124-6e08-4d09-8636-e80a61241679",
+   "plan_id": "2c751787-06aa-478e-b506-87051f0f841d",
+   "day_index": 0,
+   "day": "{\"name\":\"Full body A\",\"items\":[{\"exercise\":\"back_squat\",\"sets\":4,\"repLow\":3,\"repHigh\":6,\"rest\":180},{\"exercise\":\"machine_chest_press\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"chest_supported_row\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"lying_leg_curl\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75},{\"exercise\":\"machine_lateral_raise\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75},{\"exercise\":\"preacher_curl_machine\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75}]}",
+   "started": 1795403003618,
+   "finished": 1795403003663,
+   "note": ""
+  },
+  {
+   "id": "ace72fbe-05cb-4a2a-b0b6-e2037c6b6b37",
+   "plan_id": "2c751787-06aa-478e-b506-87051f0f841d",
+   "day_index": 1,
+   "day": "{\"name\":\"Full body B\",\"items\":[{\"exercise\":\"deadlift\",\"sets\":4,\"repLow\":3,\"repHigh\":6,\"rest\":180},{\"exercise\":\"incline_machine_press\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"machine_pulldown\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"cable_split_squat\",\"sets\":3,\"repLow\":5,\"repHigh\":8,\"rest\":120},{\"exercise\":\"reverse_pec_deck\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75},{\"exercise\":\"machine_triceps_ext\",\"sets\":3,\"repLow\":10,\"repHigh\":15,\"rest\":75}]}",
+   "started": 1795403003677,
+   "finished": 1795403003713,
+   "note": ""
+  }
+ ],
+ "set_log": [
+  {
+   "id": "a37d7ae7-85df-4309-8880-bee3e0c2aaca",
+   "session_id": "40171124-6e08-4d09-8636-e80a61241679",
+   "exercise_id": "back_squat",
+   "kg": 60.0,
+   "reps": 5,
+   "ord": 0,
+   "at": 1795403003627,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "7d5068a8-25fc-4179-b875-f515a92c8af0",
+   "session_id": "40171124-6e08-4d09-8636-e80a61241679",
+   "exercise_id": "back_squat",
+   "kg": 60.0,
+   "reps": 5,
+   "ord": 1,
+   "at": 1795403003633,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "c567f124-e51c-43d7-bfb8-b719c4471797",
+   "session_id": "40171124-6e08-4d09-8636-e80a61241679",
+   "exercise_id": "back_squat",
+   "kg": 60.0,
+   "reps": 5,
+   "ord": 2,
+   "at": 1795403003637,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "75a6089c-b36e-44c8-bbc1-cb9ecfeeb413",
+   "session_id": "40171124-6e08-4d09-8636-e80a61241679",
+   "exercise_id": "machine_chest_press",
+   "kg": 60.0,
+   "reps": 5,
+   "ord": 3,
+   "at": 1795403003641,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "c3c3f4d7-b9ad-4e8f-94ac-c565e845a6c2",
+   "session_id": "40171124-6e08-4d09-8636-e80a61241679",
+   "exercise_id": "machine_chest_press",
+   "kg": 60.0,
+   "reps": 5,
+   "ord": 4,
+   "at": 1795403003645,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "97ecccb2-f544-4c71-976f-cc7b87a5c1f6",
+   "session_id": "40171124-6e08-4d09-8636-e80a61241679",
+   "exercise_id": "machine_chest_press",
+   "kg": 60.0,
+   "reps": 5,
+   "ord": 5,
+   "at": 1795403003649,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "9e99c9fe-4024-44ee-aef6-d1bea6b59d3c",
+   "session_id": "ace72fbe-05cb-4a2a-b0b6-e2037c6b6b37",
+   "exercise_id": "back_squat",
+   "kg": 62.5,
+   "reps": 5,
+   "ord": 0,
+   "at": 1795403003684,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "b2af4354-5efe-43fd-ba0f-fbbe983ff81f",
+   "session_id": "ace72fbe-05cb-4a2a-b0b6-e2037c6b6b37",
+   "exercise_id": "back_squat",
+   "kg": 62.5,
+   "reps": 5,
+   "ord": 1,
+   "at": 1795403003689,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "a7fa689b-95bf-4828-9449-24a1c0ca7ff6",
+   "session_id": "ace72fbe-05cb-4a2a-b0b6-e2037c6b6b37",
+   "exercise_id": "back_squat",
+   "kg": 62.5,
+   "reps": 5,
+   "ord": 2,
+   "at": 1795403003693,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "8a33b1c2-3f61-45ce-8599-5b37d7c45392",
+   "session_id": "ace72fbe-05cb-4a2a-b0b6-e2037c6b6b37",
+   "exercise_id": "machine_chest_press",
+   "kg": 62.5,
+   "reps": 5,
+   "ord": 3,
+   "at": 1795403003697,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "ad8a1bdb-1eb0-4d4f-9f5b-3f754d1b594c",
+   "session_id": "ace72fbe-05cb-4a2a-b0b6-e2037c6b6b37",
+   "exercise_id": "machine_chest_press",
+   "kg": 62.5,
+   "reps": 5,
+   "ord": 4,
+   "at": 1795403003701,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  },
+  {
+   "id": "b68454cc-5677-48ed-9849-187ab17cb74e",
+   "session_id": "ace72fbe-05cb-4a2a-b0b6-e2037c6b6b37",
+   "exercise_id": "machine_chest_press",
+   "kg": 62.5,
+   "reps": 5,
+   "ord": 5,
+   "at": 1795403003705,
+   "type": "work",
+   "effort": null,
+   "rpe": null,
+   "note": "",
+   "rest": null,
+   "side": "",
+   "secs": null,
+   "meters": null
+  }
+ ],
+ "body": [
+  {
+   "id": "0592cb69-0c90-42b6-a992-16801f3494fb",
+   "at": 1795403003726,
+   "kg": 81.4,
+   "fat": 17.5,
+   "json": "{}"
+  }
+ ],
+ "ex_note": [
+  {
+   "exercise_id": "back_squat",
+   "note": "knees out, brace"
+  }
+ ]
+}

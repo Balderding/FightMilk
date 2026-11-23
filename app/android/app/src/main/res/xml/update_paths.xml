@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Only the downloaded update APKs are shared, with the installer. -->
+<!-- Only the downloaded update APKs (with the installer) and the files the person chose to
+     export (batch 20, through the share menu) are shared. Never the photo folder. -->
 <paths>
     <cache-path name="updates" path="updates/"/>
+    <cache-path name="exports" path="exports/"/>
 </paths>

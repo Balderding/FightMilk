@@ -17,8 +17,16 @@ import 'package:workout/domain/units.dart';
 import 'package:workout/llm/native.dart';
 import 'package:workout/main.dart';
 import 'package:workout/packs/pack.dart';
+import 'package:workout/domain/programs.dart';
 import 'package:workout/ui/app_state.dart';
+import 'package:workout/ui/body_screen.dart';
+import 'package:workout/ui/export_screen.dart';
+import 'package:workout/ui/plan_screen.dart';
+import 'package:workout/ui/programs_screen.dart';
+import 'package:workout/ui/reports_screen.dart';
+import 'package:workout/ui/lift_chart.dart';
 import 'package:workout/ui/log_screen.dart';
+import 'package:workout/ui/muscles_screen.dart';
 import 'package:workout/ui/pickers.dart';
 import 'package:workout/ui/theme.dart';
 
@@ -66,11 +74,11 @@ void main() {
     }
 
     await tester.runAsync(() async {
-      final repo = await Repo.open('${dir.path}/s.db', factory: databaseFactoryFfi);
+      final repo = await Repo.open('${dir.path}/s.db', factory: databaseFactoryFfiNoIsolate);
       s = await AppState.forTest(repo, PackStore(dir.path), lib);
     });
 
-    Widget app(Widget home) => RepaintBoundary(key: key, child: MaterialApp(debugShowCheckedModeBanner: false, theme: buildTheme(), home: home));
+    Widget app(Widget home) => RepaintBoundary(key: key, child: MaterialApp(key: UniqueKey(), debugShowCheckedModeBanner: false, theme: buildTheme(), home: home));
 
     // 1. first-time setup
     await tester.pumpWidget(app(Home(s: s)));
@@ -141,7 +149,7 @@ void main() {
       await tester.tap(find.text(tab).last);
       await settle();
       if (name == '7-settings') {
-        await tester.drag(find.byType(ListView).first, const Offset(0, -250));
+        await tester.tap(find.text('Ask AI').first); // the AI section of Settings
         await settle();
       }
       await shot(name);
@@ -152,6 +160,91 @@ void main() {
     await tester.pumpWidget(app(ExercisePicker(s: s, title: 'All exercises', browse: true)));
     await settle();
     await shot('8-library');
+
+    // 9. the program library
+    await tester.pumpWidget(app(ProgramsScreen(s: s)));
+    await settle();
+    await shot('9-programs');
+
+    // 10. a 5/3/1 workout: one target per set, from the training max
+    await tester.runAsync(() async {
+      await s.throwAwayWorkout();
+      final pl = buildProgram(templateById('531_bbb')!, s.profile!, lib);
+      await s.startProgram(pl, {'overhead_press': lbToKg(135), 'deadlift': lbToKg(315), 'bench_press': lbToKg(205), 'back_squat': lbToKg(275)});
+      final ses = await s.startWorkout();
+      final it = ses.day.items.first;
+      final st = await s.targetFor(it);
+      await s.repo.logSet(ses.id, it.exerciseId, st.perSet![0]!, 5);
+    });
+    await tester.pumpWidget(app(LogScreen(s: s)));
+    await settle();
+    await shot('10-program-workout');
+
+    // 11. lift rules
+    await tester.pumpWidget(app(LiftRulesScreen(s: s)));
+    await settle();
+    await shot('11-lift-rules');
+
+    // 12. a program's plan: weeks folded, the current one open
+    await tester.pumpWidget(app(Scaffold(body: PlanScreen(s: s))));
+    await settle();
+    await shot('12-program-plan');
+
+    // 13. muscles: this week's sets against each range, balance, recovery (two recent workouts)
+    await tester.runAsync(() async {
+      for (final (ago, ids) in [
+        (3, ['back_squat', 'romanian_deadlift', 'leg_press', 'lying_leg_curl', 'standing_calf_raise']),
+        (1, ['bench_press', 'barbell_row', 'overhead_press', 'lat_pulldown', 'db_curl', 'triceps_pushdown', 'db_lateral_raise']),
+      ]) {
+        final ses = await s.repo.startSession(s.plan!, 0, s.plan!.days.first);
+        for (final id in ids) {
+          for (var k = 0; k < 4; k++) {
+            await s.repo.logSet(ses.id, id, lbToKg(lib.byId(id)!.compound ? 185 : 40), 8);
+          }
+        }
+        await s.repo.finishSession(ses.id, lib, Unit.lb);
+        final when = DateTime.now().subtract(Duration(days: ago, hours: 2));
+        await s.repo.db.update('session', {'started': when.millisecondsSinceEpoch, 'finished': when.add(const Duration(minutes: 55)).millisecondsSinceEpoch}, where: 'id = ?', whereArgs: [ses.id]);
+        await s.repo.db.update('set_log', {'at': when.millisecondsSinceEpoch}, where: 'session_id = ?', whereArgs: [ses.id]);
+      }
+    });
+    await tester.pumpWidget(app(MusclesScreen(s: s)));
+    await settle();
+    await shot('13-muscles');
+
+    // 14. the records board
+    await tester.pumpWidget(app(RecordsScreen(s: s)));
+    await settle();
+    await shot('14-records');
+
+    // 15. reports and 16. the calendar
+    await tester.pumpWidget(app(ReportsScreen(s: s)));
+    await settle();
+    await shot('15-reports');
+    await tester.pumpWidget(app(CalendarScreen(s: s)));
+    await settle();
+    await shot('16-calendar');
+
+    // 17. body weight with its goal line, body numbers and strength (batch 19)
+    await tester.runAsync(() async {
+      await s.saveProfile(s.profile!.copyWith(bodyKg: lbToKg(190), heightCm: 180));
+      for (var i = 0; i < 40; i++) {
+        final lb = 192 - i * 0.12 + (i % 3 == 0 ? 0.8 : (i % 3 == 1 ? -0.5 : 0.1));
+        await s.repo.logBody(lbToKg(lb), fat: i == 39 ? 17.5 : null, at: DateTime.now().subtract(Duration(days: 39 - i, hours: -7)));
+      }
+      await s.addAim('body', lbToKg(185));
+      await s.addTape('waist', 86);
+      await s.addTape('arm', 38.5, side: 'R');
+      await s.reload();
+    });
+    await tester.pumpWidget(app(BodyScreen(s: s)));
+    await settle();
+    await shot('17-body');
+
+    // 18. the Export screen (batch 20)
+    await tester.pumpWidget(app(ExportScreen(s: s)));
+    await settle();
+    await shot('18-export');
 
     await tester.pumpWidget(const SizedBox());
     await settle();

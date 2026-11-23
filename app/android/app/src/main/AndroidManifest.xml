@@ -39,7 +39,69 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Batch 23, F352: long-press the icon; each shortcut only opens a screen -->
+            <meta-data android:name="android.app.shortcuts" android:resource="@xml/shortcuts"/>
+            <!-- Batch 20: a shared plan opens in the app, only in the forms the app makes itself:
+                 a fightmilk://plan link (also from a QR code), a .json plan file, or plan text.
+                 The app checks it and shows it before anything is saved. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="fightmilk" android:host="plan"/>
+            </intent-filter>
+            <!-- Batch 23, F354: links that only open a screen (today's workout, the weigh-in with
+                 a number filled in, the last workout); nothing is saved without the person's tap -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="fightmilk" android:host="start"/>
+                <data android:scheme="fightmilk" android:host="today"/>
+                <data android:scheme="fightmilk" android:host="weight"/>
+                <data android:scheme="fightmilk" android:host="last"/>
+            </intent-filter>
+            <!-- F356: an NFC sticker holding one of those links opens the same (no NFC permission) -->
+            <intent-filter>
+                <action android:name="android.nfc.action.NDEF_DISCOVERED"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="fightmilk"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:scheme="content" android:mimeType="application/json"/>
+                <!-- batch 21: history files from other apps open the import preview -->
+                <data android:mimeType="text/csv"/>
+                <data android:mimeType="text/comma-separated-values"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <data android:mimeType="application/json"/>
+                <data android:mimeType="text/plain"/>
+                <data android:mimeType="text/csv"/>
+                <data android:mimeType="text/comma-separated-values"/>
+            </intent-filter>
         </activity>
+        <!-- Batch 23, F351: the home-screen widget (next workout, this week; its buttons only open the app) -->
+        <receiver android:name=".FmWidget" android:exported="false">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/fm_widget_info"/>
+        </receiver>
+        <!-- Batch 23, F353: a Quick Settings tile that opens today's workout (nothing starts from the shade) -->
+        <service
+            android:name=".TodayTile"
+            android:exported="true"
+            android:icon="@drawable/ic_tile"
+            android:label="@string/tile_sub"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter>
+                <action android:name="android.service.quicksettings.action.QS_TILE"/>
+            </intent-filter>
+        </service>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->
         <provider

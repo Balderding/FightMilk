@@ -47,13 +47,26 @@ void main() {
       final a = await filled('a');
       final text = await exportBackup(a);
       expect(text, isNot(contains('sk-secret')));
-      expect((jsonDecode(text) as Map)['format'], 1);
+      expect((jsonDecode(text) as Map)['format'], 2, reason: 'batch 22: format 2 with a check; format 1 still restores (backup22_test)');
       final b = await Repo.open('${dir.path}/b.db', factory: databaseFactoryFfi);
       await importBackup(b, text, replace: true);
       expect(await counts(b), await counts(a));
       expect((await b.profile())!.toJson(), profile.toJson());
       expect((await b.activePlan())!.toJson(), (await a.activePlan())!.toJson());
       expect(await b.lastDayIndex((await b.activePlan())!.id), 0);
+      await a.close();
+      await b.close();
+    });
+
+    test('goals and seen badges survive a backup and restore (review 3, P1-3)', () async {
+      final a = await filled('a');
+      await a.kvSet('aims', '[{"id":"1","kind":"body","t":80,"s":85,"c":1},{"id":"2","kind":"volume","t":20,"s":0,"c":1}]');
+      await a.kvSet('badges_seen', '["first","w10"]');
+      final text = await exportBackup(a);
+      final b = await Repo.open('${dir.path}/b2.db', factory: databaseFactoryFfi);
+      await importBackup(b, text, replace: true);
+      expect((jsonDecode((await b.kvGet('aims'))!) as List).length, 2);
+      expect(jsonDecode((await b.kvGet('badges_seen'))!), ['first', 'w10']);
       await a.close();
       await b.close();
     });
@@ -128,6 +141,10 @@ void main() {
       final (kp, pub) = await keys();
       final z = await makeZip(kp, 3, {'../evil.svg': icon});
       await expectLater(verifyPack(z, pub), throwsA(isA<PackError>()));
+      // F421: an absolute path, a backslash, a hidden climb and a name outside icons/ (even signed)
+      for (final bad in ['/data/evil.svg', r'icons\..\evil.svg', 'icons/../../evil.svg', 'icons/Evil.svg', 'icons/a.svg.exe', 'lib/x.so']) {
+        await expectLater(verifyPack(await makeZip(kp, 3, {bad: icon}), pub), throwsA(isA<PackError>()), reason: bad);
+      }
     });
     test('install writes files; older or same version is ignored', () async {
       final (kp, pub) = await keys();

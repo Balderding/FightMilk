@@ -5,7 +5,10 @@ class C {
   static const bg = Color(0xFF0F1418);
   static const card = Color(0xFF182129);
   static const card2 = Color(0xFF202C36);
-  static const line = Color(0xFF2C3A46);
+  // borders and outlines: 3:1 or more on bg, card and card2 (F362; was #2C3A46, 1.2-1.6:1)
+  static const line = Color(0xFF667C8E);
+  // chart grid lines and painted bands, which should stay quiet behind the data
+  static const grid = Color(0xFF2C3A46);
   static const text = Color(0xFFE8EEF2);
   static const dim = Color(0xFF93A4B1);
   static const teal = Color(0xFF2EC4B6);

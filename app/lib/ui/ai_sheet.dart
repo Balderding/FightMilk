@@ -9,7 +9,7 @@ import 'widgets.dart';
 /// Ask the coach a free question. Returns the answer text, or null (cancelled / failed, with a message shown).
 Future<String?> runAsk(BuildContext context, AppState s, Future<AiRequest> Function() build) async {
   if (!await s.aiReady()) {
-    if (context.mounted) toast(context, 'Set up the AI coach in Settings first (service, model and key, or your server address).');
+    if (context.mounted) toast(context, 'Set up the Ask AI in Settings first (service, model and key, or your server address).');
     return null;
   }
   final r = await build();
@@ -45,7 +45,7 @@ Future<String?> runAsk(BuildContext context, AppState s, Future<AiRequest> Funct
 /// Returns true when the AI's plan/day was used.
 Future<bool> runAi(BuildContext context, AppState s, Future<AiRequest> Function() build) async {
   if (!await s.aiReady()) {
-    if (context.mounted) toast(context, 'Set up the AI coach in Settings first (service, model and key, or your server address).');
+    if (context.mounted) toast(context, 'Set up the Ask AI in Settings first (service, model and key, or your server address).');
     return false;
   }
   final r = await build();

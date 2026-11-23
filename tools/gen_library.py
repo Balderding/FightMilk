@@ -2,7 +2,7 @@
 
 One line per exercise:  id | name | equipment | primary | secondary | pattern | swap group | joints | compound(1/0) | about
 - equipment: barbell dumbbell machine cable smith kettlebell bodyweight band
-- muscles/joints: space separated; joints = shoulders lowerBack knees wrists
+- muscles/joints: space separated; joints = shoulders lowerBack knees wrists (+ EXTRA_JOINTS below: elbows hips neck ankles upperBack)
 - pattern picks the icon pose; swap group = exercises that can replace each other
 - about: our own short explanation (what it works, how to do it, one cue)
 The icon id is "<pattern>_<equipment>" (drawn by gen_icons.py).
@@ -335,6 +335,28 @@ STEP = {"barbell": "barbell", "smith": "barbell", "dumbbell": "dumbbell", "kettl
 TIMED_IDS = {"plank", "side_plank", "hollow_hold", "weighted_plank", "copenhagen_plank", "dead_hang", "plate_pinch",
              "farmer_carry", "kb_farmer_carry", "trap_bar_carry", "suitcase_carry", "sled_push", "farmer_march"}
 
+# joints added in batch 15 (F236), kept apart so the lines above stay readable
+EXTRA_JOINTS = {
+    "elbows": "skull_crusher db_skull_crusher jm_press tate_press close_grip_bench overhead_cable_ext db_overhead_ext bench_dip weighted_dip dips machine_dip "
+              "diamond_push_up barbell_curl ez_bar_curl preacher_curl_machine db_preacher_curl ez_preacher_curl spider_curl chin_up clean_and_jerk power_clean hang_clean",
+    "hips": "back_squat front_squat zercher_squat box_squat pause_squat pistol_squat sumo_deadlift deadlift deficit_deadlift good_morning lateral_lunge curtsy_lunge "
+            "copenhagen_plank hip_adduction cable_hip_adduction hanging_leg_raise toes_to_bar lying_leg_raise decline_situp",
+    "neck": "band_neck_ext plate_neck_curl handstand_push_up pike_push_up crunch decline_situp barbell_shrug trap_bar_shrug back_squat box_squat pause_squat "
+            "good_morning barbell_split_squat barbell_calf_raise",
+    "ankles": "box_jump pistol_squat walking_lunge lateral_lunge curtsy_lunge single_leg_calf_raise donkey_calf_raise standing_calf_raise sled_push sissy_squat "
+              "tibialis_raise front_squat",
+    "upperBack": "barbell_row pendlay_row t_bar_row yates_row deadlift rack_pull deficit_deadlift good_morning front_squat zercher_squat power_clean hang_clean high_pull "
+                 "barbell_shrug trap_bar_shrug farmer_carry trap_bar_carry",
+}
+
+# how the body lies (P1-10): careful mode while pregnant leaves out lying on the back or front
+POSITION = {
+    "supine": "bench_press db_bench_press smith_bench_press decline_bench_press decline_db_press floor_press db_floor_press kb_floor_press "
+              "close_grip_bench jm_press tate_press reverse_grip_bench skull_crusher db_skull_crusher db_fly db_pullover glute_bridge "
+              "barbell_glute_bridge frog_pump dead_bug lying_leg_raise crunch reverse_crunch hollow_hold decline_situp dragon_flag weighted_push_up",
+    "prone": "lying_leg_curl seal_row chest_supported_row chest_supported_db_row chest_supported_rear_fly reverse_hyper back_extension",
+}
+
 rows = []
 for line in DATA.strip().splitlines():
     line = line.strip()
@@ -350,11 +372,17 @@ for line in DATA.strip().splitlines():
     if i in TIMED_IDS:
         lo, hi = (30, 60)
     rows.append(dict(id=i, name=n, equipment=eq, primary=pri.split(), secondary=sec.split(), pattern=pat, swap=swap,
-                     joints=joints.split(), repLow=lo, repHigh=hi, step=STEP[eq],
+                     joints=joints.split() + [j for j, ids in EXTRA_JOINTS.items() if i in ids.split()], repLow=lo, repHigh=hi, step=STEP[eq],
                      bodyweight=eq in ("bodyweight", "band"), compound=comp, timed=i in TIMED_IDS,
                      icon=f"{pat}_{eq}", about=about.strip()))
+    pos = [k for k, ids in POSITION.items() if i in ids.split()]
+    if pos:
+        rows[-1]["position"] = pos[0]
 
 ids = [r["id"] for r in rows]
+for j, l in [*EXTRA_JOINTS.items(), *POSITION.items()]:
+    unknown = set(l.split()) - set(ids)
+    assert not unknown, (j, unknown)
 dupes = {x for x in ids if ids.count(x) > 1}
 assert not dupes, dupes
 out = pathlib.Path(__file__).resolve().parent.parent / "app" / "assets" / "exercises.json"

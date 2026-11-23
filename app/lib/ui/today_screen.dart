@@ -2,17 +2,22 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../domain/exercise.dart';
 import '../domain/plan.dart';
+import '../domain/program.dart';
 import '../domain/units.dart';
+import '../domain/volume.dart';
 import 'ai_sheet.dart';
 import '../ai/prompt.dart';
 import 'coach_screen.dart';
+import 'coaching_screen.dart';
 import 'gyms_screen.dart';
 import '../domain/plan_maker.dart';
 import 'timers_screen.dart';
 import 'app_state.dart';
 import 'log_screen.dart';
 import 'pickers.dart';
+import 'reports_screen.dart';
 import 'setup_screen.dart';
 import 'theme.dart';
 import 'widgets.dart';
@@ -21,7 +26,28 @@ class TodayScreen extends StatelessWidget {
   final AppState s;
   const TodayScreen({super.key, required this.s});
 
-  String _src(Plan p) => switch (p.source) { 'ai' => 'AI plan', 'mine' => 'My plan', _ => 'Built-in plan' };
+  /// Do another day of the plan today.
+  Future<void> _otherDay(BuildContext context, Plan plan, int di) async {
+    final i = await showModalBottomSheet<int>(
+      context: context,
+      backgroundColor: C.card,
+      builder: (c) => SafeArea(
+        child: ListView(shrinkWrap: true, padding: const EdgeInsets.all(12), children: [
+          const Padding(padding: EdgeInsets.all(4), child: Text('Do another day today', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700))),
+          for (var k = 0; k < plan.days.length; k++)
+            if (k != di)
+              ListTile(
+                title: Text(plan.days[k].name),
+                subtitle: Dim('${plan.days[k].items.length} exercises', size: 12),
+                onTap: () => Navigator.pop(c, k),
+              ),
+        ]),
+      ),
+    );
+    if (i != null) await s.pickDay(i);
+  }
+
+  String _src(Plan p) => p.program != null ? 'Program' : switch (p.source) { 'ai' => 'AI plan', 'mine' => 'My plan', _ => 'Built-in plan' };
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +61,7 @@ class TodayScreen extends StatelessWidget {
             child: Column(mainAxisSize: MainAxisSize.min, children: [
               const Text('No plan yet', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
               const SizedBox(height: 12),
-              FilledButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SetupScreen(s: s))), child: const Text('Make a plan')),
+              FilledButton(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SetupScreen(s: s))), child: const Text('Make my plan')),
             ]),
           ),
         ),
@@ -50,10 +76,13 @@ class TodayScreen extends StatelessWidget {
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                 Text(day.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
-                Dim('Week ${s.week} · day ${di + 1} of ${plan.days.length} · ~${s.profile?.minutes ?? 60} min'),
+                Dim(plan.weeksPerCycle > 1
+                    ? '${plan.name} · week ${s.programWeek.$1} of ${plan.weeksPerCycle} · cycle ${s.programWeek.$2} · ~${dayMinutes(day, s.lib)} min'
+                    : 'Week ${s.week} · day ${di + 1} of ${plan.days.length} · ~${dayMinutes(day, s.lib)} min${(s.climbStep ?? 0) == 0 ? '' : ' · extras ${s.climbStep! > 0 ? '+' : ''}${s.climbStep} set'}'),
+                if (s.carefulNote != null) Dim(s.carefulNote!, size: 12),
                 const SizedBox(height: 4),
                 ActionChip(
-                  visualDensity: VisualDensity.compact,
+                  materialTapTargetSize: MaterialTapTargetSize.padded, // 48 dp to tap (F367)
                   avatar: const Icon(Icons.fitness_center, size: 16, color: C.teal),
                   label: Text(s.activeGym == null ? 'Set up your gym' : 'At: ${s.activeGym!.name}${s.takenToday.isEmpty ? '' : ' · ${s.takenToday.length} taken'}'),
                   onPressed: () => s.gyms.isEmpty
@@ -62,7 +91,7 @@ class TodayScreen extends StatelessWidget {
                 ),
               ]),
             ),
-            Tag(_src(plan), ai: plan.source == 'ai'),
+            Flexible(child: Tag(_src(plan), ai: plan.source == 'ai')), // may shrink at a large text size (F364)
             IconButton(
                 tooltip: 'Ask AI: questions, or tell it to set things up',
                 icon: const Icon(Icons.auto_awesome, color: C.gold),
@@ -70,106 +99,147 @@ class TodayScreen extends StatelessWidget {
               ),
             PopupMenuButton<String>(
               onSelected: (v) async {
-                if (v == 'skip') {
-                  if (await confirm(context, 'Skip ${day.name}?', 'The next day in your rotation comes up instead.', yes: 'Skip')) await s.skipToday();
-                } else if (v.startsWith('day:')) {
-                  s.pickDay(int.parse(v.substring(4)));
-                } else if (v == 'ai') {
-                  if (context.mounted) await adjustToday(context, s);
-                } else if (v == 'guide') {
-                  if (context.mounted) await todaysGuide(context, s);
-                } else if (v == 'quick') {
-                  if (context.mounted) await quickWorkout(context, s);
-                } else if (v == 'deload') {
+                if (v == 'deload') {
                   await s.setDeload(!s.inDeload);
                 } else if (v == 'timers') {
                   if (context.mounted) await Navigator.push(context, MaterialPageRoute(builder: (_) => TimersScreen(s: s)));
                 }
               },
               itemBuilder: (c) => [
-                if (s.session == null) const PopupMenuItem(value: 'quick', child: Text('Quick workout: pick muscles')),
-                const PopupMenuItem(value: 'timers', child: Text('Timers (stopwatch, EMOM, Tabata)')),
+                if (!s.settings.simple) const PopupMenuItem(value: 'timers', child: Text('Timers (stopwatch, EMOM, Tabata)')),
                 if (s.session == null) PopupMenuItem(value: 'deload', child: Text(s.inDeload ? 'End the deload week' : 'Deload this week (lighter)')),
-                if (s.session == null) const PopupMenuItem(value: 'skip', child: Text('Skip this day')),
-                if (s.session == null)
-                  for (var i = 0; i < plan.days.length; i++)
-                    if (i != di) PopupMenuItem(value: 'day:$i', child: Text('Do ${plan.days[i].name} instead')),
-                if (s.settings.aiOn) const PopupMenuItem(value: 'guide', child: Text("Today's guide")),
-                if (s.settings.aiOn) const PopupMenuItem(value: 'ai', child: Text('Ask AI to adjust today')),
               ],
             ),
           ]),
         ),
-        if (s.session != null && DateTime.now().difference(s.session!.started) > const Duration(hours: 3))
-          Card(
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('This workout started ${DateTime.now().difference(s.session!.started).inHours} hours ago. Still going?', style: const TextStyle(fontWeight: FontWeight.w600)),
-                const SizedBox(height: 6),
-                Wrap(spacing: 8, children: [
-                  FilledButton.tonal(onPressed: () => s.finishWorkout(), child: const Text('Finish it')),
-                  OutlinedButton(
-                    onPressed: () async {
-                      if (await confirm(context, 'Throw it away?', 'All sets from this workout are deleted.', yes: 'Throw away')) await s.throwAwayWorkout();
-                    },
-                    child: const Text('Throw away'),
-                  ),
-                ]),
-              ]),
-            ),
-          ),
         if (s.session != null && s.restLeft != null) _RestBanner(s: s),
-        if (s.session == null && s.inDeload)
-          Card(
-            margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: ListTile(
-              leading: const Icon(Icons.spa_outlined, color: C.teal),
-              title: const Text('Deload week'),
-              subtitle: const Dim('Fewer sets at about 90%. Your progress does not move this week, so you come back fresh.', size: 12),
-              trailing: s.deloadUntil != null && DateTime.now().isBefore(s.deloadUntil!) ? TextButton(onPressed: () => s.setDeload(false), child: const Text('End it')) : null,
-            ),
-          ),
-        if (s.session == null && !s.inDeload) _StallHint(s: s),
-        if (s.session == null && s.settings.checkin)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-            child: Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
-              const Dim('How do you feel today?'),
-              for (final (v, l) in const [(1, 'Rough'), (2, 'OK'), (3, 'Great')])
-                Padding(
-                  padding: EdgeInsets.zero,
-                  child: ChoiceChip(
-                    label: Text(l, style: TextStyle(color: s.feeling == v ? C.onTeal : C.text)),
-                    selected: s.feeling == v,
-                    showCheckmark: false,
-                    onSelected: (on) => s.setFeeling(on ? v : null),
-                  ),
+        Expanded(
+          child: ListView(children: [
+            // hints scroll with the list, so any number of them fits on a small screen
+            // the cards and chips above the exercises scroll too: at a large text size they never push the Start button off (F364)
+            if (s.session == null && s.showTour)
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    const Text("What's here", style: TextStyle(fontWeight: FontWeight.w700)),
+                    const SizedBox(height: 4),
+                    const Dim('• Today: your next workout. Tap Start, then one tap per set; the app moves on by itself.\n'
+                        '• Plan: your week. Tap an exercise to change sets, reps and rest.\n'
+                        '• History and Progress: every workout, records and charts.\n'
+                        '• Ask AI: "chest and arms with drop sets", "the bench is taken". Works even with the AI off.\n'
+                        '• Settings: your gym, rest, reminders, backup. Simple mode hides the extras.', size: 13),
+                    Align(alignment: Alignment.centerRight, child: TextButton(onPressed: s.hideTour, child: const Text('Got it'))),
+                  ]),
                 ),
-            ]),
-          ),
-        if (s.session == null && day.items.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 8),
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(color: C.navy, borderRadius: BorderRadius.circular(12)),
-              child: Row(children: [
-                const Icon(Icons.campaign_outlined, color: C.gold),
-                const SizedBox(width: 10),
-                Expanded(child: Text('Hey! Today is ${day.name}: ${day.items.length} exercises, about ${s.profile?.minutes ?? 60} minutes. Start the workout now!', style: const TextStyle(fontWeight: FontWeight.w600))),
+              ),
+            if (s.session == null)
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.fromLTRB(14, 0, 14, 4),
+                child: Row(children: [
+                  ActionChip(
+                    avatar: const Icon(Icons.skip_next, size: 18, color: C.teal),
+                    label: const Text('Skip day'),
+                    onPressed: () async {
+                      if (await confirm(context, 'Skip ${day.name}?', 'The next day in your rotation comes up instead.', yes: 'Skip')) await s.skipToday();
+                    },
+                  ),
+                  const SizedBox(width: 6),
+                  if (plan.days.length > 1)
+                    ActionChip(avatar: const Icon(Icons.swap_horiz, size: 18, color: C.teal), label: const Text('Other day'), onPressed: () => _otherDay(context, plan, di)),
+                  const SizedBox(width: 6),
+                  ActionChip(avatar: const Icon(Icons.bolt, size: 18, color: C.teal), label: const Text('Quick workout'), onPressed: () => quickWorkout(context, s)),
+                  if (!s.settings.simple) ...[
+                    const SizedBox(width: 6),
+                    ActionChip(avatar: const Icon(Icons.healing, size: 18, color: C.teal), label: Text(s.soreToday.isEmpty ? 'Sore today?' : 'Sore: ${s.soreToday.length}'), onPressed: () => soreSheet(context, s)),
+                  ],
+                ]),
+              ),
+            if (s.session != null && DateTime.now().difference(s.session!.started) > const Duration(hours: 3))
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Padding(
+                  padding: const EdgeInsets.all(12),
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('This workout started ${DateTime.now().difference(s.session!.started).inHours} hours ago. Still going?', style: const TextStyle(fontWeight: FontWeight.w600)),
+                    const SizedBox(height: 6),
+                    Wrap(spacing: 8, children: [
+                      FilledButton.tonal(onPressed: () => s.finishWorkout(), child: const Text('Finish it')),
+                      OutlinedButton(
+                        onPressed: () async {
+                          if (await confirm(context, 'Throw it away?', 'All sets from this workout are deleted.', yes: 'Throw away')) await s.throwAwayWorkout();
+                        },
+                        child: const Text('Throw away'),
+                      ),
+                    ]),
+                  ]),
+                ),
+              ),
+            if (s.session == null && s.inDeload)
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: ListTile(
+                  leading: const Icon(Icons.spa_outlined, color: C.teal),
+                  title: const Text('Deload week'),
+                  subtitle: const Dim('Fewer sets at about 90%. Your progress does not move this week, so you come back fresh.', size: 12),
+                  trailing: s.deloadUntil != null && DateTime.now().isBefore(s.deloadUntil!) ? TextButton(onPressed: () => s.setDeload(false), child: const Text('End it')) : null,
+                ),
+              ),
+            if (s.session == null && s.restDay)
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: ListTile(
+                  leading: const Icon(Icons.bedtime_outlined, color: C.teal),
+                  title: const Text('Rest day'),
+                  subtitle: Dim('You train ${s.profile!.weekdays.map((d) => weekdayShort[d - 1]).join(', ')}. Next: ${s.nextTrainingDay}, ${day.name}.', size: 12),
+                  trailing: TextButton(onPressed: () => s.pickDay(s.todayIndex), child: const Text('Train anyway')),
+                ),
+              ),
+            if (s.session == null && s.programNotes.isNotEmpty)
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: ListTile(
+                  leading: const Icon(Icons.trending_up, color: C.green),
+                  title: const Text('After your last workout'),
+                  subtitle: Dim(s.programNotes.join('\n'), size: 12),
+                  trailing: TextButton(
+                      onPressed: s.clearProgramNotes,
+                      child: const Text('OK')),
+                ),
+              ),
+            if (s.session == null && s.settings.checkin)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: Wrap(spacing: 6, runSpacing: 4, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                  const Dim('How do you feel today?'),
+                  for (final (v, l) in const [(1, 'Rough'), (2, 'OK'), (3, 'Great')])
+                    Padding(
+                      padding: EdgeInsets.zero,
+                      child: ChoiceChip(
+                        label: Text(l, style: TextStyle(color: s.feeling == v ? C.onTeal : C.text)),
+                        selected: s.feeling == v,
+                        showCheckmark: false,
+                        onSelected: (on) => s.setFeeling(on ? v : null),
+                      ),
+                    ),
+                ]),
+              ),
+            if (s.session == null) WeekStripCard(s: s),
+            if (s.session == null && plan.program != null) _GraduateHint(s: s),
+            if (s.session == null && s.soreToday.isNotEmpty) _SoreCard(s: s),
+            if (s.session == null) _RecoveryCard(s: s),
+            if (s.session == null && !s.inDeload && !s.settings.simple) _StallHint(s: s),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 14),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+                if (day.items.isEmpty)
+                  Problem([s.profile?.pregnancy != null && s.careDropped > 0 ? 'Nothing here fits careful mode: pick another day or a Quick workout.' : 'This day has no exercises. Add some under Plan.']),
+                for (var i = 0; i < day.items.length; i++) _ExTile(s: s, item: day.items[i], index: i),
               ]),
             ),
-          ),
-        Expanded(
-          child: ListView(padding: const EdgeInsets.symmetric(horizontal: 14), children: [
-            if (day.items.isEmpty) const Problem(['This day has no exercises. Add some under Plan.']),
-            for (var i = 0; i < day.items.length; i++) _ExTile(s: s, item: day.items[i], index: i),
-            if (s.settings.aiOn && s.session == null)
-              TextButton.icon(onPressed: () async {
-                await adjustToday(context, s);
-              }, icon: const Icon(Icons.auto_awesome, color: C.gold), label: const Text('Ask AI to adjust today')),
+            if (s.session == null) Padding(padding: const EdgeInsets.only(top: 8), child: TipCard(s: s)),
           ]),
         ),
         Padding(
@@ -220,9 +290,14 @@ class _ExTile extends StatelessWidget {
                   final t = snap.data;
                   final reps = item.repLow == item.repHigh ? '${item.repLow}' : '${item.repLow}-${item.repHigh}';
                   final w = t?.kg == null ? '' : (e.bodyweight ? (t!.kg! > 0 ? ' @ +${fmtWeight(t.kg!, s.unit)} ${unitLabel(s.unit)}' : ' bodyweight') : ' @ ${fmtWeight(t!.kg!, s.unit)} ${unitLabel(s.unit)}');
+                  // programs: each set's reps and the weight range, not "9 x 1-5" (P2-3)
+                  final ws = [for (final x in t?.perSet ?? const <double?>[]) if (x != null) x];
+                  final line = item.perSet != null
+                      ? '${repsShort(item.perSet!)}${ws.isEmpty ? '' : ' · ${fmtWeight(ws.reduce((a, b) => a < b ? a : b), s.unit)}${ws.toSet().length > 1 ? '-${fmtWeight(ws.reduce((a, b) => a > b ? a : b), s.unit)}' : ''} ${unitLabel(s.unit)}'}'
+                      : '${item.sets} × $reps${e.timed ? ' s' : ''}$w';
                   return Text.rich(TextSpan(children: [
-                    TextSpan(text: '${item.sets} × $reps${e.timed ? ' s' : ''}$w', style: const TextStyle(color: C.dim, fontSize: 13)),
-                    if (t?.up == true) const TextSpan(text: '  ↑', style: TextStyle(color: C.gold, fontWeight: FontWeight.w700)),
+                    TextSpan(text: line, style: const TextStyle(color: C.dim, fontSize: 13)),
+                    if (t?.up == true) const WidgetSpan(alignment: PlaceholderAlignment.middle, child: Padding(padding: EdgeInsets.only(left: 4), child: Icon(Icons.arrow_upward, size: 14, color: C.gold))),
                   ]));
                 },
               ),
@@ -396,6 +471,153 @@ Future<void> quickWorkout(BuildContext context, AppState s) async {
 }
 
 /// "Several lifts are stalling": suggests a deload week.
+/// Sore today (F236): exercises that are hard on it, and one tap to swap them for today.
+class _SoreCard extends StatelessWidget {
+  final AppState s;
+  const _SoreCard({required this.s});
+  @override
+  Widget build(BuildContext context) {
+    final n = s.soreItems.length;
+    return Card(
+      margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+      child: ListTile(
+        leading: const Icon(Icons.healing, color: C.gold),
+        title: Text('Sore today: ${s.soreToday.map((j) => jointLabel[j]!.toLowerCase()).join(', ')}'),
+        subtitle: Dim(n == 0 ? 'Nothing in today\'s workout is hard on it.' : '$n exercise${n == 1 ? ' is' : 's are'} hard on it today.', size: 12),
+        onTap: () => soreSheet(context, s),
+        trailing: n == 0
+            ? null
+            : TextButton(
+                onPressed: () async {
+                  final k = await s.swapSore();
+                  if (context.mounted) toast(context, k == 0 ? 'Nothing that fits to swap to: go light or leave it out' : 'Swapped $k for today');
+                },
+                child: const Text('Swap')),
+      ),
+    );
+  }
+}
+
+/// Pick what is sore today (F236). Cleared tomorrow; "go easy on" in setup is for good.
+Future<void> soreSheet(BuildContext context, AppState s) async {
+  final sel = {...s.soreToday};
+  final ok = await showModalBottomSheet<bool>(
+    context: context,
+    backgroundColor: C.card,
+    builder: (c) => StatefulBuilder(
+      builder: (c, set) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const Text('Sore today?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            const Dim('Only for today. Exercises that are hard on it get flagged, with a swap. For something that lasts, use Setup → More choices → Go easy on.', size: 12),
+            const SizedBox(height: 10),
+            Wrap(spacing: 6, runSpacing: 6, children: [
+              for (final j in Joint.values)
+                FilterChip(label: Text(jointLabel[j]!), selected: sel.contains(j), showCheckmark: false, onSelected: (v) => set(() => v ? sel.add(j) : sel.remove(j))),
+            ]),
+            const SizedBox(height: 12),
+            FilledButton(onPressed: () => Navigator.pop(c, true), child: Text(sel.isEmpty ? 'Nothing is sore' : 'Done')),
+          ]),
+        ),
+      ),
+    ),
+  );
+  if (ok == true) await s.setSore(sel);
+}
+
+/// Recovery (F232) and rest-day (F234) hints before a workout.
+class _RecoveryCard extends StatefulWidget {
+  final AppState s;
+  const _RecoveryCard({required this.s});
+  @override
+  State<_RecoveryCard> createState() => _RecoveryCardState();
+}
+
+class _RecoveryCardState extends State<_RecoveryCard> {
+  String? _key;
+  Future<RecoveryHint?>? _hint;
+
+  /// One look per day shown and change that matters, not one per rebuild.
+  Future<RecoveryHint?> _get() {
+    final s = widget.s;
+    final k = '${s.plan?.id}|${s.todayIndex}|${s.finishedOnPlan}|${s.restHintOff}|${s.settings.simple}|${s.pickedDay}';
+    if (k != _key || _hint == null) {
+      _key = k;
+      _hint = s.recoveryHint();
+    }
+    return _hint!;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = widget.s;
+    return FutureBuilder<RecoveryHint?>(
+        future: _get(),
+        builder: (c, snap) {
+          final h = snap.data;
+          if (h == null) return const SizedBox.shrink();
+          final b = h.betterDay;
+          return Column(children: [
+            if (h.rest != null)
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: ListTile(
+                  leading: const Icon(Icons.hotel_outlined, color: C.sky),
+                  title: const Text('A day off may be better'),
+                  subtitle: Dim(h.rest!, size: 12),
+                  trailing: TextButton(onPressed: s.hideRestHint, child: const Text('Not today')),
+                ),
+              ),
+            if (h.warn != null || b != null)
+              Card(
+                margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                child: ListTile(
+                  leading: const Icon(Icons.battery_charging_full, color: C.gold),
+                  title: const Text('Still recovering'),
+                  subtitle: Dim('${h.warn ?? 'Today\'s muscles are ${h.ready}% recovered.'}${b == null ? '' : ' ${s.plan!.days[b].name} trains more rested muscles.'}', size: 12),
+                  trailing: b == null ? null : TextButton(onPressed: () => s.pickDay(b), child: const Text('Do that')),
+                ),
+              ),
+          ]);
+        },
+      );
+  }
+}
+
+/// "Time to graduate" from a beginner program (F223), until it is put away.
+class _GraduateHint extends StatefulWidget {
+  final AppState s;
+  const _GraduateHint({required this.s});
+  @override
+  State<_GraduateHint> createState() => _GraduateHintState();
+}
+
+class _GraduateHintState extends State<_GraduateHint> {
+  static final Set<String> _hidden = {}; // plans whose hint was put away this run
+  @override
+  Widget build(BuildContext context) {
+    final id = widget.s.plan?.id ?? '';
+    if (_hidden.contains(id)) return const SizedBox.shrink();
+    return FutureBuilder<String?>(
+      future: widget.s.graduateHint(),
+      builder: (c, snap) {
+        final h = snap.data;
+        if (h == null) return const SizedBox.shrink();
+        return Card(
+          margin: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+          child: ListTile(
+            leading: const Icon(Icons.school_outlined, color: C.gold),
+            title: const Text('Time to graduate?'),
+            subtitle: Dim(h, size: 12),
+            trailing: TextButton(onPressed: () => setState(() => _hidden.add(id)), child: const Text('Not yet')),
+          ),
+        );
+      },
+    );
+  }
+}
+
 class _StallHint extends StatelessWidget {
   final AppState s;
   const _StallHint({required this.s});

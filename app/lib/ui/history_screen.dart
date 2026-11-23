@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../data/repo.dart';
 import '../domain/exercise.dart';
-import '../domain/plan.dart';
 import '../domain/units.dart';
 import 'app_state.dart';
+import 'reports_screen.dart';
 import 'theme.dart';
 import 'widgets.dart';
+import '../data/export.dart' show workoutText;
+import '../services/handoff.dart';
+import 'share_card.dart';
 
 String fmtDate(DateTime d) {
   const m = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -65,7 +68,11 @@ class _HistoryScreenState extends State<HistoryScreen> {
             rows.add(_card(ses, sets));
           }
           return ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 24), children: [
-            const Text('History', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
+            Row(children: [
+              const Expanded(child: Text('History', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700))),
+              TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CalendarScreen(s: s))), icon: const Icon(Icons.calendar_month_outlined, size: 18), label: const Text('Calendar')),
+              if (!s.settings.simple) TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ReportsScreen(s: s))), icon: const Icon(Icons.insights_outlined, size: 18), label: const Text('Reports')),
+            ]),
             const SizedBox(height: 8),
             TextField(
               enableIMEPersonalizedLearning: false,
@@ -106,6 +113,7 @@ class SessionDetail extends StatefulWidget {
 
 class _SessionDetailState extends State<SessionDetail> {
   AppState get s => widget.s;
+  Future<Set<String>>? _medals;
 
   Future<void> _edit(SetLog x) async {
     final e = s.lib.byId(x.exerciseId);
@@ -138,7 +146,33 @@ class _SessionDetailState extends State<SessionDetail> {
     if (res == 'save') await s.repo.updateSet(x.id, k, r);
     if (res == 'delete') await s.repo.deleteSet(x.id);
     if (res != null) await s.historyChanged([x.exerciseId]);
-    if (mounted) setState(() {});
+    if (mounted) setState(() => _medals = null); // an edit can make or break a record
+  }
+
+  Future<String> _text(Session ses) async => workoutText(ses.day.name, ses.started, ses.finished, await s.repo.setsFor(ses.id), s.lib, s.unit, note: ses.note);
+
+  Future<void> _share(Session ses) async {
+    final how = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: C.card,
+      builder: (c) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          ListTile(leading: const Icon(Icons.image_outlined), title: const Text('As a picture'), onTap: () => Navigator.pop(c, 'image')),
+          ListTile(leading: const Icon(Icons.notes), title: const Text('As text'), onTap: () => Navigator.pop(c, 'text')),
+        ]),
+      ),
+    );
+    if (how == 'text') await _shareText(ses);
+    if (how == 'image' && mounted) {
+      final sets = await s.repo.setsFor(ses.id);
+      final medals = await (_medals ?? Future.value(<String>{}));
+      if (mounted) await shareCardSheet(context, workoutCard(ses.day.name, ses.started, ses.finished, sets, s.lib, s.unit, records: sets.where((x) => medals.contains(x.id)).length));
+    }
+  }
+
+  Future<void> _shareText(Session ses) async {
+    final r = await handOff(await _text(ses), '');
+    if (mounted && r == 'failed') toast(context, 'Could not open the share menu. The text is copied.');
   }
 
   @override
@@ -148,9 +182,14 @@ class _SessionDetailState extends State<SessionDetail> {
       appBar: AppBar(
         title: Text('${fmtDate(ses.started)} · ${ses.day.name}'),
         actions: [
+          // F315 / F321: the workout as text, through the share menu (1 tap)
+          IconButton(tooltip: 'Share', icon: const Icon(Icons.share), onPressed: () => _share(ses)),
           PopupMenuButton<String>(
             onSelected: (v) async {
-              if (v == 'again') {
+              if (v == 'copy') {
+                await copySensitive(await _text(ses));
+                if (context.mounted) toast(context, 'Copied as text.');
+              } else if (v == 'again') {
                 if (s.session != null) {
                   toast(context, 'A workout is going. Finish it first.');
                   return;
@@ -159,11 +198,12 @@ class _SessionDetailState extends State<SessionDetail> {
                 await s.setToday(ses.day);
                 if (context.mounted) toast(context, 'Set as today\'s workout. Start it from Today.');
               } else if (v == 'plan' && s.plan != null) {
-                await s.savePlanEdits(s.plan!.addDay(ses.day.name).let((pl) => Plan(id: pl.id, name: pl.name, source: pl.source, days: [...pl.days]..[pl.days.length - 1] = ses.day, userEdited: true, created: pl.created)));
+                await s.savePlanEdits(s.plan!.addDay(ses.day.name).let((pl) => pl.copyWith(days: [...pl.days]..[pl.days.length - 1] = ses.day, userEdited: true)));
                 if (context.mounted) toast(context, 'Added to your plan as a new day.');
               }
             },
             itemBuilder: (c) => const [
+              PopupMenuItem(value: 'copy', child: Text('Copy as text')),
               PopupMenuItem(value: 'again', child: Text('Do this again today')),
               PopupMenuItem(value: 'plan', child: Text('Add to my plan as a day')),
             ],
@@ -199,17 +239,23 @@ class _SessionDetailState extends State<SessionDetail> {
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                     Text(s.lib.byId(g.key)?.name ?? g.key, style: const TextStyle(fontWeight: FontWeight.w600)),
                     const SizedBox(height: 4),
-                    Wrap(spacing: 8, runSpacing: 6, children: [
-                      for (final x in g.value)
-                        ActionChip(
-                          label: Text('${setTypeLetter[x.type]!.isEmpty ? '' : '${setTypeLetter[x.type]} '}${fmtWeight(x.kg, s.unit)} × ${x.reps}${x.note.isEmpty ? '' : ' ✎'}'),
-                          onPressed: () => _edit(x),
-                        ),
-                    ]),
+                    FutureBuilder<Set<String>>(
+                      future: _medals ??= s.medalsFor(groups.keys),
+                      builder: (c, m) => Wrap(spacing: 8, runSpacing: 6, children: [
+                        for (final x in g.value)
+                          ActionChip(
+                            // a medal on a set that broke a record when it was done (F269)
+                            avatar: (m.data ?? const {}).contains(x.id) ? const Icon(Icons.emoji_events, color: C.gold, size: 16) : null,
+                            label: Text('${setTypeLetter[x.type]!.isEmpty ? '' : '${setTypeLetter[x.type]} '}${fmtWeight(x.kg, s.unit)} × ${x.reps}${x.note.isEmpty ? '' : ' ✎'}'),
+                            onPressed: () => _edit(x),
+                          ),
+                      ]),
+                    ),
                   ]),
                 ),
               ),
             const Dim('Tap a set to change or delete it.'),
+            if (sets.any((x) => x.type != SetType.work)) const Dim(setTypeKey, size: 12),
           ]);
         },
       ),

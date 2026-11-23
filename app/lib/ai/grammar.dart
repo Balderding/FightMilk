@@ -1,7 +1,10 @@
 import '../domain/exercise.dart';
 import '../domain/library.dart';
 import '../domain/plan.dart';
+import '../domain/programs.dart';
 import '../domain/plan_maker.dart';
+import '../ui/app_state.dart';
+import '../data/export.dart' show ExportKind;
 
 /// Grammars (llama.cpp GBNF) that lock the on-phone model to:
 ///  - the workout list format,
@@ -97,7 +100,7 @@ String toolGrammar(Library lib, Profile p, int planDays, {bool mustAct = false})
   return '''
 root ::= ${mustAct ? 'act{1,6} ' : ''}"SAY: " say "\\n"
 say ::= [^\\n]{1,250}
-act ::= "DO: " (today | swap | add | remove | change | style | pick | skip | start | setting | profile) "\\n"
+act ::= "DO: " (today | swap | add | remove | change | style | pick | skip | start | setting | profile | program | plans | sore | volume | stall | changes | dashboard | deload | feeling | pain | resthint | body | tape | export | importundo | progression | superset | unsuperset | day | exercise | log | fill | step | note | gym | weak | goal) "\\n"
 today ::= "today\\nDAY: " name "\\n" item{2,$cap}
 item ::= ex " | " sets " | " reps " | " rest "\\n"
 swap ::= "swap " ex " -> " ex " " scope
@@ -108,8 +111,38 @@ style ::= "style " ex " " ("drop" | "amrap" | "failure" | "restpause" | "normal"
 pick ::= "pick day " ($dayN)
 skip ::= "skip day"
 start ::= "start workout"
-setting ::= "setting " ("rest " (rest | "plan") | "smart_rest " onoff | "sound " ("cute" | "simple" | "off") | "keep_awake " onoff | "reminders " ("off" | wd ("," wd){0,6}) | "reminder_time " [0-2] [0-9] ":" [0-5] [0-9])
-profile ::= "profile " ("goal " ("strength" | "size" | "both") | "days " [1-7] | "unit " ("kg" | "lb"))
+setting ::= "setting " ("rest " (rest | "plan") | "smart_rest " onoff | "sound " ("cute" | "simple" | "off") | "keep_awake " onoff | "left_handed " onoff | "dim_rest " onoff | "reminders " ("off" | wd ("," wd){0,6}) | "reminder_time " [0-2] [0-9] ":" [0-5] [0-9] | "weigh_reminder " ("off" | [0-2] [0-9] ":" [0-5] [0-9]) | "simple " onoff | "checkin " onoff | "effort_chips " onoff | "warmups " onoff | "climb " onoff | "tips " onoff | "chart_smooth " onoff | "chart_dots " onoff | "badges " onoff)
+sore ::= "sore " ("none" | "swap" | joint ("," joint){0,4})
+joint ::= ${Joint.values.map((j) => '"${j.name.toLowerCase()}"').join(' | ')}
+volume ::= "volume fit"
+stall ::= "stall swap " ex
+changes ::= "changes undo " [1-9] [0-9]?
+dashboard ::= "dashboard " ("add " | "remove ") (${dashTiles.keys.map((k) => '"$k"').join(' | ')})
+deload ::= "deload " onoff
+feeling ::= "feeling " ("rough" | "ok" | "great")
+pain ::= "pain " ex (" " joint | " clear")?
+resthint ::= "rest_hint off"
+body ::= "body " num " " ("kg" | "lb") (" fat " [0-9] [0-9]? ("." [0-9])?)?
+importundo ::= "import undo"
+export ::= "export " (${ExportKind.values.map((k) => '"${k.name}"').join(' | ')})
+tape ::= "tape " [a-z] [a-z ]{0,20} " " [0-9] [0-9]? [0-9]? ("." [0-9])? (" cm" | " in")? (" left" | " right")?
+progression ::= "progression " ex " " ("linear" | "double")
+superset ::= "superset " ("auto" | ex " " ex) " " scope
+unsuperset ::= "unsuperset " ex " " scope
+day ::= "day copy " [1-9]
+exercise ::= "exercise " ("favourite" | "unfavourite" | "hide" | "unhide") " " ex
+log ::= "log " ex " " num " " [0-9]{1,3}
+fill ::= "fill " ex " " num " " [0-9]{1,3}
+step ::= "step " ex " " (num | "usual")
+note ::= "note " ex " " [^\\n]{1,120}
+gym ::= "gym " ("use " [^\\n]{1,40} | ("add " | "remove " | "taken ") [a-z_]{2,40})
+weak ::= "weak " ex " " [a-z_]{2,30}
+goal ::= "goal " ("remove " [1-9] | ("lift " | "reps ") ex " " num | ("body " | "volume ") num) (" by " [0-9]{4} "-" [0-9]{2} "-" [0-9]{2})?
+num ::= [0-9]{1,4} ("." [0-9]{1,2})?
+profile ::= "profile " ("goal " ("strength" | "size" | "both" | "fat_loss" | "fitness" | "sport" | "powerlifting" | "powerbuilding") | "days " [1-7] | "unit " ("kg" | "lb") | "experience " ("new" | "some" | "years") | "weekdays " ("none" | wd ("," wd){0,6}) | "sport_days " ("none" | wd ("," wd){0,6}) | "focus " ("none" | muscle) | "height " ("none" | "1" [0-9] [0-9] | "2" [0-4] [0-9] | "250" | [3-8] "'" [0-9] [0-9]? | [4-9] [0-9] " in") | "sex " ("m" | "f" | "none") | ("priority " | "low ") ("add " | "remove ") muscle)
+muscle ::= ${priorityMuscles.map((m) => '"$m"').join(' | ')}
+program ::= "program start " (${programTemplates.map((t) => '"${t.id}"').join(' | ')})
+plans ::= "plans " ("copy" | "variety " ("0" | "4" | "6" | "8"))
 wd ::= "mon" | "tue" | "wed" | "thu" | "fri" | "sat" | "sun"
 onoff ::= "on" | "off"
 scope ::= "today" | "always"

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Batch 23, F352: long-press the app icon. Each one only opens a screen; nothing is saved
+     until the person taps Save there (D15 is the owner's to decide before anything writes). -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="today"
+        android:enabled="true"
+        android:icon="@drawable/ic_sc_today"
+        android:shortcutShortLabel="@string/sc_today_short"
+        android:shortcutLongLabel="@string/sc_today_long">
+        <intent
+            android:action="org.balderding.workout.SHORTCUT"
+            android:targetPackage="org.balderding.workout"
+            android:targetClass="org.balderding.workout.MainActivity">
+            <extra android:name="go" android:value="today" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="weight"
+        android:enabled="true"
+        android:icon="@drawable/ic_sc_weight"
+        android:shortcutShortLabel="@string/sc_weight_short"
+        android:shortcutLongLabel="@string/sc_weight_long">
+        <intent
+            android:action="org.balderding.workout.SHORTCUT"
+            android:targetPackage="org.balderding.workout"
+            android:targetClass="org.balderding.workout.MainActivity">
+            <extra android:name="go" android:value="weight" />
+        </intent>
+    </shortcut>
+    <shortcut
+        android:shortcutId="last"
+        android:enabled="true"
+        android:icon="@drawable/ic_sc_last"
+        android:shortcutShortLabel="@string/sc_last_short"
+        android:shortcutLongLabel="@string/sc_last_long">
+        <intent
+            android:action="org.balderding.workout.SHORTCUT"
+            android:targetPackage="org.balderding.workout"
+            android:targetClass="org.balderding.workout.MainActivity">
+            <extra android:name="go" android:value="last" />
+        </intent>
+    </shortcut>
+</shortcuts>

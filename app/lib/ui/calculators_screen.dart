@@ -68,6 +68,7 @@ class _CalculatorsScreenState extends State<CalculatorsScreen> {
                 ]),
                 const SizedBox(height: 6),
                 const Text('RPE chart (weight for reps at RPE)', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Dim('RPE = how hard: 10 = not one more rep, 9 = one left, 8 = two left.', size: 12),
                 SingleChildScrollView(
                   scrollDirection: Axis.horizontal,
                   child: DataTable(

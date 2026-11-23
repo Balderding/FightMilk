@@ -7,9 +7,24 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// The release key (keys/release.jks, never committed), named in android/key.properties. A
+// release build without a readable key FAILS; it never falls back to debug keys, because an APK
+// signed with them can never update over the real one. Others who build from source can make an
+// unsigned release with -Pfightmilk.unsigned=true and sign it themselves. Debug builds are as
+// before. (-Pfightmilk.keyprops=<file> names another key.properties, for the build check.)
+val keyPropsFile = (project.findProperty("fightmilk.keyprops") as String?)?.let { file(it) } ?: rootProject.file("key.properties")
 val keyProps = Properties().apply {
-    val f = rootProject.file("key.properties")
-    if (f.exists()) load(FileInputStream(f))
+    if (keyPropsFile.isFile) FileInputStream(keyPropsFile).use { load(it) }
+}
+val unsignedRelease = (project.findProperty("fightmilk.unsigned") as String?) == "true"
+val releaseKeyProblem: String? = run {
+    if (!keyPropsFile.isFile) return@run "release key missing: ${keyPropsFile.path} does not exist"
+    for (k in listOf("storeFile", "storePassword", "keyAlias", "keyPassword")) {
+        if ((keyProps[k] as String?).isNullOrEmpty()) return@run "release key missing: $k is not set in ${keyPropsFile.path}"
+    }
+    val store = file(keyProps["storeFile"] as String)
+    if (!store.isFile || !store.canRead()) return@run "release key missing: ${store.path}"
+    null
 }
 
 android {
@@ -60,7 +75,11 @@ android {
 
     signingConfigs {
         create("release") {
-            if (keyProps.containsKey("storeFile")) {
+            // F420: APK Signature Scheme v3 as well as v2 (same key, no rotation: installed copies
+            // update as before; v3 lets the key be rotated later)
+            enableV2Signing = true
+            enableV3Signing = true
+            if (releaseKeyProblem == null) {
                 storeFile = file(keyProps["storeFile"] as String)
                 storePassword = keyProps["storePassword"] as String
                 keyAlias = keyProps["keyAlias"] as String
@@ -71,9 +90,17 @@ android {
 
     buildTypes {
         release {
-            // Own release key (keys/release.jks, never committed); falls back to debug keys if missing.
-            signingConfig = if (keyProps.containsKey("storeFile")) signingConfigs.getByName("release") else signingConfigs.getByName("debug")
+            // Own release key only; never debug keys (see releaseKeyProblem above).
+            signingConfig = if (releaseKeyProblem == null && !unsignedRelease) signingConfigs.getByName("release") else null
         }
+    }
+}
+
+// Refuse, loudly, before anything is built: a release without the release key.
+gradle.taskGraph.whenReady {
+    val release = allTasks.any { it.project == project && it.name.contains("Release") && (it.name.startsWith("assemble") || it.name.startsWith("bundle") || it.name.startsWith("package")) }
+    if (release && !unsignedRelease && releaseKeyProblem != null) {
+        throw GradleException("$releaseKeyProblem, refusing to sign a release with debug keys. (To build an unsigned release for your own signing, add -Pfightmilk.unsigned=true.)")
     }
 }
 

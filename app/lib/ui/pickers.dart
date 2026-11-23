@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../domain/exercise.dart';
 import '../domain/gym.dart';
 import 'anim/exercise_anim.dart';
+import '../domain/explain.dart';
 import 'app_state.dart';
 import 'theme.dart';
 import 'widgets.dart';
@@ -207,7 +208,9 @@ final _retry = Exercise.fromJson(const {'id': '__retry__', 'name': '', 'equipmen
 /// Swap sheet: same muscles with what the gym has. Returns (exercise, forever).
 Future<(Exercise, bool)?> swapSheet(BuildContext context, AppState s, Exercise from, {Set<String> exclude = const {}}) async {
   final pr = s.profile!;
-  final alts = s.lib.swapsFor(from, pr.have, pr.avoid, items: pr.items).where((e) => !exclude.contains(e.id)).toList();
+  final ranked = rankSwaps(from, s.lib.swapsFor(from, pr.have, pr.avoid, items: pr.items).where((e) => !exclude.contains(e.id)), avoid: {...pr.avoid, ...s.soreToday}, favs: s.lib.favs);
+  final alts = [for (final r in ranked) r.$1];
+  final why = {for (final r in ranked) r.$1.id: r.$2};
   final pick = await showModalBottomSheet<Exercise>(
     context: context,
     isScrollControlled: true,
@@ -218,7 +221,7 @@ Future<(Exercise, bool)?> swapSheet(BuildContext context, AppState s, Exercise f
       maxChildSize: .9,
       builder: (c2, sc) => ListView(controller: sc, padding: const EdgeInsets.all(16), children: [
         Text('Swap ${from.name}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-        const Dim('Same muscles, with what your gym has'),
+        const Dim('Same muscles, with what your gym has. Closest first.'),
         if (pr.items != null)
           for (final it in _usedItems(from, pr.items!))
             Align(
@@ -240,7 +243,7 @@ Future<(Exercise, bool)?> swapSheet(BuildContext context, AppState s, Exercise f
             child: ListTile(
               leading: ExIcon(s.iconFor(e), size: 40),
               title: Text(e.name),
-              subtitle: Dim(equipmentLabel[e.equipment]!),
+              subtitle: Dim(why[e.id]!.isEmpty ? equipmentLabel[e.equipment]! : '${why[e.id]![0].toUpperCase()}${why[e.id]!.substring(1)}'),
               trailing: IconButton(icon: const Icon(Icons.info_outline, color: C.dim), onPressed: () => exerciseInfo(c, s, e)),
               onTap: () => Navigator.pop(c, e),
             ),

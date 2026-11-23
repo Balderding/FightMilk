@@ -48,13 +48,14 @@ String guideLine({
   String? nextName,
   required bool workoutDone,
   required bool firstOfWorkout,
+  bool warmupShown = false, // the warm-up card is on screen: no need to say it again (P3-7)
 }) {
   final w = weight == null ? '' : ' at $weight';
   if (workoutDone) return "That's the whole workout. Amazing work! Tap Finish to save it.";
   if (exerciseDone) return nextName == null ? '$name done! Add another exercise or tap Finish.' : '$name done! Next up: $nextName.';
   if (resting) return 'Rest up and breathe. Next: set $setNo of $sets$w.';
   if (restOver) return "Rest's over: set $setNo of $sets, $reps reps. Let's go!";
-  if (firstOfWorkout) return "Hey, let's start the workout! First up: $name, $sets sets of $reps$w. Do a light warm-up set or two first.";
+  if (firstOfWorkout) return "Hey, let's start the workout! First up: $name, $sets sets of $reps$w.${warmupShown ? '' : ' Do a light warm-up set or two first.'}";
   if (setNo >= sets) return 'Last set of $name! Make it count.';
   return "Set $setNo of $sets: $reps reps$w. You've got this.";
 }

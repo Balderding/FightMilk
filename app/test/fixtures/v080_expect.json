@@ -1,0 +1,28 @@
+{
+ "made_by": "FightMilk 0.8.0 (git 85bbb86), its own code",
+ "user_version": 2,
+ "kv": {
+  "profile": "{\"goal\":\"strength\",\"days\":3,\"minutes\":60,\"have\":[\"bodyweight\",\"dumbbell\",\"barbell\"],\"avoid\":[],\"unit\":\"kg\",\"split\":\"full_body\"}",
+  "settings": "{\"aiOn\":false,\"ai\":{\"kind\":\"claude\",\"model\":\"claude-opus-5-5\",\"baseUrl\":null},\"preview\":true,\"autoPacks\":false,\"keepAwake\":true,\"rest\":150,\"steps\":{},\"chatProject\":false,\"smartRest\":true,\"sound\":\"simple\",\"remindDays\":[1,3,5],\"remindAt\":1095,\"autoUpdate\":true,\"aiAuto\":false,\"hideRecents\":false,\"warmups\":false,\"restOff\":false,\"checkin\":true,\"deloadEvery\":0,\"formula\":\"epley\",\"effortDrives\":true,\"dropPct\":10,\"missesToDrop\":3,\"progSpeed\":\"slow\"}",
+  "gyms": "[{\"id\":\"61d97ed0-0f69-4b79-a0c9-25a344c51a9c\",\"name\":\"Home garage\",\"items\":[\"barbell\",\"bench\",\"dumbbells\",\"rack\"],\"maxDb\":32.0,\"platesUnit\":\"lb\"}]",
+  "gym_active": "61d97ed0-0f69-4b79-a0c9-25a344c51a9c"
+ },
+ "lift_state": {
+  "back_squat": "{\"exercise_id\":\"back_squat\",\"work_kg\":62.5,\"misses\":1,\"work_reps\":null,\"updated\":1795403003711}",
+  "machine_chest_press": "{\"exercise_id\":\"machine_chest_press\",\"work_kg\":62.5,\"misses\":1,\"work_reps\":null,\"updated\":1795403003712}"
+ },
+ "counts": {
+  "plan": 1,
+  "session": 2,
+  "set_log": 12,
+  "body": 1,
+  "ex_note": 1,
+  "lift_state": 2
+ },
+ "first_exercise": "back_squat",
+ "plan_days": [
+  "Full body A",
+  "Full body B",
+  "Full body C"
+ ]
+}

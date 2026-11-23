@@ -1,6 +1,6 @@
 enum Equipment { barbell, dumbbell, machine, cable, smith, kettlebell, band, bodyweight }
 
-enum Joint { shoulders, lowerBack, knees, wrists }
+enum Joint { shoulders, lowerBack, knees, wrists, elbows, hips, neck, ankles, upperBack }
 
 enum StepKind { barbell, dumbbell, machine, cable, bodyweight }
 
@@ -20,6 +20,11 @@ const jointLabel = {
   Joint.lowerBack: 'Lower back',
   Joint.knees: 'Knees',
   Joint.wrists: 'Wrists',
+  Joint.elbows: 'Elbows',
+  Joint.hips: 'Hips',
+  Joint.neck: 'Neck',
+  Joint.ankles: 'Ankles',
+  Joint.upperBack: 'Upper back',
 };
 
 class Exercise {
@@ -32,6 +37,8 @@ class Exercise {
   final bool bodyweight, compound;
   final bool _timed;
   final String about; // what it works and how to do it, in our own words
+  /// How the body lies (P1-10): 'supine' on the back, 'prone' on the front, '' otherwise.
+  final String position;
 
   const Exercise({
     required this.id,
@@ -50,6 +57,7 @@ class Exercise {
     required this.icon,
     bool? timed,
     this.about = '',
+    this.position = '',
   }) : _timed = timed ?? (pattern == 'plank' || pattern == 'carry');
 
   factory Exercise.fromJson(Map<String, dynamic> j) => Exercise(
@@ -69,6 +77,7 @@ class Exercise {
         icon: j['icon'] as String,
         timed: j['timed'] as bool?,
         about: (j['about'] ?? '') as String,
+        position: (j['position'] ?? '') as String,
       );
 
   /// Exercises whose "reps" are seconds held (planks, hangs, carries).
@@ -94,6 +103,7 @@ class Exercise {
         icon: icon,
         timed: timed ?? _timed,
         about: about ?? this.about,
+        position: position,
       );
 
   Map<String, dynamic> toJson() => {
@@ -105,6 +115,7 @@ class Exercise {
         'pattern': pattern,
         'swap': swap,
         'joints': [for (final j in joints) j.name],
+        if (position.isNotEmpty) 'position': position,
         'repLow': repLow,
         'repHigh': repHigh,
         'step': step.name,
@@ -131,6 +142,19 @@ const setTypeLabel = {
 };
 
 /// The short letter shown next to a set (W, D, F, +, RP); working sets show none.
+/// One plain line per kind of set, shown wherever the kinds are picked.
+const setTypeHelp = {
+  SetType.warmup: 'Light, before the real sets. Does not count toward progress.',
+  SetType.work: 'A normal set: it counts toward your progress.',
+  SetType.drop: 'Straight after a set: lower the weight and go again with no rest.',
+  SetType.failure: 'Keep going until you cannot do one more clean rep.',
+  SetType.amrap: 'AMRAP: as many reps as you can with good form. Extra reps make the next jump bigger.',
+  SetType.restpause: 'Rest 10-15 s, then squeeze out a few more reps with the same weight.',
+};
+
+/// The key to the letters, shown wherever they appear.
+const setTypeKey = 'W warm-up · D drop set · F to failure · + as many as possible · RP rest-pause';
+
 const setTypeLetter = {SetType.warmup: 'W', SetType.work: '', SetType.drop: 'D', SetType.failure: 'F', SetType.amrap: '+', SetType.restpause: 'RP'};
 
 class SetLog {
@@ -149,6 +173,9 @@ class SetLog {
   final String side; // '' both, 'L', 'R'
   final int? secs; // time (holds, cardio)
   final double? meters; // distance (carries, cardio)
+  /// The plan slot the set belongs to (its lift key, "bench_press#F"): the same exercise twice in a
+  /// day keeps its sets apart. null = logged before slots existed (= the exercise id).
+  final String? slot;
 
   const SetLog({
     this.id = '',
@@ -166,7 +193,11 @@ class SetLog {
     this.side = '',
     this.secs,
     this.meters,
+    this.slot,
   });
+
+  /// The plan slot this set counts for.
+  String get key => slot ?? exerciseId;
 
   /// Counts toward the planned sets, records and progression.
   bool get counts => type != SetType.warmup && type != SetType.drop;
@@ -190,6 +221,7 @@ class SetLog {
         'side': side,
         'secs': secs,
         'meters': meters,
+        'slot': slot,
       };
 
   factory SetLog.fromJson(Map<String, dynamic> j) => SetLog(
@@ -208,5 +240,6 @@ class SetLog {
         side: (j['side'] ?? '') as String,
         secs: j['secs'] as int?,
         meters: (j['meters'] as num?)?.toDouble(),
+        slot: j['slot'] as String?,
       );
 }

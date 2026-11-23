@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Quick Settings tile icon (F353): a dumbbell, one colour (Android tints it). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF"
+        android:pathData="M3,9h2v6h-2zM6,7h2.5v10h-2.5zM15.5,7h2.5v10h-2.5zM19,9h2v6h-2zM8.5,11h7v2h-7z" />
+</vector>

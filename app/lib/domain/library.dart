@@ -49,11 +49,14 @@ class Library {
   /// Bodyweight work is assumed possible in any gym.
   /// Exercises you hid (never in plans, swaps or the picker's gym list) and favourites (first).
   final Set<String> hidden = {};
+
+  /// Left out for now whatever the gym has (F237: pregnant or after a birth).
+  Set<String> caution = const {};
   final Set<String> favs = {};
 
   /// With [items] (a gym profile) the gym's real equipment decides; without, the 8 kinds do.
   bool usable(Exercise e, Set<Equipment> have, Set<Joint> avoid, {Set<String>? items}) =>
-      !hidden.contains(e.id) && (items != null ? gymAllows(e, items) : (have.contains(e.equipment) || e.equipment == Equipment.bodyweight)) && e.joints.intersection(avoid).isEmpty;
+      !hidden.contains(e.id) && !caution.contains(e.id) && (items != null ? gymAllows(e, items) : (have.contains(e.equipment) || e.equipment == Equipment.bodyweight)) && e.joints.intersection(avoid).isEmpty;
 
   List<Exercise> available(Set<Equipment> have, Set<Joint> avoid, {Set<String>? items}) => [for (final e in all) if (usable(e, have, avoid, items: items)) e];
 

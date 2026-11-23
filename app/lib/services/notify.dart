@@ -125,6 +125,49 @@ class Notifier {
     }
   }
 
+  /// Its own channel, so Android can turn the weigh-in reminder off alone (review 4, P3-N23).
+  static const _weigh = NotificationDetails(
+    android: AndroidNotificationDetails('weigh_in', 'Weigh-in reminder', channelDescription: 'A morning reminder to weigh in', importance: Importance.defaultImportance,
+        visibility: NotificationVisibility.private),
+  );
+
+  /// Whether Android lets FightMilk show notifications (null: unknown).
+  Future<bool?> enabled() async {
+    if (!_ready) return null;
+    try {
+      return await _android?.areNotificationsEnabled();
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// A morning weigh-in reminder for the next 2 weeks (F303); [minutes] < 0 = off. [skipToday]:
+  /// already weighed in today, so today's reminder is left out (P3-N23).
+  Future<void> scheduleWeighIn(int minutes, {bool skipToday = false}) async {
+    if (!_ready) return;
+    for (var i = 0; i < 14; i++) {
+      try {
+        await _p.cancel(id: 200 + i);
+      } catch (_) {}
+    }
+    if (minutes < 0) return;
+    final now = DateTime.now();
+    for (var i = 0; i < 14; i++) {
+      final d = DateTime(now.year, now.month, now.day + i, minutes ~/ 60, minutes % 60);
+      if (!d.isAfter(now) || (i == 0 && skipToday)) continue;
+      try {
+        await _p.zonedSchedule(
+          id: 200 + i,
+          scheduledDate: tz.TZDateTime.from(d.toUtc(), tz.UTC),
+          notificationDetails: _weigh,
+          androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+          title: 'Morning weigh-in',
+          body: 'Before breakfast is best. Tap to open FightMilk and weigh in.',
+        );
+      } catch (_) {}
+    }
+  }
+
   /// Every notification and reminder this app has scheduled.
   Future<void> cancelAll() async {
     if (!_ready) return;

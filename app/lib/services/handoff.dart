@@ -32,4 +32,14 @@ Future<void> copySensitive(String text) async {
   }
 }
 
+/// Hands a file the person chose to export to the share menu (batch 20, F321). [path] must be
+/// inside the cache's exports/ folder. Returns 'chooser' or 'failed'.
+Future<String> shareFile(String path, String mime, {String title = 'Send to…'}) async {
+  try {
+    return (await _ch.invokeMethod<String>('shareFile', {'path': path, 'mime': mime, 'title': title})) ?? 'failed';
+  } catch (_) {
+    return 'failed';
+  }
+}
+
 Future<String?> pasteText() async => (await Clipboard.getData(Clipboard.kTextPlain))?.text;

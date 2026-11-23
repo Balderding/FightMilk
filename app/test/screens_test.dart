@@ -23,7 +23,7 @@ void main() {
     late AppState s;
     await tester.runAsync(() async {
       final dir = Directory.systemTemp.createTempSync('sc');
-      final r = await Repo.open('${dir.path}/s.db', factory: databaseFactoryFfi);
+      final r = await Repo.open('${dir.path}/s.db', factory: databaseFactoryFfiNoIsolate);
       s = await AppState.forTest(r, PackStore(dir.path), Library.fromJsonString(File('assets/exercises.json').readAsStringSync()));
       await s.saveProfile(Profile(goal: Goal.both, days: 4, minutes: 60, have: Equipment.values.toSet(), avoid: {}, unit: Unit.lb));
       await s.makeBuiltInPlan();

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Batch 23: app shortcuts (F352) and the Quick Settings tile (F353) -->
+    <string name="sc_today_short">Today\'s workout</string>
+    <string name="sc_today_long">Open today\'s workout</string>
+    <string name="sc_weight_short">Log weight</string>
+    <string name="sc_weight_long">Log your body weight</string>
+    <string name="sc_last_short">Last workout</string>
+    <string name="sc_last_long">Show the last workout</string>
+    <string name="tile_label">FightMilk</string>
+    <string name="widget_empty">Open FightMilk once to show your next workout here.</string>
+    <string name="widget_desc">Your next workout and this week, with a button to start</string>
+    <string name="tile_sub">Today\'s workout</string>
+</resources>

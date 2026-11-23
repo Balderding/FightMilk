@@ -28,6 +28,17 @@ double defaultBarKg(Unit u) => u == Unit.lb ? lbToKg(45) : 20;
   return (out, fromUnit(made, u));
 }
 
+/// One row of the % table (review 2, P1-1): the plates per side in the person's unit, "the bar",
+/// "below the bar", and "≈ X" when the plates make a different weight than the row's.
+String plateLine(double kg, double barKg, List<double> platesInUnit, Unit u) {
+  if (kg < barKg - 0.01) return 'below the bar';
+  final pl = platesFor(kg, barKg, platesInUnit, u);
+  // plates keep two decimals (1.25 kg), no trailing zeros
+  String pf(double v) => v.toStringAsFixed(2).replaceFirst(RegExp(r'\.?0+$'), '');
+  final s = pl.$1.isEmpty ? 'the bar' : 'per side ${pl.$1.map(pf).join(' + ')}';
+  return (toUnit(pl.$2, u) - toUnit(kg, u)).abs() > 0.05 ? '$s ≈ ${fmtWeight(pl.$2, u)}' : s;
+}
+
 /// Does this exercise get loaded with plates, and what does the bar weigh?
 /// null = not plate-loaded (dumbbells, pin-loaded machines, cables, bodyweight).
 double? barFor(Exercise e, {required double barKg, double smithKg = 0}) {

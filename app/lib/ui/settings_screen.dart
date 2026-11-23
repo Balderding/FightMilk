@@ -7,7 +7,9 @@ import 'package:flutter/services.dart';
 import '../ai/ai.dart';
 import '../ai/prompt.dart';
 import '../data/backup.dart';
-import '../data/csv_export.dart';
+import '../services/crash_log.dart';
+import 'recovery_screen.dart' show showDetails;
+import '../domain/calendar_ics.dart';
 import '../domain/exercise.dart';
 import '../domain/plan.dart';
 import '../domain/units.dart';
@@ -17,274 +19,662 @@ import '../llm/model_store.dart';
 import '../llm/native.dart';
 import '../version.dart';
 import 'app_state.dart';
+import 'coaching_screen.dart';
 import 'coach_screen.dart';
 import 'gyms_screen.dart';
 import '../services/handoff.dart';
 import 'setup_screen.dart';
 import 'theme.dart';
 import 'widgets.dart';
+import 'export_screen.dart';
+import 'import_screen.dart';
+import '../data/webdav.dart';
 
 const privacyText = 'No accounts. No tracking. No ads. Nothing about you is collected or sold.\n\n'
     'Your workouts are stored only on this phone (Android cloud backup is switched off for this app).\n\n'
-    'The app goes online for three things only, and only when you choose:\n'
+    'The app goes online only when you tap something that needs it, or when you start it with an update or icon-pack check switched on:\n'
     '1. When you ask the AI something: the text shown to you before sending goes to the AI service you picked, with your own key.\n'
     '2. When you check for new icons or a new app version: the app asks GitHub. Like visiting any web page, GitHub sees your phone\'s internet address.\n'
-    '3. When you download the on-phone AI model: the app fetches it from Hugging Face, once.\n\n'
+    '3. When you download the on-phone AI model: the app fetches it from Hugging Face, once.\n'
+    '4. When you send a backup to your own server: only to the address you typed, over https.\n\n'
     'Nothing else, ever. The code is open for anyone to check.';
 
-class SettingsScreen extends StatelessWidget {
+/// Where the privacy promise is written down (F397), shown as text.
+const privacyUrl = 'https://github.com/Balderding/FightMilk/blob/main/PRIVACY.md';
+
+/// The release key's certificate fingerprint (F414): the same as tools/release_cert.sha256.
+const signingFingerprint = 'f4f3906d08e2413d1c0175011d4ee29e7ebabce019df8a429eaa5f8e51c28989';
+
+/// One section of Settings: a short list on the main page, its own page when tapped.
+class _Section {
+  final IconData icon;
+  final String title, sub;
+  final List<String> finds; // what the search box matches
+  final List<Widget> Function(BuildContext) body;
+  const _Section(this.icon, this.title, this.sub, this.finds, this.body);
+}
+
+class SettingsScreen extends StatefulWidget {
   final AppState s;
   const SettingsScreen({super.key, required this.s});
+  @override
+  State<SettingsScreen> createState() => _SettingsScreenState();
+}
+
+class _SettingsScreenState extends State<SettingsScreen> {
+  final _q = TextEditingController();
+  AppState get s => widget.s;
+
+  List<_Section> get _sections {
+    final st = s.settings;
+    return [
+      _Section(Icons.fitness_center, 'Workout', 'Screen, warm-ups, rest, sounds, weight steps',
+          ['keep the screen on', 'warm-up help', 'rest between sets', 'smart rest', 'rest off', 'reward sounds', 'smallest weight steps', 'how was that set', 'effort chips'], _workout),
+      _Section(Icons.notifications_none, 'Reminders', st.remindDays.isEmpty ? 'Off' : 'On ${st.remindDays.length} days', ['remind me to train', 'reminder time', 'notifications'], _reminders),
+      _Section(Icons.trending_up, 'Progress', 'How weights go up, deloads, check-in', ['progression speed', 'drop the weight after', 'missed sessions', 'effort taps change the jump', 'deload week', 'how I feel', 'check-in', 'one-rep max formula', 'epley', 'brzycki'], _progress),
+      _Section(Icons.store_mall_directory_outlined, 'Gyms & equipment', s.activeGym == null ? 'Set up your gym' : 'At ${s.activeGym!.name}', ['your gyms', 'machines', 'bar and plates', 'planet fitness', 'your setup', 'goal', 'days', 'units', 'kg', 'lb', 'sore joints', 'split'], _gyms),
+      _Section(Icons.auto_awesome, 'Ask AI', st.aiOn ? 'On: ${aiKindLabel[st.ai.kind]}' : 'Off', ['ai', 'api key', 'on-phone model', 'lfm', 'claude', 'openai', 'gemini', 'own server', 'ask me first', 'auto'], (c) => [_AiCard(s: s)]),
+      // F340: the status line is the section's subtitle, so it is seen without opening anything
+      _Section(Icons.backup_outlined, 'Backup', s.backupStatus.line(DateTime.now(), hasWorkouts: s.finishedOnPlan > 0 || s.historyVersion > 0), ['backup', 'automatic backup', 'folder', 'password', 'restore', 'keep'], _backup),
+      _Section(Icons.lock_outline, 'Data & privacy', 'Backup, CSV export, hide in recent apps', ['backup', 'export', 'import', 'csv', 'hide in recent apps', 'screenshots', 'delete all data', 'privacy'], _data),
+      _Section(Icons.info_outline, 'About & updates', '$appName $appVersion', ['app updates', 'new version', 'exercise icons', 'icon pack', 'about', 'licence'], _about),
+    ];
+  }
+
+  void _open(_Section x) => Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => Scaffold(
+            appBar: AppBar(title: Text(x.title)),
+            body: SafeArea(child: ListenableBuilder(listenable: s, builder: (c, _) => ListView(padding: const EdgeInsets.fromLTRB(14, 4, 14, 32), children: x.body(c)))),
+          ),
+        ),
+      );
 
   @override
   Widget build(BuildContext context) {
     final st = s.settings;
-    final pr = s.profile;
+    final q = _q.text.trim().toLowerCase();
+    final all = _sections;
+    final hits = q.isEmpty ? all : [for (final x in all) if (x.title.toLowerCase().contains(q) || x.finds.any((f) => f.contains(q))) x];
     return SafeArea(
       child: ListView(padding: const EdgeInsets.fromLTRB(14, 12, 14, 32), children: [
         const Text('Settings', style: TextStyle(fontSize: 22, fontWeight: FontWeight.w700)),
         const SizedBox(height: 10),
-        Card(
-          child: ListTile(
-            title: const Text('Your setup', style: TextStyle(fontWeight: FontWeight.w600)),
-            subtitle: Dim(pr == null ? '' : '${goalLabel[pr.goal]} · ${pr.days} days · ${pr.minutes} min · ${unitLabel(pr.unit)}'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SetupScreen(s: s))),
+        TextField(
+          enableIMEPersonalizedLearning: false,
+          controller: _q,
+          onChanged: (_) => setState(() {}),
+          decoration: InputDecoration(
+            prefixIcon: const Icon(Icons.search),
+            hintText: 'Find a setting (rest, plates, backup…)',
+            suffixIcon: q.isEmpty ? null : IconButton(icon: const Icon(Icons.close), onPressed: () => setState(_q.clear)),
           ),
         ),
-        _AiCard(s: s),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Exercise icons', style: TextStyle(fontWeight: FontWeight.w600)),
-              Dim(s.packs.installedVersion() == 0 ? 'Built-in set · ${s.lib.all.length} exercises' : 'Icon pack v${s.packs.installedVersion()} · ${s.lib.all.length} exercises'),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: st.autoPacks,
-                onChanged: (v) => s.saveSettings(st.copyWith(autoPacks: v)),
-                title: const Text('Check GitHub for new icons when the app opens'),
-              ),
-              OutlinedButton(
-                onPressed: () async {
-                  toast(context, 'Checking GitHub…');
-                  final m = await s.checkPacks();
-                  if (context.mounted) toast(context, m);
-                },
-                child: const Text('Check now'),
-              ),
-            ]),
+        const SizedBox(height: 8),
+        if (q.isEmpty)
+          Card(
+            child: SwitchListTile(
+              value: st.simple,
+              onChanged: (v) => s.saveSettings(st.copyWith(simple: v)),
+              title: const Text('Simple mode (beginner)'),
+              subtitle: const Dim(
+                  'Hides the advanced tools: kinds of sets, RPE, training maxes, progression tuning, timers, tips, sore-joint and recovery cards, the extra Progress charts, Reports, Goals and badges, body numbers, tape, progress photos and strength scores. Everything still works the same. New to lifting? Try the Machine starter in Plan → Programs.',
+                  size: 12),
+            ),
           ),
-        ),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Workout', style: TextStyle(fontWeight: FontWeight.w600)),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: st.keepAwake,
-                onChanged: (v) => s.saveSettings(st.copyWith(keepAwake: v)),
-                title: const Text('Keep the screen on during a workout'),
-              ),
-              const Dim('The rest timer buzzes even with the screen off.'),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: st.warmups,
-                onChanged: (v) => s.saveSettings(st.copyWith(warmups: v)),
-                title: const Text('Warm-up help'),
-                subtitle: const Dim('A 5-minute warm-up before the first lift, warm-up sets worked out for each big lift, stretches at the end.', size: 12),
-              ),
-              const Q('Rest between sets'),
-              Pills<int>(
-                values: const [-1, 0, 60, 90, 120, 180, 240, -9],
-                label: (v) => v == -9 ? 'Off' : v == -1 ? 'Smart (by effort)' : v == 0 ? "Plan's own" : '${v ~/ 60}:${(v % 60).toString().padLeft(2, '0')}',
-                selected: {st.restOff ? -9 : (st.rest ?? (st.smartRest ? -1 : 0))},
-                onTap: (v) => s.saveSettings(v == -9
-                    ? st.copyWith(restOff: true)
-                    : v <= 0
-                        ? st.copyWith(planRest: true, smartRest: v == -1, restOff: false)
-                        : st.copyWith(rest: v, restOff: false)),
-              ),
-              const Dim('Smart: heavy sets and big lifts rest longer, missed reps add time, and you can tap how hard a set felt.', size: 12),
-              const Q('Reward sounds'),
-              Row(children: [
-                Expanded(
-                  child: Pills<String>(
-                    values: const ['cute', 'simple', 'off'],
-                    label: (v) => switch (v) { 'cute' => 'Cute (uwu)', 'simple' => 'Simple', _ => 'Off' },
-                    selected: {st.sound},
-                    onTap: (v) => s.saveSettings(st.copyWith(sound: v)),
-                  ),
-                ),
-                IconButton(tooltip: 'Play', icon: const Icon(Icons.play_circle_outline, color: C.teal), onPressed: () => s.sounds.play(Reward.exercise)),
-              ]),
-              const Q('Remind me to train'),
-              Pills<int>(
-                values: const [1, 2, 3, 4, 5, 6, 7],
-                label: (d) => const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d - 1],
-                selected: st.remindDays.toSet(),
-                onTap: (d) => s.saveSettings(st.copyWith(remindDays: st.remindDays.contains(d) ? (st.remindDays.toList()..remove(d)) : [...st.remindDays, d])),
-              ),
-              if (st.remindDays.isNotEmpty)
-                TextButton.icon(
-                  icon: const Icon(Icons.schedule),
-                  label: Text('at ${TimeOfDay(hour: st.remindAt ~/ 60, minute: st.remindAt % 60).format(context)}'),
-                  onPressed: () async {
-                    final t = await showTimePicker(context: context, initialTime: TimeOfDay(hour: st.remindAt ~/ 60, minute: st.remindAt % 60));
-                    if (t != null) await s.saveSettings(s.settings.copyWith(remindAt: t.hour * 60 + t.minute));
-                  },
-                ),
-              Q('Smallest weight steps (${unitLabel(s.unit)})'),
-              for (final k in [StepKind.barbell, StepKind.dumbbell, StepKind.machine, StepKind.cable])
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(children: [
-                    SizedBox(width: 84, child: Text(switch (k) { StepKind.barbell => 'Barbell', StepKind.dumbbell => 'Dumbbell', StepKind.machine => 'Machine', _ => 'Cable' })),
-                    Expanded(
-                      child: Pills<double>(
-                        values: s.unit == Unit.lb ? const [2.5, 5, 10] : const [1, 1.25, 2, 2.5, 5],
-                        label: (v) => fmtNum(v),
-                        selected: {stepIn(k, s.unit)},
-                        onTap: (v) => s.saveSettings(st.copyWith(steps: {...st.steps, '${k.name}_${s.unit.name}': v})),
-                      ),
-                    ),
-                  ]),
-                ),
-            ]),
+        for (final x in hits)
+          Card(
+            child: ListTile(
+              leading: Icon(x.icon, color: C.teal),
+              title: Text(x.title, style: const TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: Dim(q.isEmpty ? x.sub : x.finds.where((f) => f.contains(q)).take(3).join(' · '), size: 12),
+              trailing: const Icon(Icons.chevron_right),
+              onTap: () => _open(x),
+            ),
           ),
-        ),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Progression', style: TextStyle(fontWeight: FontWeight.w600)),
-              const Dim('How the app moves your weights after each workout.', size: 12),
-              const Q('Speed'),
-              Pills<String>(
-                values: const ['slow', 'steady', 'fast'],
-                label: (v) => {'slow': 'Slow (2 good sessions)', 'steady': 'Steady (1 step)', 'fast': 'Fast (2 steps)'}[v]!,
-                selected: {st.progSpeed},
-                onTap: (v) => s.saveSettings(st.copyWith(progSpeed: v)),
-              ),
-              const Q('Drop the weight after'),
-              Pills<int>(values: const [1, 2, 3], label: (v) => '$v missed session${v == 1 ? '' : 's'}', selected: {st.missesToDrop}, onTap: (v) => s.saveSettings(st.copyWith(missesToDrop: v))),
-              Pills<int>(values: const [5, 10, 15], label: (v) => 'by $v%', selected: {st.dropPct}, onTap: (v) => s.saveSettings(st.copyWith(dropPct: v))),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: st.effortDrives,
-                onChanged: (v) => s.saveSettings(st.copyWith(effortDrives: v)),
-                title: const Text('Effort taps change the jump'),
-                subtitle: const Dim('All "Easy" at the top of the range: a bigger jump. "All-out": one step only.', size: 12),
-              ),
-              const Q('Deload week'),
-              Pills<int>(values: const [0, 4, 5, 6], label: (v) => v == 0 ? 'When I ask' : 'Every $v weeks', selected: {st.deloadEvery}, onTap: (v) => s.saveSettings(st.copyWith(deloadEvery: v))),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: st.checkin,
-                onChanged: (v) => s.saveSettings(st.copyWith(checkin: v)),
-                title: const Text('Ask how I feel before a workout'),
-                subtitle: const Dim('Rough: one set fewer and a bit lighter. Optional every time.', size: 12),
-              ),
-              const Q('One-rep max formula'),
-              Pills<String>(values: const ['epley', 'brzycki'], label: (v) => v == 'epley' ? 'Epley' : 'Brzycki', selected: {st.formula}, onTap: (v) => s.saveSettings(st.copyWith(formula: v))),
-            ]),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: const Icon(Icons.fitness_center, color: C.teal),
-            title: const Text('Your gyms'),
-            subtitle: Dim(s.activeGym == null ? 'Set up the machines and equipment your gym has' : 'At ${s.activeGym!.name} · ${s.gyms.length} gym${s.gyms.length == 1 ? '' : 's'}', size: 12),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => GymsScreen(s: s))),
-          ),
-        ),
-        _UpdateCard(s: s),
-        Card(
-          child: Padding(
-            padding: const EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              const Text('Your data', style: TextStyle(fontWeight: FontWeight.w600)),
-              const Dim('Stored only on this phone. A backup is one file you keep wherever you like (API keys are never in it). '
-                  'Export sets as CSV gives every set you logged as a spreadsheet that Strong, Hevy, Liftosaur and spreadsheet apps can import.'),
-              const SizedBox(height: 8),
-              SwitchListTile(
-                contentPadding: EdgeInsets.zero,
-                value: st.hideRecents,
-                onChanged: (v) => s.saveSettings(st.copyWith(hideRecents: v)),
-                title: const Text('Hide the app in recent apps'),
-                subtitle: const Dim('The app switcher shows a blank card, and screenshots of the app are blocked.', size: 12),
-              ),
-              Wrap(spacing: 8, runSpacing: 8, children: [
-                OutlinedButton(onPressed: () => _export(context), child: const Text('Export backup')),
-                OutlinedButton(onPressed: () => _import(context), child: const Text('Import backup')),
-                OutlinedButton(onPressed: () => _exportCsv(context), child: const Text('Export sets as CSV')),
-                OutlinedButton(
-                  onPressed: () async {
-                    if (await confirm(context, 'Delete everything?', 'All workouts, plans, settings, saved API keys, reminders and downloaded AI models are removed from this phone. This cannot be undone. Export a backup first if you want one.', yes: 'Delete everything')) {
-                      await s.wipeEverything();
-                    }
-                  },
-                  child: const Text('Delete all data', style: TextStyle(color: C.gold)),
-                ),
-              ]),
-            ]),
-          ),
-        ),
-        const Card(
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Privacy, in plain words', style: TextStyle(fontWeight: FontWeight.w600)),
-              SizedBox(height: 6),
-              Dim(privacyText),
-            ]),
-          ),
-        ),
-        const Card(
-          child: Padding(
-            padding: EdgeInsets.all(12),
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('About', style: TextStyle(fontWeight: FontWeight.w600)),
-              SizedBox(height: 6),
-              Dim('FightMilk is free and open source. Code: GPL-3.0. Exercise icons and sounds: CC BY-SA 4.0. Made by balderding. github.com/Balderding/FightMilk'),
-            ]),
-          ),
-        ),
+        if (hits.isEmpty) const Padding(padding: EdgeInsets.all(12), child: Dim('Nothing matches. Try "rest", "gym", "AI" or "backup".')),
       ]),
     );
   }
 
+  List<Widget> _workout(BuildContext context) {
+    final st = s.settings;
+    return [
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.keepAwake,
+        onChanged: (v) => s.saveSettings(st.copyWith(keepAwake: v)),
+        title: const Text('Keep the screen on during a workout'),
+        subtitle: const Dim('The rest timer buzzes even with the screen off.', size: 12),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.leftHanded,
+        onChanged: (v) => s.saveSettings(st.copyWith(leftHanded: v)),
+        title: const Text('Left-handed'),
+        subtitle: const Dim('Mirrors the − and + buttons and the Done row in a workout.', size: 12),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.dimRest,
+        onChanged: (v) => s.saveSettings(st.copyWith(dimRest: v)),
+        title: const Text('Dark screen while resting'),
+        subtitle: const Dim('Goes dark 8 seconds into a rest and shows only the timer. A touch wakes it and presses nothing, so a phone in your pocket stays put.', size: 12),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.warmups,
+        onChanged: (v) => s.saveSettings(st.copyWith(warmups: v)),
+        title: const Text('Warm-up help'),
+        subtitle: const Dim('A 5-minute warm-up before the first lift, warm-up sets worked out for each big lift, stretches at the end.', size: 12),
+      ),
+      const Q('Rest between sets'),
+      Pills<int>(
+        values: const [-1, 0, 60, 90, 120, 180, 240, -9],
+        label: (v) => v == -9 ? 'Off' : v == -1 ? 'Smart' : v == 0 ? "Plan's own" : '${v ~/ 60}:${(v % 60).toString().padLeft(2, '0')}',
+        selected: {st.restOff ? -9 : (st.rest ?? (st.smartRest ? -1 : 0))},
+        onTap: (v) => s.saveSettings(v == -9
+            ? st.copyWith(restOff: true)
+            : v <= 0
+                ? st.copyWith(planRest: true, smartRest: v == -1, restOff: false)
+                : st.copyWith(rest: v, restOff: false)),
+      ),
+      const Dim('Smart: heavy sets and big lifts rest longer, missed reps add time. Each exercise in your plan can also have its own rest (Plan → tap the exercise).', size: 12),
+      if (!st.simple)
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: st.effortChips,
+          onChanged: (v) => s.saveSettings(st.copyWith(effortChips: v)),
+          title: const Text('Ask "how was that set?" while I rest'),
+          subtitle: const Dim('Easy / Good / Hard / All-out after each set. Changes the rest time and the next jump.', size: 12),
+        ),
+      const Q('Reward sounds'),
+      Row(children: [
+        Expanded(
+          child: Pills<String>(
+            values: const ['cute', 'simple', 'off'],
+            label: (v) => switch (v) { 'cute' => 'Cute (uwu)', 'simple' => 'Simple', _ => 'Off' },
+            selected: {st.sound},
+            onTap: (v) => s.saveSettings(st.copyWith(sound: v)),
+          ),
+        ),
+        IconButton(tooltip: 'Play', icon: const Icon(Icons.play_circle_outline, color: C.teal), onPressed: () => s.sounds.play(Reward.exercise)),
+      ]),
+      Q('Smallest weight steps (${unitLabel(s.unit)})'),
+      const Dim('How much the + and − buttons add. One exercise can have its own step in the plan.', size: 12),
+      const SizedBox(height: 6),
+      for (final k in [StepKind.barbell, StepKind.dumbbell, StepKind.machine, StepKind.cable])
+        Padding(
+          padding: const EdgeInsets.only(bottom: 6),
+          child: Row(children: [
+            SizedBox(width: 84, child: Text(switch (k) { StepKind.barbell => 'Barbell', StepKind.dumbbell => 'Dumbbell', StepKind.machine => 'Machine', _ => 'Cable' })),
+            Expanded(
+              child: Pills<double>(
+                values: s.unit == Unit.lb ? const [2.5, 5, 10] : const [1, 1.25, 2, 2.5, 5],
+                label: (v) => fmtNum(v),
+                selected: {stepIn(k, s.unit)},
+                onTap: (v) => s.saveSettings(st.copyWith(steps: {...st.steps, '${k.name}_${s.unit.name}': v})),
+              ),
+            ),
+          ]),
+        ),
+    ];
+  }
+
+  List<Widget> _reminders(BuildContext context) {
+    final st = s.settings;
+    return [
+      const Dim('A quiet "time to train" notification on the days you pick. It shows nothing on the lock screen.', size: 13),
+      const Q('Remind me to train on'),
+      Pills<int>(
+        values: const [1, 2, 3, 4, 5, 6, 7],
+        label: (d) => const ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][d - 1],
+        selected: st.remindDays.toSet(),
+        onTap: (d) => s.saveSettings(st.copyWith(remindDays: st.remindDays.contains(d) ? (st.remindDays.toList()..remove(d)) : [...st.remindDays, d])),
+      ),
+      if (st.remindDays.isNotEmpty)
+        TextButton.icon(
+          icon: const Icon(Icons.schedule),
+          label: Text('at ${TimeOfDay(hour: st.remindAt ~/ 60, minute: st.remindAt % 60).format(context)}'),
+          onPressed: () async {
+            final t = await showTimePicker(context: context, initialTime: TimeOfDay(hour: st.remindAt ~/ 60, minute: st.remindAt % 60));
+            if (t != null) await s.saveSettings(s.settings.copyWith(remindAt: t.hour * 60 + t.minute));
+          },
+        ),
+      // F357: the training days in the person's own calendar app, as a file they save
+      const SizedBox(height: 8),
+      OutlinedButton.icon(icon: const Icon(Icons.event_outlined), label: const Text('Put my training days in my calendar…'), onPressed: () => _calendar(context)),
+      // F354, F356: links and NFC stickers only open a screen
+      const SizedBox(height: 12),
+      const Q('Links and NFC stickers'),
+      const Dim('fightmilk://start opens today\'s workout, fightmilk://weight?kg=80 opens the weigh-in with 80 filled in, fightmilk://last the last workout. '
+          'Write one onto an NFC sticker with any NFC writer app and tap the sticker with your phone. They only open the screen: nothing is saved until you tap Save.', size: 12),
+    ];
+  }
+
+  Future<void> _calendar(BuildContext context) async {
+    final st = s.settings;
+    final wd = s.profile?.weekdays ?? const <int>[];
+    if (wd.isEmpty && st.remindDays.isEmpty) return toast(context, 'Pick your training days above first.');
+    final ics = planIcs(s.plan!, s.lib, weekdays: wd, days: wd.isNotEmpty ? wd : st.remindDays, at: st.remindAt, minutes: s.profile?.minutes ?? 60, now: DateTime.now());
+    try {
+      final uri = await FilePicker.saveFile(fileName: 'fightmilk-training-days.ics', bytes: Uint8List.fromList(utf8.encode(ics)), mimeType: 'text/calendar', dialogTitle: 'Save the calendar file');
+      if (context.mounted) toast(context, uri == null ? 'Not saved.' : 'Saved. Open it in Files to add the days to your calendar.');
+    } catch (_) {
+      if (context.mounted) toast(context, 'The calendar file could not be saved.');
+    }
+  }
+
+  List<Widget> _progress(BuildContext context) {
+    final st = s.settings;
+    return [
+      const Dim('How the app moves your weights after each workout. The defaults suit most people.', size: 13),
+      const Q('Speed'),
+      Pills<String>(
+        values: const ['slow', 'steady', 'fast'],
+        label: (v) => {'slow': 'Slow (2 good sessions)', 'steady': 'Steady (1 step)', 'fast': 'Fast (2 steps)'}[v]!,
+        selected: {st.progSpeed},
+        onTap: (v) => s.saveSettings(st.copyWith(progSpeed: v)),
+      ),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: TextButton.icon(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => RulesScreen(s: s))), icon: const Icon(Icons.menu_book_outlined, size: 18), label: const Text('How the weights move')),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.tips,
+        onChanged: (v) => s.saveSettings(st.copyWith(tips: v)),
+        title: const Text('Tip of the day on Today'),
+        subtitle: const Dim('One short tip about training, rest or food.', size: 12),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.chartSmooth,
+        onChanged: (v) => s.saveSettings(st.copyWith(chartSmooth: v)),
+        title: const Text('Smooth chart lines'),
+        subtitle: const Dim('Curves instead of straight lines between workouts on Progress.', size: 12),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.chartDots,
+        onChanged: (v) => s.saveSettings(st.copyWith(chartDots: v)),
+        title: const Text('A dot on every workout'),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.badges,
+        onChanged: (v) => s.saveSettings(st.copyWith(badges: v)),
+        title: const Text('Badges and levels'),
+        subtitle: const Dim('Shown quietly in History → Reports; no pop-ups.', size: 12),
+      ),
+      const Q('Deload week'),
+      const Dim('A lighter week (fewer sets at about 90%) so you come back fresh. Your progress does not move during it.', size: 12),
+      const SizedBox(height: 4),
+      Pills<int>(values: const [0, 4, 5, 6], label: (v) => v == 0 ? 'When I ask' : 'Every $v weeks', selected: {st.deloadEvery}, onTap: (v) => s.saveSettings(st.copyWith(deloadEvery: v))),
+      Align(
+        alignment: Alignment.centerLeft,
+        child: s.inDeload
+            ? TextButton(onPressed: () => s.setDeload(false), child: const Text('End the deload now'))
+            : TextButton(onPressed: () => s.setDeload(true), child: const Text('Start a deload week now')),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.climb,
+        onChanged: (v) => s.saveSettings(st.copyWith(climb: v)),
+        title: const Text('Climb volume through each block'),
+        subtitle: Dim(
+            'The extra exercises start a block one set lighter and gain a set each week until the deload (${st.deloadEvery > 0 ? 'every ${st.deloadEvery} weeks' : 'blocks of 5 weeks'}). Main lifts and programs keep their sets.',
+            size: 12),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.checkin,
+        onChanged: (v) => s.saveSettings(st.copyWith(checkin: v)),
+        title: const Text('Ask how I feel before a workout'),
+        subtitle: const Dim('Rough: one set fewer and a bit lighter. Optional every time.', size: 12),
+      ),
+      if (!st.simple) ...[
+        const Q('Drop the weight after'),
+        Pills<int>(values: const [1, 2, 3], label: (v) => '$v missed session${v == 1 ? '' : 's'}', selected: {st.missesToDrop}, onTap: (v) => s.saveSettings(st.copyWith(missesToDrop: v))),
+        Pills<int>(values: const [5, 10, 15], label: (v) => 'by $v%', selected: {st.dropPct}, onTap: (v) => s.saveSettings(st.copyWith(dropPct: v))),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: st.effortDrives,
+          onChanged: (v) => s.saveSettings(st.copyWith(effortDrives: v)),
+          title: const Text('Effort taps change the jump'),
+          subtitle: const Dim('All "Easy" at the top of the range: a bigger jump. "All-out": one step only.', size: 12),
+        ),
+        const Q('One-rep max formula'),
+        const Dim('How the best single lift is estimated from a set (for records and charts). Both are close below 10 reps.', size: 12),
+        Pills<String>(values: const ['epley', 'brzycki'], label: (v) => v == 'epley' ? 'Epley' : 'Brzycki', selected: {st.formula}, onTap: (v) => s.saveSettings(st.copyWith(formula: v))),
+      ],
+    ];
+  }
+
+  List<Widget> _gyms(BuildContext context) {
+    final pr = s.profile;
+    return [
+      Card(
+        child: ListTile(
+          leading: const Icon(Icons.store_mall_directory_outlined, color: C.teal),
+          title: const Text('Your gyms'),
+          subtitle: Dim(s.activeGym == null ? 'The machines and equipment each gym has, its bar and plates' : 'At ${s.activeGym!.name} · ${s.gyms.length} gym${s.gyms.length == 1 ? '' : 's'} · machines, bar and plates', size: 12),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => GymsScreen(s: s))),
+        ),
+      ),
+      Card(
+        child: ListTile(
+          leading: const Icon(Icons.person_outline, color: C.teal),
+          title: const Text('Your setup'),
+          subtitle: Dim(pr == null ? '' : '${goalLabel[pr.goal]} · ${pr.days} days · ${pr.minutes} min · ${unitLabel(pr.unit)}', size: 12),
+          trailing: const Icon(Icons.chevron_right),
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => SetupScreen(s: s))),
+        ),
+      ),
+    ];
+  }
+
+  /// Settings → Backup (batch 22, F338-F340).
+  List<Widget> _backup(BuildContext context) {
+    final a = s.autoBackup, st = s.backupStatus, now = DateTime.now();
+    return [
+      Text(st.line(now, hasWorkouts: true), key: const Key('backupLine'), style: TextStyle(color: st.needsAttention || st.old(now) ? C.gold : C.text, fontSize: 14)),
+      const SizedBox(height: 4),
+      const Dim('A backup is one file with your workouts, plans, settings and goals. API keys and progress photos are never in it.', size: 12),
+      const Q('Automatic backup'),
+      Pills<String>(
+        values: const ['off', 'workout', 'day'],
+        label: (v) => switch (v) { 'workout' => 'After each workout', 'day' => 'Once a day', _ => 'Off' },
+        selected: {a.when},
+        onTap: (v) async {
+          if (v != 'off' && a.tree == null && !await _pickFolder(context)) return;
+          await s.saveAutoBackupChoice(s.autoBackup.copyWith(when: v));
+        },
+      ),
+      ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.folder_outlined),
+        title: Text(a.tree == null ? 'No folder picked' : (a.folderName.isEmpty ? 'Your backup folder' : a.folderName)),
+        subtitle: const Dim('A folder on this phone, or a cloud app\'s folder you choose. Only FightMilk\'s own backup files there are ever changed.', size: 12),
+        trailing: TextButton(onPressed: () => _pickFolder(context), child: Text(a.tree == null ? 'Pick' : 'Change')),
+      ),
+      const Q('Keep the newest'),
+      Pills<int>(values: const [3, 7, 14, 30], label: (v) => '$v', selected: {a.keep}, onTap: (v) => s.saveAutoBackupChoice(a.copyWith(keep: v))),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: a.body,
+        onChanged: (v) => s.saveAutoBackupChoice(a.copyWith(body: v)),
+        title: const Text('With body data'),
+        subtitle: const Dim('Weigh-ins, body fat, tape, height and the body goal. Off: a restore keeps the phone\'s.', size: 12),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: a.locked,
+        onChanged: (v) async {
+          if (v) {
+            final pw = await askLock(context);
+            if (pw == null || pw.isEmpty) return;
+            await s.secrets.setBackupPassword(pw);
+          } else {
+            await s.secrets.setBackupPassword(null);
+          }
+          await s.saveAutoBackupChoice(s.autoBackup.copyWith(locked: v));
+        },
+        title: const Text('Lock with a password'),
+        subtitle: const Dim('The password stays in this phone\'s secure storage. Keep it somewhere safe too: a new phone needs it.', size: 12),
+      ),
+      const SizedBox(height: 8),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        FilledButton.icon(
+          onPressed: a.tree == null
+              ? null
+              : () async {
+                  final ok = await s.backupNow();
+                  if (context.mounted) toast(context, ok ? 'Backed up.' : s.backupStatus.line(DateTime.now(), hasWorkouts: true));
+                },
+          icon: const Icon(Icons.backup_outlined),
+          label: const Text('Back up now'),
+        ),
+        OutlinedButton(onPressed: () => _export(context), child: const Text('Save a backup file…')),
+        OutlinedButton(onPressed: () => _import(context), child: const Text('Restore a backup…')),
+      ]),
+      // F343: the person's own server, only when they tap Send
+      const Q('Your own server (WebDAV, Nextcloud)'),
+      ListTile(
+        contentPadding: EdgeInsets.zero,
+        leading: const Icon(Icons.dns_outlined),
+        title: Text(s.server == null ? 'Not set up' : Uri.parse(s.server!.url).host),
+        subtitle: const Dim('Only when you tap Send: never by itself. https only. The password stays in this phone\'s secure storage.', size: 12),
+        trailing: TextButton(onPressed: () => _serverSetup(context), child: Text(s.server == null ? 'Set up' : 'Change')),
+      ),
+      if (s.server != null) OutlinedButton.icon(key: const Key('sendServer'), onPressed: () => _sendToServer(context), icon: const Icon(Icons.cloud_upload_outlined), label: const Text('Send a backup to my server…')),
+    ];
+  }
+
+  Future<void> _serverSetup(BuildContext context) async {
+    final url = TextEditingController(text: s.server?.url ?? ''), user = TextEditingController(text: s.server?.user ?? ''), pw = TextEditingController();
+    String? err;
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: C.card,
+      builder: (c) => StatefulBuilder(
+        builder: (c, set) => Padding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(c).viewInsets.bottom),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            const Text('Your own server', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            const Dim('The folder\'s WebDAV address, for example https://cloud.example.org/remote.php/dav/files/you/Backups', size: 12),
+            TextField(enableIMEPersonalizedLearning: false, controller: url, keyboardType: TextInputType.url, autocorrect: false, decoration: const InputDecoration(labelText: 'Folder address (https://...)')),
+            TextField(enableIMEPersonalizedLearning: false, controller: user, autocorrect: false, decoration: const InputDecoration(labelText: 'User name')),
+            TextField(enableIMEPersonalizedLearning: false, controller: pw, obscureText: true, autocorrect: false, enableSuggestions: false, decoration: const InputDecoration(labelText: 'Password (an app password is best)')),
+            if (err != null) Padding(padding: const EdgeInsets.only(top: 6), child: Text(err!, style: const TextStyle(color: C.gold))),
+            const SizedBox(height: 10),
+            FilledButton(
+              onPressed: () {
+                final bad = checkServerUrl(url.text);
+                if (bad != null) return set(() => err = bad);
+                if (user.text.trim().isEmpty) return set(() => err = 'Fill in the user name.');
+                if (pw.text.isEmpty && s.server == null) return set(() => err = 'Fill in the password.');
+                // a password belongs to one server and user: a new address or user needs its own (review 7, P1-3)
+                if (pw.text.isEmpty && s.server != null && serverKey(ServerConfig(url.text, user.text)) != serverKey(s.server!)) {
+                  return set(() => err = 'The server or user changed: type its password.');
+                }
+                Navigator.pop(c, true);
+              },
+              child: const Text('Save'),
+            ),
+            if (s.server != null) TextButton(onPressed: () => Navigator.pop(c, false), child: const Text('Remove this server')),
+          ]),
+        ),
+      ),
+    );
+    if (ok == null) return;
+    if (ok) {
+      final c = ServerConfig(url.text.trim(), user.text.trim());
+      await saveServer(s.repo, c);
+      if (pw.text.isNotEmpty) await s.secrets.setServerPassword(pw.text, forServer: serverKey(c));
+    } else {
+      await saveServer(s.repo, null);
+      await s.secrets.setServerPassword(null);
+    }
+    await s.reload();
+  }
+
+  Future<void> _sendToServer(BuildContext context) async {
+    final body = await askBodyData(context, forYou: true);
+    if (body == null || !context.mounted) return;
+    // locked by default: the file leaves the phone (the person may still choose no password)
+    final pw = await askLock(context);
+    if (pw == null || !context.mounted) return;
+    final c = s.server!;
+    // exactly where it goes, before it goes
+    final file = serverFileName(DateTime.now(), locked: pw.isNotEmpty); // the real name, shown and used (review 7, P3-6)
+    if (!await confirm(context, 'Send this backup?', 'To: ${serverTarget(c, file)}\nAs: ${c.user}\n${pw.isEmpty ? 'Not locked: the server and anyone with access to it can read it.' : 'Locked with your password.'}${body ? '' : '\nWithout body data.'}', yes: 'Send')) return;
+    try {
+      final to = await busyWhile(context, pw.isEmpty ? 'Sending…' : 'Locking and sending…', () => s.sendBackupToServer(body: body, lockPassword: pw, name: file));
+      if (context.mounted) toast(context, 'Sent to ${to.host}.');
+    } on BackupError catch (e) {
+      if (context.mounted) toast(context, e.message);
+    }
+  }
+
+  /// Android's own folder picker; true when one was picked.
+  Future<bool> _pickFolder(BuildContext context) async {
+    try {
+      final tree = await AppState.backupFolder.pick();
+      if (tree == null) return false;
+      final name = Uri.decodeComponent(tree.split('/').last).split(':').last;
+      await s.saveAutoBackupChoice(s.autoBackup.copyWith(tree: tree, folderName: name));
+      return true;
+    } catch (e) {
+      if (context.mounted) toast(context, 'The folder could not be used: $e');
+      return false;
+    }
+  }
+
+  List<Widget> _data(BuildContext context) {
+    final st = s.settings;
+    return [
+      const Dim('Stored only on this phone. A backup is one file you keep wherever you like (API keys and progress photos are never in it). '
+          'Export makes a file of your sets, body data, plans or records in the format you pick (Strong, Hevy, FitNotes, a spreadsheet, text, Garmin), to save or share.'),
+      const SizedBox(height: 8),
+      Wrap(spacing: 8, runSpacing: 8, children: [
+        OutlinedButton(onPressed: () => _export(context), child: const Text('Export backup')),
+        OutlinedButton(onPressed: () => _import(context), child: const Text('Import backup')),
+        FilledButton.tonal(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ExportScreen(s: s))), child: const Text('Export…')),
+        FilledButton.tonal(onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => ImportScreen(s: s))), child: const Text('Import from another app…')),
+      ]),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: st.hideRecents,
+        onChanged: (v) => s.saveSettings(st.copyWith(hideRecents: v)),
+        title: const Text('Hide the app in recent apps'),
+        subtitle: const Dim('The app switcher shows a blank card, and screenshots of the app are blocked.', size: 12),
+      ),
+      const Q('Privacy, in plain words'),
+      const Dim(privacyText),
+      const SizedBox(height: 16),
+      OutlinedButton(
+        onPressed: () async {
+          if (await confirm(context, 'Delete everything?', 'All workouts, plans, settings, progress photos, saved API keys, reminders and downloaded AI models are removed from this phone. This cannot be undone. Export a backup first if you want one.\n\nBackups already in your backup folder or on your server are not deleted; remove them there if you want them gone.', yes: 'Delete everything')) {
+            await s.wipeEverything();
+          }
+        },
+        child: const Text('Delete all data', style: TextStyle(color: C.gold)),
+      ),
+    ];
+  }
+
+  List<Widget> _about(BuildContext context) {
+    final st = s.settings;
+    return [
+      _UpdateCard(s: s),
+      // F397, F413, F414: the privacy promise, the licences, and the signing fingerprint, as text
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('Privacy and licences', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 4),
+            const Dim('The privacy promise in full:', size: 12),
+            const SelectableText(privacyUrl, style: TextStyle(color: C.teal, fontSize: 12)),
+            const SizedBox(height: 8),
+            const Dim('Release APKs are signed with one key. Its certificate fingerprint (SHA-256):', size: 12),
+            const SelectableText(signingFingerprint, style: TextStyle(fontFamily: 'monospace', fontSize: 12)),
+            const SizedBox(height: 4),
+            TextButton.icon(
+              icon: const Icon(Icons.gavel_outlined, size: 18),
+              label: const Text('Licences'),
+              onPressed: () => showLicensePage(context: context, applicationName: appName, applicationVersion: appVersion, applicationLegalese: 'Code: GPL-3.0. Icons, texts and sounds: CC BY-SA 4.0. Made by balderding.'),
+            ),
+          ]),
+        ),
+      ),
+      // F430: the last errors, kept on this phone; shown first, copied only on a tap
+      Card(
+        child: ListTile(
+          leading: const Icon(Icons.description_outlined, color: C.teal),
+          title: const Text('Debug info'),
+          subtitle: const Dim('The last errors, if any: only their kind and where in the app. Nothing is sent.', size: 12),
+          onTap: () async {
+            final text = await (CrashLog.current?.text(header: '$appName $appVersion\n\n') ?? Future.value('No errors recorded.'));
+            if (context.mounted) await showDetails(context, text);
+          },
+        ),
+      ),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('Exercise icons', style: TextStyle(fontWeight: FontWeight.w600)),
+            Dim(s.packs.installedVersion() == 0 ? 'Built-in set · ${s.lib.all.length} exercises' : 'Icon pack v${s.packs.installedVersion()} · ${s.lib.all.length} exercises'),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              value: st.autoPacks,
+              onChanged: (v) => s.saveSettings(st.copyWith(autoPacks: v)),
+              title: const Text('Check GitHub for new icons when the app opens'),
+            ),
+            OutlinedButton(
+              onPressed: () async {
+                toast(context, 'Checking GitHub…');
+                final m = await s.checkPacks();
+                if (context.mounted) toast(context, m);
+              },
+              child: const Text('Check now'),
+            ),
+          ]),
+        ),
+      ),
+      Card(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            const Text('About', style: TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            const Dim('FightMilk is free and open source. Code: GPL-3.0. Exercise icons and sounds: CC BY-SA 4.0. Made by balderding. github.com/Balderding/FightMilk'),
+            if (s.loadProblems.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Text('These saved settings could not be read and were reset: ${s.loadProblems.join(', ')}.', key: const Key('loadProblems'), style: const TextStyle(color: C.gold, fontSize: 12)),
+              ),
+          ]),
+        ),
+      ),
+    ];
+  }
+
   Future<void> _export(BuildContext context) async {
     try {
-      final text = await exportBackup(s.repo);
+      final body = await askBodyData(context, forYou: true); // asked once, plain words (batch 20)
+      if (body == null) return;
+      if (!context.mounted) return;
+      final pw = await askLock(context); // F338
+      if (pw == null) return;
+      final plain = await exportBackup(s.repo, body: body);
+      if (!context.mounted) return;
+      final text = pw.isEmpty ? plain : await busyWhile(context, 'Locking…', () => lockBackup(plain, pw));
       final d = DateTime.now();
       final name = 'workout-backup-${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}.json';
       final uri = await FilePicker.saveFile(fileName: name, bytes: Uint8List.fromList(utf8.encode(text)), mimeType: 'application/json', dialogTitle: 'Save backup');
+      if (uri != null) await s.noteManualBackup();
       if (context.mounted) toast(context, uri == null ? 'Not saved.' : 'Backup saved.');
     } catch (e) {
       if (context.mounted) toast(context, 'Could not save the backup: $e');
     }
   }
 
-  Future<void> _exportCsv(BuildContext context) async {
-    try {
-      final text = await exportCsv(s.repo, s.lib, s.unit);
-      final d = DateTime.now();
-      final name = 'fightmilk-sets-${s.unit.name}-${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}.csv';
-      final uri = await FilePicker.saveFile(fileName: name, bytes: Uint8List.fromList(utf8.encode(text)), mimeType: 'text/csv', dialogTitle: 'Save sets as CSV');
-      if (context.mounted) toast(context, uri == null ? 'Not saved.' : 'CSV saved (weights in ${s.unit.name}).');
-    } catch (e) {
-      if (context.mounted) toast(context, 'Could not save the CSV: $e');
-    }
-  }
-
   Future<void> _import(BuildContext context) async {
     final files = await FilePicker.pickFiles(dialogTitle: 'Pick a backup file');
     if (files.isEmpty || !context.mounted) return;
-    final text = utf8.decode(await files.first.readAsBytes(), allowMalformed: true);
+    // the size first: a file picked by mistake (a video, 500 MB) is never read whole (review 7, P2-4)
+    const tooBig = 'That file is too big to be a backup from this app (over 64 MB).';
+    if ((files.first.lengthSync() ?? 0) > backupMaxBytes) return toast(context, tooBig);
+    final bytes = await readCapped(files.first.readAsByteStream());
     if (!context.mounted) return;
+    if (bytes == null) return toast(context, tooBig);
+    final text = utf8.decode(bytes, allowMalformed: true);
     final replace = await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: C.card,
@@ -293,6 +683,7 @@ class SettingsScreen extends StatelessWidget {
           padding: const EdgeInsets.all(16),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
             const Text('Import backup', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            if (!backupHasBody(text)) const Padding(padding: EdgeInsets.only(top: 6), child: Dim('This backup has no body data; the weigh-ins, tape and height on this phone are kept.', size: 12)),
             const SizedBox(height: 12),
             FilledButton(onPressed: () => Navigator.pop(c, false), child: const Text('Add to what is on this phone')),
             const SizedBox(height: 8),
@@ -302,12 +693,34 @@ class SettingsScreen extends StatelessWidget {
       ),
     );
     if (replace == null) return;
-    try {
-      await importBackup(s.repo, text, replace: replace);
-      await s.reload();
-      if (context.mounted) toast(context, 'Backup imported.');
-    } on BackupError catch (e) {
-      if (context.mounted) toast(context, e.message);
+    String? pw;
+    String? problem;
+    for (var tries = 0; tries < 5; tries++) {
+      final took = Stopwatch()..start();
+      try {
+        await busyWhile(context, pw == null ? 'Restoring…' : 'Opening the locked backup…', () async {
+          await importBackup(s.repo, text, replace: replace, password: pw);
+          await s.reload();
+        });
+        if (context.mounted) toast(context, 'Backup imported.');
+        return;
+      } on BackupNeedsPassword {
+        // asked below
+      } on BackupError catch (e) {
+        if (pw == null || !e.message.startsWith('Wrong password')) {
+          if (context.mounted) toast(context, e.message);
+          return;
+        }
+        // a file this slow to open is not offered again and again (review 7, P2-2)
+        if (took.elapsed > const Duration(seconds: 15)) {
+          if (context.mounted) toast(context, 'Wrong password. This locked backup takes very long to open on this phone, so it was not tried again.');
+          return;
+        }
+        problem = e.message;
+      }
+      if (!context.mounted) return;
+      pw = await askUnlock(context, problem: problem);
+      if (pw == null) return;
     }
   }
 }
@@ -383,7 +796,7 @@ class _AiCardState extends State<_AiCard> {
           Row(children: [
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                const Text('AI coach', style: TextStyle(fontWeight: FontWeight.w600)),
+                const Text('Ask AI', style: TextStyle(fontWeight: FontWeight.w600)),
                 Dim(st.aiOn ? 'On: ${aiKindLabel[a.kind]}' : 'Off: the built-in plan maker is used'),
               ]),
             ),
@@ -445,7 +858,7 @@ class _AiCardState extends State<_AiCard> {
               const SizedBox(height: 6),
               OutlinedButton.icon(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CoachScreen(s: s))),
-                icon: const Icon(Icons.chat_bubble_outline, color: C.gold),
+                icon: const Icon(Icons.auto_awesome, color: C.gold),
                 label: const Text('Ask AI'),
               ),
               const SizedBox(height: 6),
@@ -483,7 +896,7 @@ class _AiCardState extends State<_AiCard> {
             const SizedBox(height: 6),
             OutlinedButton.icon(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CoachScreen(s: s))),
-              icon: const Icon(Icons.chat_bubble_outline, color: C.gold),
+              icon: const Icon(Icons.auto_awesome, color: C.gold),
               label: const Text('Ask AI'),
             ),
             const SizedBox(height: 6),
@@ -539,7 +952,7 @@ class _PhoneModel extends StatelessWidget {
           Expanded(
             child: OutlinedButton.icon(
               onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => CoachScreen(s: s))),
-              icon: const Icon(Icons.chat_bubble_outline, color: C.gold),
+              icon: const Icon(Icons.auto_awesome, color: C.gold),
               label: const Text('Ask AI'),
             ),
           ),
@@ -607,7 +1020,7 @@ class _UpdateCard extends StatelessWidget {
             OutlinedButton(onPressed: s.checkForUpdate, child: const Text('Check for updates')),
           if (s.updateNote != null) Padding(padding: const EdgeInsets.only(top: 6), child: Dim(s.updateNote!, size: 12)),
           const SizedBox(height: 4),
-          const Dim('Updates are checked against their published fingerprint, and Android only installs them if they are signed by the same key as this app. Your workouts stay.', size: 11),
+          const Dim('Updates are checked against their published fingerprint, and Android only installs them if they are signed by the same key as this app. Your workouts stay.', size: 12),
         ]),
       ),
     );

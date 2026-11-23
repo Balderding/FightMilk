@@ -1,7 +1,7 @@
 name: workout
 description: "Free, private workout app: designs heavy-lifting workouts, logs sets, shows progress."
 publish_to: 'none'
-version: 0.8.0+11
+version: 0.9.0+12
 
 environment:
   sdk: ^3.13.7
@@ -21,6 +21,7 @@ dependencies:
   http: ^1.6.0
   path: ^1.9.1
   path_provider: ^2.1.6
+  qr: ^4.0.1
   sqflite: ^2.4.6
   timezone: ^0.11.2
   uuid: ^4.6.0
@@ -38,3 +39,4 @@ flutter:
     - assets/exercises.json
     - assets/icons/
     - assets/sounds/
+    - assets/licenses/

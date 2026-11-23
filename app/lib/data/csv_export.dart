@@ -69,4 +69,12 @@ String csvNum(double v) {
   return r == r.roundToDouble() ? r.toInt().toString() : r.toString();
 }
 
-String csvField(String s) => '"${s.replaceAll('"', '""')}"';
+/// A CSV cell. Text that a spreadsheet would run as a formula (= + - @, tab, CR, LF or the
+/// full-width ＝＋－＠ first) gets a ' in front, as OWASP advises; plain numbers like -2.5 stay
+/// numbers (review 5, P2-4).
+String csvField(String s) {
+  final l = s.trimLeft();
+  final risky = (s.isNotEmpty && '\t\r\n'.contains(s[0])) || (l.isNotEmpty && '=+-@＝＋－＠'.contains(l[0]) && !RegExp(r'^-?\d+(\.\d+)?$').hasMatch(l));
+  final v = risky ? "'$s" : s;
+  return '"${v.replaceAll('"', '""')}"';
+}

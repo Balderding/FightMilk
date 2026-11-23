@@ -25,7 +25,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_barbell",
-   "about": "The classic chest builder. Lie with eyes under the bar, feet planted, shoulder blades pinched. Lower to mid-chest, press up and slightly back. Keep wrists stacked over elbows."
+   "about": "The classic chest builder. Lie with eyes under the bar, feet planted, shoulder blades pinched. Lower to mid-chest, press up and slightly back. Keep wrists stacked over elbows.",
+   "position": "supine"
   },
   {
    "id": "db_bench_press",
@@ -50,7 +51,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_dumbbell",
-   "about": "Flat press with a dumbbell in each hand, so each side works on its own and you get a deeper stretch. Lower until elbows are just below the bench, then press up and slightly in."
+   "about": "Flat press with a dumbbell in each hand, so each side works on its own and you get a deeper stretch. Lower until elbows are just below the bench, then press up and slightly in.",
+   "position": "supine"
   },
   {
    "id": "machine_chest_press",
@@ -99,7 +101,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_smith",
-   "about": "Bench press on a fixed track. Position the bench so the bar touches mid-chest. Good for pushing near failure without a spotter; use the safety hooks."
+   "about": "Bench press on a fixed track. Position the bench so the bar touches mid-chest. Good for pushing near failure without a spotter; use the safety hooks.",
+   "position": "supine"
   },
   {
    "id": "push_up",
@@ -141,7 +144,8 @@
    "pattern": "dip",
    "swap": "chest_press",
    "joints": [
-    "shoulders"
+    "shoulders",
+    "elbows"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -174,7 +178,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_barbell",
-   "about": "Bench press with the head lower than the hips. Shorter range and easy on the shoulders; bring the bar to the lower chest."
+   "about": "Bench press with the head lower than the hips. Shorter range and easy on the shoulders; bring the bar to the lower chest.",
+   "position": "supine"
   },
   {
    "id": "decline_db_press",
@@ -196,7 +201,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_dumbbell",
-   "about": "Dumbbell press on a decline bench. Lower chest focus with a long, comfortable stretch."
+   "about": "Dumbbell press on a decline bench. Lower chest focus with a long, comfortable stretch.",
+   "position": "supine"
   },
   {
    "id": "floor_press",
@@ -218,7 +224,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_barbell",
-   "about": "Bench press lying on the floor. Elbows stop on the floor, which cuts the range and spares the shoulders while overloading the lockout."
+   "about": "Bench press lying on the floor. Elbows stop on the floor, which cuts the range and spares the shoulders while overloading the lockout.",
+   "position": "supine"
   },
   {
    "id": "db_floor_press",
@@ -240,7 +247,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_dumbbell",
-   "about": "Dumbbell press from the floor. Pause the elbows lightly on the ground each rep. A good shoulder-friendly option."
+   "about": "Dumbbell press from the floor. Pause the elbows lightly on the ground each rep. A good shoulder-friendly option.",
+   "position": "supine"
   },
   {
    "id": "kb_floor_press",
@@ -262,7 +270,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_kettlebell",
-   "about": "Press a kettlebell from the floor with the bell resting on the back of the forearm. Keep the wrist straight."
+   "about": "Press a kettlebell from the floor with the bell resting on the back of the forearm. Keep the wrist straight.",
+   "position": "supine"
   },
   {
    "id": "cable_chest_press",
@@ -333,7 +342,8 @@
    "compound": true,
    "timed": false,
    "icon": "pushup_bodyweight",
-   "about": "A push-up with a plate on your back or a weight vest. Log the added weight; keep the hips from sagging."
+   "about": "A push-up with a plate on your back or a weight vest. Log the added weight; keep the hips from sagging.",
+   "position": "supine"
   },
   {
    "id": "deficit_push_up",
@@ -574,7 +584,8 @@
    "compound": true,
    "timed": false,
    "icon": "incline_barbell",
-   "about": "Bench press with palms facing you. Hits the upper chest and triceps; use a spotter and a careful grip."
+   "about": "Bench press with palms facing you. Hits the upper chest and triceps; use a spotter and a careful grip.",
+   "position": "supine"
   },
   {
    "id": "incline_push_up",
@@ -689,7 +700,8 @@
    "compound": false,
    "timed": false,
    "icon": "fly_dumbbell",
-   "about": "Lie flat, arms slightly bent, open wide until you feel a chest stretch, then bring the weights back up in an arc. Go light and controlled."
+   "about": "Lie flat, arms slightly bent, open wide until you feel a chest stretch, then bring the weights back up in an arc. Go light and controlled.",
+   "position": "supine"
   },
   {
    "id": "low_cable_fly",
@@ -1084,7 +1096,8 @@
    "swap": "overhead_press",
    "joints": [
     "shoulders",
-    "wrists"
+    "wrists",
+    "neck"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -1109,7 +1122,8 @@
    "swap": "overhead_press",
    "joints": [
     "shoulders",
-    "wrists"
+    "wrists",
+    "neck"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -1568,7 +1582,8 @@
    "compound": false,
    "timed": false,
    "icon": "rear_dumbbell",
-   "about": "Lie chest-down on an incline bench and raise dumbbells out to the sides. Takes the lower back out of it."
+   "about": "Lie chest-down on an incline bench and raise dumbbells out to the sides. Takes the lower back out of it.",
+   "position": "prone"
   },
   {
    "id": "barbell_row",
@@ -1584,7 +1599,8 @@
    "pattern": "row",
    "swap": "row",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -1639,7 +1655,8 @@
    "compound": true,
    "timed": false,
    "icon": "row_machine",
-   "about": "Chest on the pad, pull the handles back and squeeze the shoulder blades. No lower-back strain."
+   "about": "Chest on the pad, pull the handles back and squeeze the shoulder blades. No lower-back strain.",
+   "position": "prone"
   },
   {
    "id": "seated_cable_row",
@@ -1678,7 +1695,8 @@
    "pattern": "row",
    "swap": "row",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -1734,7 +1752,8 @@
    "compound": true,
    "timed": false,
    "icon": "row_dumbbell",
-   "about": "Lie chest-down on an incline bench and row two dumbbells. Strict and back-friendly."
+   "about": "Lie chest-down on an incline bench and row two dumbbells. Strict and back-friendly.",
+   "position": "prone"
   },
   {
    "id": "inverted_row",
@@ -1838,7 +1857,8 @@
    "pattern": "row",
    "swap": "row",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -1870,7 +1890,8 @@
    "compound": true,
    "timed": false,
    "icon": "row_barbell",
-   "about": "Lie face down on a high bench and row the bar up to it. Zero cheating, zero lower-back load."
+   "about": "Lie face down on a high bench and row the bar up to it. Zero cheating, zero lower-back load.",
+   "position": "prone"
   },
   {
    "id": "meadows_row",
@@ -1908,7 +1929,8 @@
    "pattern": "row",
    "swap": "row",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2067,7 +2089,8 @@
    "pattern": "pulldown",
    "swap": "vertical_pull",
    "joints": [
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2298,7 +2321,8 @@
    "compound": false,
    "timed": false,
    "icon": "pullover_dumbbell",
-   "about": "Lie across a bench holding one dumbbell over your chest, lower it behind your head, pull it back over. Stretches lats and chest."
+   "about": "Lie across a bench holding one dumbbell over your chest, lower it behind your head, pull it back over. Stretches lats and chest.",
+   "position": "supine"
   },
   {
    "id": "machine_pullover",
@@ -2355,7 +2379,9 @@
    "swap": "squat",
    "joints": [
     "knees",
-    "lowerBack"
+    "lowerBack",
+    "hips",
+    "neck"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2381,7 +2407,10 @@
    "swap": "squat",
    "joints": [
     "knees",
-    "wrists"
+    "wrists",
+    "hips",
+    "ankles",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2602,7 +2631,9 @@
    "swap": "squat",
    "joints": [
     "knees",
-    "lowerBack"
+    "lowerBack",
+    "hips",
+    "neck"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2627,7 +2658,9 @@
    "swap": "squat",
    "joints": [
     "knees",
-    "lowerBack"
+    "lowerBack",
+    "hips",
+    "neck"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2652,7 +2685,9 @@
    "pattern": "squat",
    "swap": "squat",
    "joints": [
-    "knees"
+    "knees",
+    "hips",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2844,7 +2879,8 @@
    "pattern": "lunge",
    "swap": "lunge",
    "joints": [
-    "knees"
+    "knees",
+    "ankles"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -2988,7 +3024,8 @@
    "pattern": "lunge",
    "swap": "lunge",
    "joints": [
-    "knees"
+    "knees",
+    "neck"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3037,7 +3074,9 @@
    "pattern": "lunge",
    "swap": "lunge",
    "joints": [
-    "knees"
+    "knees",
+    "hips",
+    "ankles"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3061,7 +3100,9 @@
    "pattern": "lunge",
    "swap": "lunge",
    "joints": [
-    "knees"
+    "knees",
+    "hips",
+    "ankles"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3086,7 +3127,9 @@
    "pattern": "lunge",
    "swap": "lunge",
    "joints": [
-    "knees"
+    "knees",
+    "hips",
+    "ankles"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3159,7 +3202,9 @@
    "pattern": "hinge",
    "swap": "hinge",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "hips",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3313,7 +3358,8 @@
    "compound": false,
    "timed": false,
    "icon": "hinge_bodyweight",
-   "about": "Hips on the pad, lower your chest toward the floor and raise back to a straight line. Hold a plate to load it."
+   "about": "Hips on the pad, lower your chest toward the floor and raise back to a straight line. Hold a plate to load it.",
+   "position": "prone"
   },
   {
    "id": "cable_pull_through",
@@ -3376,7 +3422,8 @@
    "pattern": "hinge",
    "swap": "hinge",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "hips"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3426,7 +3473,10 @@
    "pattern": "hinge",
    "swap": "hinge",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "hips",
+    "neck",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3475,7 +3525,8 @@
    "pattern": "hinge",
    "swap": "hinge",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3501,7 +3552,9 @@
    "pattern": "hinge",
    "swap": "hinge",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "hips",
+    "upperBack"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -3533,7 +3586,8 @@
    "compound": false,
    "timed": false,
    "icon": "hinge_machine",
-   "about": "Lie face down on the machine and swing the legs up behind you. Strengthens the lower back without loading the spine."
+   "about": "Lie face down on the machine and swing the legs up behind you. Strengthens the lower back without loading the spine.",
+   "position": "prone"
   },
   {
    "id": "band_good_morning",
@@ -3690,7 +3744,8 @@
    "compound": true,
    "timed": false,
    "icon": "thrust_bodyweight",
-   "about": "Lying on the floor, drive the hips up and squeeze. Add a weight on the hips to progress."
+   "about": "Lying on the floor, drive the hips up and squeeze. Add a weight on the hips to progress.",
+   "position": "supine"
   },
   {
    "id": "barbell_glute_bridge",
@@ -3712,7 +3767,8 @@
    "compound": true,
    "timed": false,
    "icon": "thrust_barbell",
-   "about": "Glute bridge from the floor with a barbell over the hips. Shorter range, can go heavy."
+   "about": "Glute bridge from the floor with a barbell over the hips. Shorter range, can go heavy.",
+   "position": "supine"
   },
   {
    "id": "single_leg_hip_thrust",
@@ -3918,7 +3974,8 @@
    "compound": false,
    "timed": false,
    "icon": "thrust_bodyweight",
-   "about": "Lie on your back with soles together, knees out, and pump the hips up. High-rep glute burner."
+   "about": "Lie on your back with soles together, knees out, and pump the hips up. High-rep glute burner.",
+   "position": "supine"
   },
   {
    "id": "leg_extension",
@@ -3975,7 +4032,8 @@
    "pattern": "legext",
    "swap": "quad_iso",
    "joints": [
-    "knees"
+    "knees",
+    "ankles"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -4070,7 +4128,8 @@
    "compound": false,
    "timed": false,
    "icon": "legcurl_machine",
-   "about": "Lie face down, pad behind the ankles, curl the heels toward your glutes. Keep the hips down."
+   "about": "Lie face down, pad behind the ankles, curl the heels toward your glutes. Keep the hips down.",
+   "position": "prone"
   },
   {
    "id": "seated_leg_curl",
@@ -4226,7 +4285,9 @@
    "secondary": [],
    "pattern": "calf",
    "swap": "calf",
-   "joints": [],
+   "joints": [
+    "ankles"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "machine",
@@ -4326,7 +4387,9 @@
    "secondary": [],
    "pattern": "calf",
    "swap": "calf",
-   "joints": [],
+   "joints": [
+    "ankles"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "bodyweight",
@@ -4346,7 +4409,9 @@
    "secondary": [],
    "pattern": "calf",
    "swap": "calf",
-   "joints": [],
+   "joints": [
+    "ankles"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "machine",
@@ -4366,7 +4431,9 @@
    "secondary": [],
    "pattern": "calf",
    "swap": "calf",
-   "joints": [],
+   "joints": [
+    "neck"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "barbell",
@@ -4386,7 +4453,9 @@
    "secondary": [],
    "pattern": "calf",
    "swap": "calf",
-   "joints": [],
+   "joints": [
+    "ankles"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "bodyweight",
@@ -4406,7 +4475,9 @@
    "secondary": [],
    "pattern": "adduction",
    "swap": "adductor",
-   "joints": [],
+   "joints": [
+    "hips"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "machine",
@@ -4428,7 +4499,9 @@
    ],
    "pattern": "adduction",
    "swap": "adductor",
-   "joints": [],
+   "joints": [
+    "hips"
+   ],
    "repLow": 30,
    "repHigh": 60,
    "step": "bodyweight",
@@ -4448,7 +4521,9 @@
    "secondary": [],
    "pattern": "adduction",
    "swap": "adductor",
-   "joints": [],
+   "joints": [
+    "hips"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "cable",
@@ -4489,7 +4564,8 @@
    "pattern": "curl",
    "swap": "biceps",
    "joints": [
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -4510,7 +4586,9 @@
    "secondary": [],
    "pattern": "curl",
    "swap": "biceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "barbell",
@@ -4614,7 +4692,9 @@
    "secondary": [],
    "pattern": "curl",
    "swap": "biceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "machine",
@@ -4634,7 +4714,9 @@
    "secondary": [],
    "pattern": "curl",
    "swap": "biceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "dumbbell",
@@ -4674,7 +4756,9 @@
    "secondary": [],
    "pattern": "curl",
    "swap": "biceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "barbell",
@@ -4694,7 +4778,9 @@
    "secondary": [],
    "pattern": "curl",
    "swap": "biceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "dumbbell",
@@ -4947,7 +5033,8 @@
    "pattern": "overhead_ext",
    "swap": "triceps",
    "joints": [
-    "shoulders"
+    "shoulders",
+    "elbows"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -4969,7 +5056,8 @@
    "pattern": "overhead_ext",
    "swap": "triceps",
    "joints": [
-    "shoulders"
+    "shoulders",
+    "elbows"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -4991,7 +5079,8 @@
    "pattern": "overhead_ext",
    "swap": "triceps",
    "joints": [
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -5000,7 +5089,8 @@
    "compound": false,
    "timed": false,
    "icon": "overhead_ext_barbell",
-   "about": "Lying on a bench, lower the bar toward your forehead by bending only the elbows, then straighten."
+   "about": "Lying on a bench, lower the bar toward your forehead by bending only the elbows, then straighten.",
+   "position": "supine"
   },
   {
    "id": "close_grip_bench",
@@ -5015,7 +5105,8 @@
    "pattern": "press",
    "swap": "triceps",
    "joints": [
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -5024,7 +5115,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_barbell",
-   "about": "Bench press with hands about shoulder-width and elbows close. Heavy triceps work."
+   "about": "Bench press with hands about shoulder-width and elbows close. Heavy triceps work.",
+   "position": "supine"
   },
   {
    "id": "machine_triceps_ext",
@@ -5058,7 +5150,9 @@
    ],
    "pattern": "dip",
    "swap": "triceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "machine",
@@ -5078,7 +5172,9 @@
    "secondary": [],
    "pattern": "overhead_ext",
    "swap": "triceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "dumbbell",
@@ -5086,7 +5182,8 @@
    "compound": false,
    "timed": false,
    "icon": "overhead_ext_dumbbell",
-   "about": "Lying extension with dumbbells, palms facing each other. Easier on the elbows."
+   "about": "Lying extension with dumbbells, palms facing each other. Easier on the elbows.",
+   "position": "supine"
   },
   {
    "id": "bench_dip",
@@ -5102,7 +5199,8 @@
    "swap": "triceps",
    "joints": [
     "shoulders",
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -5126,7 +5224,8 @@
    "pattern": "pushup",
    "swap": "triceps",
    "joints": [
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -5190,7 +5289,8 @@
    "pattern": "press",
    "swap": "triceps",
    "joints": [
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -5199,7 +5299,8 @@
    "compound": true,
    "timed": false,
    "icon": "press_barbell",
-   "about": "A mix of close-grip bench and skull crusher: lower the bar toward your chin, then press. Heavy triceps builder."
+   "about": "A mix of close-grip bench and skull crusher: lower the bar toward your chin, then press. Heavy triceps builder.",
+   "position": "supine"
   },
   {
    "id": "single_arm_pushdown",
@@ -5255,7 +5356,8 @@
    "pattern": "dip",
    "swap": "triceps",
    "joints": [
-    "shoulders"
+    "shoulders",
+    "elbows"
    ],
    "repLow": 6,
    "repHigh": 10,
@@ -5276,7 +5378,9 @@
    "secondary": [],
    "pattern": "overhead_ext",
    "swap": "triceps",
-   "joints": [],
+   "joints": [
+    "elbows"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "dumbbell",
@@ -5284,7 +5388,8 @@
    "compound": false,
    "timed": false,
    "icon": "overhead_ext_dumbbell",
-   "about": "Lying, dumbbells over the chest, bend the elbows out so the bells touch your chest, then press back up."
+   "about": "Lying, dumbbells over the chest, bend the elbows out so the bells touch your chest, then press back up.",
+   "position": "supine"
   },
   {
    "id": "barbell_shrug",
@@ -5296,7 +5401,10 @@
    "secondary": [],
    "pattern": "shrug",
    "swap": "shrug",
-   "joints": [],
+   "joints": [
+    "neck",
+    "upperBack"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "barbell",
@@ -5416,7 +5524,10 @@
    "secondary": [],
    "pattern": "shrug",
    "swap": "shrug",
-   "joints": [],
+   "joints": [
+    "neck",
+    "upperBack"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "barbell",
@@ -5439,7 +5550,9 @@
    ],
    "pattern": "carry",
    "swap": "carry",
-   "joints": [],
+   "joints": [
+    "upperBack"
+   ],
    "repLow": 30,
    "repHigh": 60,
    "step": "dumbbell",
@@ -5485,7 +5598,9 @@
    ],
    "pattern": "carry",
    "swap": "carry",
-   "joints": [],
+   "joints": [
+    "upperBack"
+   ],
    "repLow": 30,
    "repHigh": 60,
    "step": "barbell",
@@ -5531,7 +5646,8 @@
    "pattern": "carry",
    "swap": "carry",
    "joints": [
-    "knees"
+    "knees",
+    "ankles"
    ],
    "repLow": 30,
    "repHigh": 60,
@@ -5706,7 +5822,9 @@
    "secondary": [],
    "pattern": "shrug",
    "swap": "neck",
-   "joints": [],
+   "joints": [
+    "neck"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "bodyweight",
@@ -5726,7 +5844,9 @@
    "secondary": [],
    "pattern": "shrug",
    "swap": "neck",
-   "joints": [],
+   "joints": [
+    "neck"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "bodyweight",
@@ -5786,7 +5906,9 @@
    "secondary": [],
    "pattern": "legraise",
    "swap": "core",
-   "joints": [],
+   "joints": [
+    "hips"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "bodyweight",
@@ -5953,7 +6075,9 @@
    "pattern": "crunch",
    "swap": "core",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "hips",
+    "neck"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -5962,7 +6086,8 @@
    "compound": false,
    "timed": false,
    "icon": "crunch_bodyweight",
-   "about": "Feet hooked on a decline bench, sit up and lower slowly. Hold a plate to load it."
+   "about": "Feet hooked on a decline bench, sit up and lower slowly. Hold a plate to load it.",
+   "position": "supine"
   },
   {
    "id": "side_plank",
@@ -6002,7 +6127,8 @@
    "compound": false,
    "timed": false,
    "icon": "plank_bodyweight",
-   "about": "On your back, arms up and knees bent, lower the opposite arm and leg while keeping the lower back flat."
+   "about": "On your back, arms up and knees bent, lower the opposite arm and leg while keeping the lower back flat.",
+   "position": "supine"
   },
   {
    "id": "hollow_hold",
@@ -6022,7 +6148,8 @@
    "compound": false,
    "timed": true,
    "icon": "plank_bodyweight",
-   "about": "Lie on your back, arms and legs off the floor, lower back pressed down. Log seconds."
+   "about": "Lie on your back, arms and legs off the floor, lower back pressed down. Log seconds.",
+   "position": "supine"
   },
   {
    "id": "russian_twist",
@@ -6057,7 +6184,8 @@
    "pattern": "legraise",
    "swap": "core",
    "joints": [
-    "lowerBack"
+    "lowerBack",
+    "hips"
    ],
    "repLow": 10,
    "repHigh": 15,
@@ -6066,7 +6194,8 @@
    "compound": false,
    "timed": false,
    "icon": "legraise_bodyweight",
-   "about": "On your back, raise straight legs up and lower slowly without the lower back arching."
+   "about": "On your back, raise straight legs up and lower slowly without the lower back arching.",
+   "position": "supine"
   },
   {
    "id": "reverse_crunch",
@@ -6086,7 +6215,8 @@
    "compound": false,
    "timed": false,
    "icon": "legraise_bodyweight",
-   "about": "On your back, curl the knees and hips up off the floor toward your chest."
+   "about": "On your back, curl the knees and hips up off the floor toward your chest.",
+   "position": "supine"
   },
   {
    "id": "crunch",
@@ -6098,7 +6228,9 @@
    "secondary": [],
    "pattern": "crunch",
    "swap": "core",
-   "joints": [],
+   "joints": [
+    "neck"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "bodyweight",
@@ -6106,7 +6238,8 @@
    "compound": false,
    "timed": false,
    "icon": "crunch_bodyweight",
-   "about": "Lie on your back and curl your ribs toward your hips. Small, controlled movement."
+   "about": "Lie on your back and curl your ribs toward your hips. Small, controlled movement.",
+   "position": "supine"
   },
   {
    "id": "weighted_plank",
@@ -6224,7 +6357,9 @@
    ],
    "pattern": "legraise",
    "swap": "core",
-   "joints": [],
+   "joints": [
+    "hips"
+   ],
    "repLow": 10,
    "repHigh": 15,
    "step": "bodyweight",
@@ -6254,7 +6389,8 @@
    "compound": false,
    "timed": false,
    "icon": "legraise_bodyweight",
-   "about": "Lying on a bench, hold behind your head and lower your straight body from the shoulders. Very advanced."
+   "about": "Lying on a bench, hold behind your head and lower your straight body from the shoulders. Very advanced.",
+   "position": "supine"
   },
   {
    "id": "stir_the_pot",
@@ -6336,7 +6472,9 @@
    "swap": "power",
    "joints": [
     "lowerBack",
-    "wrists"
+    "wrists",
+    "elbows",
+    "upperBack"
    ],
    "repLow": 3,
    "repHigh": 5,
@@ -6362,7 +6500,9 @@
    "swap": "power",
    "joints": [
     "lowerBack",
-    "wrists"
+    "wrists",
+    "elbows",
+    "upperBack"
    ],
    "repLow": 3,
    "repHigh": 5,
@@ -6418,7 +6558,8 @@
    "joints": [
     "shoulders",
     "lowerBack",
-    "wrists"
+    "wrists",
+    "elbows"
    ],
    "repLow": 3,
    "repHigh": 5,
@@ -6569,7 +6710,8 @@
    "pattern": "olympic",
    "swap": "power",
    "joints": [
-    "shoulders"
+    "shoulders",
+    "upperBack"
    ],
    "repLow": 3,
    "repHigh": 5,
@@ -6594,7 +6736,8 @@
    "pattern": "olympic",
    "swap": "power",
    "joints": [
-    "knees"
+    "knees",
+    "ankles"
    ],
    "repLow": 3,
    "repHigh": 5,

@@ -9,16 +9,23 @@ import '../domain/exercise.dart';
 import '../domain/plates.dart';
 import '../domain/warmup_text.dart';
 import '../domain/plan.dart';
+import '../domain/program.dart';
 import '../domain/superset.dart';
 import '../domain/units.dart';
 import '../services/sounds.dart';
 import 'anim/exercise_anim.dart';
 import 'app_state.dart';
+import 'coach_screen.dart';
+import 'coaching_screen.dart';
 import 'pickers.dart';
 import 'theme.dart';
+import 'timers_screen.dart';
 import 'widgets.dart';
 
 /// The screen that matters most: one tap per set, weight and reps already filled in.
+/// F086: how long after the last touch the screen goes dark in a rest (tests shorten it).
+Duration restDimAfter = const Duration(seconds: 8);
+
 class LogScreen extends StatefulWidget {
   final AppState s;
   const LogScreen({super.key, required this.s});
@@ -38,7 +45,7 @@ class _LogScreenState extends State<LogScreen> {
 
   Timer? _timer;
   bool _beeped = false;
-  final Set<String> _asked = {};
+  int? _undoEx; // the exercise the Undo button's set belongs to
   DateTime? _setAt; // when the last set was logged (for effort taps)
   int? _lastReps;
   bool _lastWasFinal = false;
@@ -53,7 +60,7 @@ class _LogScreenState extends State<LogScreen> {
   PlanDay get day => s.session!.day;
   PlanItem get item => day.items[ex];
   Exercise get e => s.lib.byId(item.exerciseId)!;
-  List<SetLog> get mine => sets.where((x) => x.exerciseId == item.exerciseId).toList();
+  List<SetLog> get mine => sets.where((x) => x.key == liftKey(item)).toList();
 
   /// Warm-up rows for this exercise: only the first big lift for its main muscle today, only
   /// before the first working set, and only when there is a weight to warm up to.
@@ -72,8 +79,9 @@ class _LogScreenState extends State<LogScreen> {
 
   Future<void> _logWarmup(double wkg, int wreps) async {
     HapticFeedback.selectionClick();
-    final l = await s.repo.logSet(s.session!.id, item.exerciseId, wkg, wreps, type: SetType.warmup);
+    final l = await s.repo.logSet(s.session!.id, item.exerciseId, wkg, wreps, type: SetType.warmup, slot: liftKey(item));
     _lastSetId = l.id;
+    _undoEx = ex;
     await _load();
     _beeped = false;
     s.startRest(const Duration(seconds: 60));
@@ -90,15 +98,25 @@ class _LogScreenState extends State<LogScreen> {
   /// Sets that count toward the plan (not warm-ups or drop sets).
   List<SetLog> get counted => mine.where((x) => x.counts).toList();
 
-  int _countedFor(String exId) => sets.where((x) => x.exerciseId == exId && x.counts).length;
+  /// Sets done for a plan slot (the same exercise twice in a day counts apart).
+  int _countedFor(PlanItem it) => sets.where((x) => x.key == liftKey(it) && x.counts).length;
 
   /// The type the next set should be: the last planned set takes the item's style.
   SetType _defaultType() {
     final n = counted.length;
+    if (item.perSet != null) return n < item.perSet!.length && item.perSet![n].amrap ? SetType.amrap : SetType.work;
     if (n == item.sets - 1) {
       return switch (item.style) { 'amrap' => SetType.amrap, 'failure' => SetType.failure, 'restpause' => SetType.restpause, _ => SetType.work };
     }
     return SetType.work;
+  }
+
+  /// F086: the last touch; the screen dims [restDimAfter] after it while a rest runs.
+  DateTime _touchAt = DateTime.now();
+
+  bool get _dimmed {
+    final left = s.restLeft;
+    return s.settings.dimRest && left != null && left > Duration.zero && DateTime.now().difference(_touchAt) >= restDimAfter;
   }
 
   @override
@@ -119,6 +137,8 @@ class _LogScreenState extends State<LogScreen> {
       HapticFeedback.heavyImpact();
       s.sounds.play(Reward.restOver);
     }
+    // "Rest over" counts up for a while, then goes away by itself (nothing to tap away)
+    if (left == Duration.zero && (s.restOver?.inMinutes ?? 0) >= 3) s.stopRest();
     setState(() {});
   }
 
@@ -134,7 +154,7 @@ class _LogScreenState extends State<LogScreen> {
     if (first) {
       // resume on the first exercise that isn't finished
       for (var i = 0; i < day.items.length; i++) {
-        final n = _countedFor(day.items[i].exerciseId);
+        final n = _countedFor(day.items[i]);
         if (n < day.items[i].sets) {
           ex = i;
           break;
@@ -155,7 +175,12 @@ class _LogScreenState extends State<LogScreen> {
     }
     _type = _defaultType();
     final m = counted;
-    if (m.isNotEmpty) {
+    final ps = item.perSet;
+    if (ps != null && m.length < ps.length) {
+      // programs: each set has its own target; a set with no weight yet keeps the last one
+      kg = target?.perSet?[m.length] ?? (m.isNotEmpty ? m.last.kg : (target?.kg ?? 0));
+      reps = ps[m.length].reps;
+    } else if (m.isNotEmpty) {
       kg = m.last.kg;
       reps = m.last.reps;
     } else {
@@ -163,35 +188,24 @@ class _LogScreenState extends State<LogScreen> {
       reps = target?.reps ?? item.repLow;
     }
     loaded = true;
-    final gnext = item.group == null ? null : roundStart(day.items, ex, {for (final x in day.items) x.exerciseId: _countedFor(x.exerciseId)});
+    final gnext = item.group == null ? null : roundStart(day.items, ex, {for (final x in day.items) x.exerciseId: _countedFor(x)});
     s.restNext = gnext != null ? (s.lib.byId(day.items[gnext].exerciseId)?.name ?? '') : counted.length < item.sets ? e.name : (ex + 1 < day.items.length ? s.lib.byId(day.items[ex + 1].exerciseId)?.name ?? '' : '');
     if (mounted) setState(() {});
-    if (mine.isEmpty && target?.kg == null && last.isEmpty && !e.bodyweight && !_asked.contains(item.exerciseId)) {
-      _asked.add(item.exerciseId);
-      WidgetsBinding.instance.addPostFrameCallback((_) => _firstTime());
-    }
   }
 
-  /// First time doing a lift: ask what they can handle instead of starting at zero.
-  Future<void> _firstTime() async {
-    if (!mounted) return;
-    final c = TextEditingController();
-    final v = await showDialog<String>(
-      context: context,
-      builder: (d) => AlertDialog(
-        backgroundColor: C.card,
-        title: Text('First time: ${e.name}'),
-        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text('What weight can you do for about ${item.repLow} reps${e.equipment == Equipment.dumbbell || e.equipment == Equipment.kettlebell ? ' (per dumbbell)' : ''}? A guess is fine; the app adjusts after this workout.'),
-          const SizedBox(height: 10),
-          TextField(enableIMEPersonalizedLearning: false, controller: c, autofocus: true, keyboardType: const TextInputType.numberWithOptions(decimal: true), decoration: InputDecoration(suffixText: unitLabel(s.unit))),
-        ]),
-        actions: [TextButton(onPressed: () => Navigator.pop(d), child: const Text('Skip')), FilledButton(onPressed: () => Navigator.pop(d, c.text), child: const Text('Use it'))],
-      ),
-    );
-    final n = double.tryParse((v ?? '').replaceAll(',', '.'));
-    if (n != null && n > 0 && mounted) setState(() => kg = roundToStep(fromUnit(n, s.unit), e.step, s.unit));
+  /// The reps of the set coming up (programs: that set's own).
+  int get _setReps {
+    final ps = item.perSet;
+    return ps != null && counted.length < ps.length ? ps[counted.length].reps : item.repLow;
   }
+
+  /// First time doing a lift (no target, no history): the weight is picked on the screen, no pop-up.
+  bool get _firstTimeLift => mine.isEmpty && target?.kg == null && last.isEmpty && !e.bodyweight;
+
+  /// Quick jumps for the weight, in the user's unit.
+  List<double> get _jumps => s.unit == Unit.lb ? const [-10, 10, 25, 45] : const [-5, 5, 10, 20];
+
+  void _jump(double d) => setState(() => kg = roundToStep((kg + fromUnit(d, s.unit)).clamp(0, 2000).toDouble(), e.step, s.unit));
 
   void _go(int i) {
     if (i < 0 || i >= day.items.length) return;
@@ -201,27 +215,51 @@ class _LogScreenState extends State<LogScreen> {
 
   double get _step => stepKg(e.step, s.unit);
 
+  /// The weight shown on a set row not done yet (programs: that set's own weight).
+  String _plannedKg(int i) {
+    final ps = target?.perSet;
+    if (ps == null || i >= ps.length) return target?.kg == null ? '–' : '${fmtWeight(target!.kg!, s.unit)} ${unitLabel(s.unit)}';
+    final w = ps[i];
+    return w == null ? '–' : '${fmtWeight(w, s.unit)} ${unitLabel(s.unit)}';
+  }
+
+  String _plannedReps(int i) {
+    final ps = item.perSet;
+    if (ps != null && i < ps.length) return '${ps[i].reps}${ps[i].amrap ? '+' : ''} ${e.timed ? 's' : 'reps'}';
+    return '$reps ${e.timed ? 's' : 'reps'}';
+  }
+
   bool _saving = false;
   bool _dropOffered = false;
 
+  /// A weighted lift with no weight yet (first time, no history): Done asks for one first (P1-8).
+  bool get _needsWeight => !e.bodyweight && kg <= 0 && _type != SetType.warmup;
+
   Future<void> _done() async {
     if (_saving) return; // a quick double tap logs one set, not two
+    if (_needsWeight) {
+      await _pickWeight();
+      if (!mounted || kg <= 0) return; // nothing picked: nothing logged
+    }
     _saving = true;
     setState(() {});
     try {
       HapticFeedback.mediumImpact();
+      final ex0 = this.ex;
       final it = item, ex = e;
       final type = _type;
+      final wasDrop = _dropOffered;
       final before = counted.length;
       final prevAt = sets.isEmpty ? null : sets.map((x) => x.at).whereType<DateTime>().fold<DateTime?>(null, (a, b) => a == null || b.isAfter(a) ? b : a);
       final rest = prevAt == null ? null : DateTime.now().difference(prevAt).inSeconds;
-      final logged = await s.repo.logSet(s.session!.id, it.exerciseId, kg, reps, type: type, rest: rest);
+      final logged = await s.repo.logSet(s.session!.id, it.exerciseId, kg, reps, type: type, rest: rest, slot: liftKey(it));
       _lastSetId = logged.id;
+      _undoEx = ex0;
       final wasBest = _bestE1rm, wasKg = _bestKg;
       await _load();
       if (mounted) _afterSet(logged, ex, it, wasBest, wasKg, type);
       final exerciseDone = type != SetType.warmup && type != SetType.drop && before + 1 == it.sets;
-      final allDone = day.items.every((x) => _countedFor(x.exerciseId) >= x.sets);
+      final allDone = day.items.every((x) => _countedFor(x) >= x.sets);
       // a drop set right after the planned last set: lighter weight, go again with no rest
       if (exerciseDone && it.style == 'drop') {
         _type = SetType.drop;
@@ -235,8 +273,8 @@ class _LogScreenState extends State<LogScreen> {
       _lastWasFinal = exerciseDone;
       _effort = null;
       // superset: on to the partner with a short break; the full rest after the round
-      final doneMap = {for (final x in day.items) x.exerciseId: _countedFor(x.exerciseId)};
-      final cur = day.items.indexWhere((x) => x.exerciseId == it.exerciseId);
+      final doneMap = {for (final x in day.items) x.exerciseId: _countedFor(x)};
+      final cur = day.items.indexWhere((x) => liftKey(x) == liftKey(it));
       final partner = (type == SetType.warmup || cur < 0 || _dropOffered) ? null : nextInRound(day.items, cur, doneMap);
       final again = (partner == null && cur >= 0 && type != SetType.warmup && !_dropOffered) ? roundStart(day.items, cur, doneMap) : null;
       if (partner != null) {
@@ -252,6 +290,18 @@ class _LogScreenState extends State<LogScreen> {
       } else {
         if (type == SetType.drop) _dropOffered = false;
         s.startRest(Duration(seconds: type == SetType.warmup ? 60 : _restFor(ex, it, reps, exerciseDone, null)));
+      }
+      // this exercise is finished (its drop set too): on to the next one that isn't, while the rest runs
+      final finishedHere = it.group == null && ((exerciseDone && it.style != 'drop') || (type == SetType.drop && wasDrop));
+      if (finishedHere && !allDone && cur >= 0) {
+        final n = day.items.length;
+        for (var k = 1; k < n; k++) {
+          final j = (cur + k) % n;
+          if (_countedFor(day.items[j]) < day.items[j].sets) {
+            _go(j);
+            break;
+          }
+        }
       }
     } finally {
       _saving = false;
@@ -272,7 +322,7 @@ class _LogScreenState extends State<LogScreen> {
       msg = '🏆 Heaviest yet: ${fmtWeight(x.kg, s.unit)} ${unitLabel(s.unit)}';
     }
     final done = counted.length >= it.sets && counts;
-    if (msg == null && done) {
+    if (msg == null && done && ruleFor(s.plan?.program, it) == null) {
       final c = counted;
       if (c.every((y) => y.reps >= it.repHigh)) {
         msg = 'All sets at the top of the range: next time the weight goes up.';
@@ -282,18 +332,23 @@ class _LogScreenState extends State<LogScreen> {
         msg = 'In range: next time aim for one more rep.';
       }
     }
-    m.showSnackBar(SnackBar(
-      content: Text(msg ?? 'Set logged: ${fmtWeight(x.kg, s.unit)} × ${x.reps}'),
-      duration: const Duration(seconds: 4),
-      action: SnackBarAction(
-        label: 'Undo',
-        onPressed: () async {
-          await s.repo.deleteSet(x.id);
-          s.stopRest();
-          await _load();
-        },
-      ),
-    ));
+    // a plain set shows nothing (Undo sits in the bottom bar); only records and "next time" get a short line
+    if (msg == null) return;
+    m.showSnackBar(SnackBar(content: Text(msg), duration: const Duration(seconds: 2)));
+  }
+
+  /// Undo the last logged set (the button in the bottom bar).
+  Future<void> _undo() async {
+    final id = _lastSetId;
+    if (id == null) return;
+    HapticFeedback.selectionClick();
+    await s.repo.deleteSet(id);
+    _lastSetId = null;
+    _dropOffered = false;
+    s.stopRest();
+    if (_undoEx != null && _undoEx! < day.items.length) ex = _undoEx!;
+    _undoEx = null;
+    await _load();
   }
 
   /// Log the rest of this exercise's planned sets with the numbers on screen.
@@ -302,7 +357,7 @@ class _LogScreenState extends State<LogScreen> {
     if (left <= 0) return;
     if (!await confirm(context, 'Fill $left set${left == 1 ? '' : 's'}?', 'Logs $left × ${fmtWeight(kg, s.unit)} ${unitLabel(s.unit)} × $reps for ${e.name}.', yes: 'Fill')) return;
     for (var i = 0; i < left; i++) {
-      await s.repo.logSet(s.session!.id, item.exerciseId, kg, reps);
+      await s.repo.logSet(s.session!.id, item.exerciseId, kg, reps, slot: liftKey(item));
     }
     s.stopRest();
     await _load();
@@ -322,15 +377,15 @@ class _LogScreenState extends State<LogScreen> {
               selected: k == ex,
               leading: Text('${k + 1}', style: const TextStyle(fontWeight: FontWeight.w700)),
               title: Text(s.lib.byId(day.items[k].exerciseId)?.name ?? day.items[k].exerciseId),
-              subtitle: Dim('${_countedFor(day.items[k].exerciseId)} of ${day.items[k].sets} sets', size: 12),
+              subtitle: Dim('${_countedFor(day.items[k])} of ${day.items[k].sets} sets', size: 12),
               trailing: Row(mainAxisSize: MainAxisSize.min, children: [
-                if (_countedFor(day.items[k].exerciseId) >= day.items[k].sets) const Icon(Icons.check, color: C.green),
+                if (_countedFor(day.items[k]) >= day.items[k].sets) const Icon(Icons.check, color: C.green),
                 IconButton(tooltip: 'Move up', icon: const Icon(Icons.arrow_upward, size: 20), onPressed: k == 0 ? null : () => Navigator.pop(c, -1000 - k)),
                 IconButton(tooltip: 'Move down', icon: const Icon(Icons.arrow_downward, size: 20), onPressed: k == day.items.length - 1 ? null : () => Navigator.pop(c, -2000 - k)),
                 IconButton(
                   tooltip: 'Take out for today',
                   icon: const Icon(Icons.remove_circle_outline, size: 20),
-                  onPressed: day.items.length < 2 || _countedFor(day.items[k].exerciseId) > 0 ? null : () => Navigator.pop(c, -3000 - k),
+                  onPressed: day.items.length < 2 || _countedFor(day.items[k]) > 0 ? null : () => Navigator.pop(c, -3000 - k),
                 ),
               ]),
               onTap: () => Navigator.pop(c, k),
@@ -372,6 +427,7 @@ class _LogScreenState extends State<LogScreen> {
         builder: (c2, sc) => ListView(controller: sc, padding: const EdgeInsets.all(16), children: [
           Text(e.name, style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
           Dim('${rows.length} workouts', size: 12),
+          if (all.any((x) => x.type != SetType.work)) const Dim(setTypeKey, size: 12),
           const SizedBox(height: 8),
           if (rows.isEmpty) const Dim('Nothing yet.'),
           for (final l in rows)
@@ -480,10 +536,13 @@ class _LogScreenState extends State<LogScreen> {
   String _guide() {
     final m = counted;
     final left = s.restLeft;
-    final allDone = day.items.every((x) => _countedFor(x.exerciseId) >= x.sets);
+    final allDone = day.items.every((x) => _countedFor(x) >= x.sets);
     final exDone = m.length >= item.sets;
     final next = ex + 1 < day.items.length ? s.lib.byId(day.items[ex + 1].exerciseId)?.name : null;
-    final reps = item.repLow == item.repHigh ? '${item.repLow}' : '${item.repLow}-${item.repHigh}';
+    final ps = item.perSet;
+    final reps = ps != null && m.length < ps.length
+        ? '${ps[m.length].reps}${ps[m.length].amrap ? '+' : ''}'
+        : (item.repLow == item.repHigh ? '${item.repLow}' : '${item.repLow}-${item.repHigh}');
     final w = kg > 0 && !e.bodyweight ? '${fmtWeight(kg, s.unit)} ${unitLabel(s.unit)}' : null;
     return guideLine(
       name: e.name,
@@ -497,6 +556,7 @@ class _LogScreenState extends State<LogScreen> {
       nextName: next,
       workoutDone: allDone,
       firstOfWorkout: sets.isEmpty,
+      warmupShown: sets.isEmpty && s.warmupsOn && !s.settings.simple,
     );
   }
 
@@ -520,22 +580,28 @@ class _LogScreenState extends State<LogScreen> {
     final res = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: C.card,
+      isScrollControlled: true, // scrolls on small phones and above the keyboard
       builder: (c) => StatefulBuilder(
         builder: (c, set) => SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(16, 16, 16, 16 + MediaQuery.of(c).viewInsets.bottom),
             child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-              const Text('Change this set', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+              Row(children: [
+                const Expanded(child: Text('Change this set', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700))),
+                TextButton.icon(onPressed: () => Navigator.pop(c, 'hurt'), icon: const Icon(Icons.healing, size: 18), label: const Text('That hurt')),
+              ]),
               const SizedBox(height: 12),
               BigStepper(value: fmtWeight(k, s.unit), unit: unitLabel(s.unit), onMinus: () => set(() => k = (k - _step).clamp(0, 2000)), onPlus: () => set(() => k += _step)),
               const SizedBox(height: 8),
               BigStepper(value: '$r', unit: 'reps', onMinus: () => set(() => r = (r - 1).clamp(0, 500)), onPlus: () => set(() => r++)),
               const SizedBox(height: 10),
+              if (!s.settings.simple) ...[
               Wrap(spacing: 6, runSpacing: 6, children: [
                 for (final t in SetType.values)
                   ChoiceChip(label: Text(setTypeLabel[t]!), selected: type == t, showCheckmark: false, onSelected: (_) => set(() => type = t)),
               ]),
               const SizedBox(height: 8),
+              const Dim('RPE: how hard it was. 10 = not one more rep, 9 = one left, 8 = two left.', size: 12),
               Row(children: [
                 const Text('RPE  '),
                 Expanded(
@@ -550,6 +616,7 @@ class _LogScreenState extends State<LogScreen> {
                 for (final (v, l) in const [('', 'Both sides'), ('L', 'Left'), ('R', 'Right')])
                   ChoiceChip(label: Text(l), selected: side == v, showCheckmark: false, onSelected: (_) => set(() => side = v)),
               ]),
+              ],
               TextField(enableIMEPersonalizedLearning: false, controller: note, decoration: const InputDecoration(hintText: 'Note for this set (optional)')),
               const SizedBox(height: 12),
               Row(children: [
@@ -567,7 +634,111 @@ class _LogScreenState extends State<LogScreen> {
       await s.repo.updateSetInfo(x.id, type: type, rpe: rpe, clearRpe: rpe == null, side: side, note: note.text.trim());
     }
     if (res == 'delete') await s.repo.deleteSet(x.id);
+    if (res == 'hurt') return _hurt(x);
     if (res != null) await _load();
+  }
+
+  /// "That hurt" (F235): where, then swap it, stop it for today or carry on lighter. The next
+  /// two workouts of it start lighter too.
+  Future<void> _hurt(SetLog x) async {
+    Joint? j = e.joints.length == 1 ? e.joints.first : null;
+    var always = false;
+    final what = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: C.card,
+      isScrollControlled: true,
+      builder: (c) => StatefulBuilder(
+        builder: (c, set) => SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Text('That hurt: ${e.name}', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+              const Dim('Where? (optional)', size: 12),
+              const SizedBox(height: 6),
+              Wrap(spacing: 6, runSpacing: 6, children: [
+                for (final k in [...e.joints, ...Joint.values.where((v) => !e.joints.contains(v))])
+                  ChoiceChip(label: Text(jointLabel[k]!), selected: j == k, showCheckmark: false, onSelected: (v) => set(() => j = v ? k : null)),
+              ]),
+              if (j != null)
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: always,
+                  onChanged: (v) => set(() => always = v ?? false),
+                  title: Text('Go easy on my ${jointLabel[j]!.toLowerCase()} from now on'),
+                  subtitle: const Dim('New plans and swaps leave out exercises that are hard on it.', size: 12),
+                ),
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 6),
+                child: Dim('Pain is a sign to stop, not to push through. If it is sharp, swells, or is still there in a few days, get it checked.', size: 12),
+              ),
+              ListTile(leading: const Icon(Icons.swap_horiz), title: Text('Swap ${e.name} for today'), onTap: () => Navigator.pop(c, 'swap')),
+              ListTile(leading: const Icon(Icons.stop_circle_outlined), title: const Text('Stop it for today'), subtitle: const Dim('The sets done so far count.', size: 12), onTap: () => Navigator.pop(c, 'stop')),
+              if (!e.bodyweight) ListTile(leading: const Icon(Icons.south), title: const Text('Keep going 20% lighter'), onTap: () => Navigator.pop(c, 'lighter')), // P3-4
+              ListTile(leading: const Icon(Icons.edit_note), title: const Text('Just note it'), onTap: () => Navigator.pop(c, 'note')),
+              const Dim('Every choice notes it on the set, and the next two times you do it start 20% and then 10% lighter.', size: 12),
+            ]),
+          ),
+        ),
+      ),
+    );
+    if (what == null) return;
+    await s.flagPain(e.id, j);
+    if (always && j != null && s.profile != null) await s.saveProfile(s.profile!.copyWith(avoid: {...s.profile!.avoid, j!}));
+    final tag = 'Hurt${j == null ? '' : ' (${jointLabel[j]!.toLowerCase()})'}';
+    await s.repo.updateSetInfo(x.id, note: [if (x.note.isNotEmpty) x.note, tag].join(' · '));
+    if (what == 'swap') return _swap();
+    if (what == 'stop') {
+      final l = [...day.items];
+      l[ex] = item.copyWith(sets: _countedFor(item).clamp(1, 99));
+      await s.setToday(day.copyWith(items: l));
+    }
+    await _load();
+    if (what == 'lighter' && mounted && !e.bodyweight) setState(() => kg = roundToStep(kg * 0.8, e.step, s.unit));
+  }
+
+  /// Tap the weight: a grid of nearby weights to pick with one tap; typing is the fallback.
+  Future<void> _pickWeight() async {
+    final st = _step;
+    // no weight yet: a barbell starts at the empty bar, everything else at one step
+    final bar = e.equipment == Equipment.barbell && kg <= 0 ? fromUnit(s.unit == Unit.lb ? 45 : 20, s.unit) : null;
+    final start = bar ?? ((kg - 12 * st) < st ? st : kg - 12 * st);
+    final values = [for (var i = 0; i < 30; i++) roundToStep(start + i * st, e.step, s.unit)];
+    final v = await showModalBottomSheet<double>(
+      context: context,
+      backgroundColor: C.card,
+      isScrollControlled: true,
+      builder: (c) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Text(_firstTimeLift ? 'Pick a weight you can do for about ${repsWord(_setReps)}' : 'Weight', style: const TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+            if (e.equipment == Equipment.dumbbell || e.equipment == Equipment.kettlebell) const Dim('Per dumbbell', size: 12),
+            const SizedBox(height: 8),
+            GridView.count(
+              shrinkWrap: true,
+              crossAxisCount: 5,
+              mainAxisSpacing: 6,
+              crossAxisSpacing: 6,
+              childAspectRatio: 1.6,
+              physics: const NeverScrollableScrollPhysics(),
+              children: [
+                for (final w in values)
+                  FilledButton.tonal(
+                    style: FilledButton.styleFrom(padding: EdgeInsets.zero, backgroundColor: (w - kg).abs() < 0.01 ? C.teal : C.card2, foregroundColor: (w - kg).abs() < 0.01 ? C.onTeal : C.text),
+                    onPressed: () => Navigator.pop(c, w),
+                    child: Text(fmtWeight(w, s.unit), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(onPressed: () => Navigator.pop(c, -1.0), icon: const Icon(Icons.keyboard_outlined), label: const Text('Type a number')),
+          ]),
+        ),
+      ),
+    );
+    if (v == null || !mounted) return;
+    if (v < 0) return _typeWeight();
+    setState(() => kg = v);
   }
 
   Future<void> _typeWeight() async {
@@ -646,30 +817,92 @@ class _LogScreenState extends State<LogScreen> {
     await _load();
   }
 
+  /// One step: the summary, stars, "bad day" and "keep today's changes" on one sheet.
   Future<void> _finish() async {
     final n = sets.length;
+    final summary = n == 0 ? '' : await _summaryText();
+    final next = n == 0 ? const <NextLine>[] : await s.previewNext();
+    var showNext = false;
+    final changed = _changedFromPlan();
+    if (!mounted) return;
+    var rating = 0;
+    var excuse = false;
+    var keep = false;
     final res = await showModalBottomSheet<String>(
       context: context,
       backgroundColor: C.card,
-      builder: (c) => SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-            const Text('Finish workout?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
-            const SizedBox(height: 6),
-            Dim(n == 0 ? 'No sets logged, so nothing will be saved and today stays next in line.' : '$n sets logged. Weights for next time are worked out from what you did.', size: 14),
-            if (n > 0) ...[
+      isScrollControlled: true,
+      builder: (c) => StatefulBuilder(
+        builder: (c, set) => SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Row(children: [
+                Text(n == 0 ? 'Finish workout?' : 'Workout done', style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+                if (n > 0) const Padding(padding: EdgeInsets.only(left: 6), child: Icon(Icons.fitness_center, color: C.gold, size: 20)),
+              ]),
+              const SizedBox(height: 6),
+              if (n == 0) const Dim('No sets logged, so nothing will be saved and today stays next in line.', size: 14),
+              if (n > 0) ...[
+                Text(summary),
+                if (next.isNotEmpty) () {
+                  // "Bad day": weights do not drop, so the lines that would go down stay the same;
+                  // folded to one line so Save stays on screen (review 2, P2-5)
+                  final l = [for (final x in next) if (!(excuse && x.change < 0)) x];
+                  final shown = next.length == 1 ? l : (showNext ? l : const <NextLine>[]);
+                  return Padding(
+                    padding: const EdgeInsets.only(top: 6),
+                    child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                      Row(children: [
+                        Expanded(child: Text(next.length == 1 ? 'Next time' : 'Next time: ${nextSummary([...l, for (final x in next) if (excuse && x.change < 0) NextLine(x.text, 0)])}', style: const TextStyle(fontWeight: FontWeight.w600))),
+                        if (next.length > 1) TextButton(onPressed: () => set(() => showNext = !showNext), child: Text(showNext ? 'Hide' : 'Show')),
+                      ]),
+                      for (final x in shown) Dim('• ${x.text}', size: 13),
+                    ]),
+                  );
+                }(),
+                if (s.settings.aiOn)
+                  Align(alignment: Alignment.centerLeft, child: TextButton.icon(onPressed: () => Navigator.pop(c, 'finish_ai'), icon: const Icon(Icons.auto_awesome, size: 18), label: const Text('Save, then ask AI for a summary'))),
+                const SizedBox(height: 6),
+                const Text('How was it?'),
+                Row(children: [
+                  for (var i = 1; i <= 5; i++)
+                    IconButton(onPressed: () => set(() => rating = rating == i ? 0 : i), icon: Icon(i <= rating ? Icons.star : Icons.star_border, color: C.gold, size: 30)),
+                ]),
+                CheckboxListTile(
+                  contentPadding: EdgeInsets.zero,
+                  value: excuse,
+                  onChanged: (v) => set(() => excuse = v ?? false),
+                  title: const Text("Bad day: don't count missed reps"),
+                  subtitle: const Dim('Weights stay where they were instead of dropping.', size: 12),
+                ),
+                if (changed)
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: keep,
+                    onChanged: (v) => set(() => keep = v ?? false),
+                    title: const Text("Keep today's changes in my plan"),
+                    subtitle: const Dim('Swaps, added or removed exercises become part of this day.', size: 12),
+                  ),
+                ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: const Text('Cool-down stretches'),
+                  childrenPadding: const EdgeInsets.only(bottom: 8),
+                  expandedCrossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Dim('Hold each 20-30 s', size: 12),
+                    for (final l in coolDown([for (final id in {for (final x in sets) x.exerciseId}) if (s.lib.byId(id) != null) s.lib.byId(id)!])) Dim('• $l', size: 13),
+                  ],
+                ),
+              ],
               const SizedBox(height: 10),
-              const Text('Cool-down (hold each 20-30 s)', style: TextStyle(fontWeight: FontWeight.w600)),
-              for (final l in coolDown([for (final id in {for (final x in sets) x.exerciseId}) if (s.lib.byId(id) != null) s.lib.byId(id)!])) Dim('• $l', size: 13),
-            ],
-            const SizedBox(height: 14),
-            FilledButton(onPressed: () => Navigator.pop(c, 'finish'), child: const Text('Finish')),
-            const SizedBox(height: 8),
-            OutlinedButton(onPressed: () => Navigator.pop(c), child: const Text('Keep going')),
-            const SizedBox(height: 8),
-            TextButton(onPressed: () => Navigator.pop(c, 'throw'), child: const Text('Throw this workout away', style: TextStyle(color: C.gold))),
-          ]),
+              SizedBox(height: 52, child: FilledButton(onPressed: () => Navigator.pop(c, 'finish'), child: Text(n == 0 ? 'Finish' : 'Save and finish'))),
+              const SizedBox(height: 8),
+              OutlinedButton(onPressed: () => Navigator.pop(c), child: const Text('Keep going')),
+              const SizedBox(height: 4),
+              TextButton(onPressed: () => Navigator.pop(c, 'throw'), child: const Text('Throw this workout away', style: TextStyle(color: C.gold))),
+            ]),
+          ),
         ),
       ),
     );
@@ -677,61 +910,23 @@ class _LogScreenState extends State<LogScreen> {
       if (!mounted) return;
       if (!await confirm(context, 'Throw it away?', 'All sets from this workout are deleted.', yes: 'Throw away')) return;
       await s.throwAwayWorkout();
-    } else if (res == 'finish') {
-      if (sets.isNotEmpty) s.sounds.play(Reward.workout);
-      final summary = await _summaryText();
-      final changed = _changedFromPlan();
+    } else if (res == 'finish' || res == 'finish_ai') {
+      if (n > 0) s.sounds.play(Reward.workout);
       final planDay = s.session!.dayIndex;
       final todayDay = day;
-      var rating = 0;
-      var excuse = false;
-      bool? keep = false;
-      if (mounted && sets.isNotEmpty) {
-        keep = await showDialog<bool>(
-          context: context,
-          builder: (d) => StatefulBuilder(
-            builder: (d, set) => AlertDialog(
-              backgroundColor: C.card,
-              title: const Text('Workout done 💪'),
-              content: SingleChildScrollView(
-                child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(summary),
-                  const SizedBox(height: 10),
-                  const Text('How was it?'),
-                  Row(children: [
-                    for (var i = 1; i <= 5; i++)
-                      IconButton(visualDensity: VisualDensity.compact, onPressed: () => set(() => rating = i), icon: Icon(i <= rating ? Icons.star : Icons.star_border, color: C.gold)),
-                  ]),
-                  CheckboxListTile(
-                    contentPadding: EdgeInsets.zero,
-                    dense: true,
-                    value: excuse,
-                    onChanged: (v) => set(() => excuse = v ?? false),
-                    title: const Text("Bad day: don't count missed reps"),
-                    subtitle: const Dim('Weights stay where they were instead of dropping.', size: 12),
-                  ),
-                ]),
-              ),
-              actions: [
-                if (changed) TextButton(onPressed: () => Navigator.pop(d, true), child: const Text("Keep today's changes in my plan")),
-                FilledButton(onPressed: () => Navigator.pop(d, false), child: const Text('Done')),
-              ],
-            ),
-          ),
-        );
-      }
       await s.finishWorkout(excuse: excuse, rating: rating == 0 ? null : rating);
-      if (mounted && sets.isNotEmpty) {
-        if (keep == true && s.plan != null && planDay >= 0 && planDay < s.plan!.days.length) {
-          final pl = s.plan!;
-          final days = [...pl.days]..[planDay] = todayDay.copyWith(name: pl.days[planDay].name);
-          await s.savePlanEdits(Plan(id: pl.id, name: pl.name, source: pl.source == 'built-in' ? 'mine' : pl.source, days: days, userEdited: true, created: pl.created));
-        }
+      if (keep && n > 0 && s.plan != null && planDay >= 0 && planDay < s.plan!.days.length) {
+        final pl = s.plan!;
+        final days = [...pl.days]..[planDay] = todayDay.copyWith(name: pl.days[planDay].name);
+        await s.savePlanEdits(pl.copyWith(source: pl.source == 'built-in' ? 'mine' : pl.source, days: days, userEdited: true));
       }
     } else {
       return;
     }
-    if (mounted) Navigator.pop(context);
+    if (!mounted) return;
+    final nav = Navigator.of(context);
+    nav.pop();
+    if (res == 'finish_ai') nav.push(MaterialPageRoute(builder: (_) => CoachScreen(s: s, ask: 'Sum up the workout I just finished: what went well, and what to do next time.')));
   }
 
   bool _changedFromPlan() {
@@ -758,7 +953,7 @@ class _LogScreenState extends State<LogScreen> {
       final now = work.where((x) => x.exerciseId == id).fold<double>(0, (a, x) => e1rm(x.kg, x.reps) > a ? e1rm(x.kg, x.reps) : a);
       if (now > best + 0.05) records.add('${ex.name}: est. 1RM ${fmtWeight(now, s.unit)} ${unitLabel(s.unit)}');
     }
-    final short = [for (final it in day.items) if (_countedFor(it.exerciseId) < it.sets) s.lib.byId(it.exerciseId)?.name ?? it.exerciseId];
+    final short = [for (final it in day.items) if (_countedFor(it) < it.sets) s.lib.byId(it.exerciseId)?.name ?? it.exerciseId];
     final b = StringBuffer()
       ..writeln('$mins min · ${work.length} sets · ${fmtNum(toUnit(vol, s.unit).roundToDouble())} ${unitLabel(s.unit)} lifted')
       ..writeln();
@@ -779,6 +974,79 @@ class _LogScreenState extends State<LogScreen> {
     return 'Last time ${last.map((x) => e.bodyweight && x.kg == 0 ? '${x.reps}' : '${fmtWeight(x.kg, s.unit)}×${x.reps}').join(', ')}';
   }
 
+  String _mmss(Duration d) => '${d.inMinutes}:${(d.inSeconds % 60).toString().padLeft(2, '0')}';
+
+  /// Always at the bottom, in thumb reach: the rest timer, Undo, Done set and Finish.
+  Widget _bottomBar() {
+    final left = s.restLeft;
+    final resting = left != null && left > Duration.zero;
+    final over = left != null && left == Duration.zero;
+    final allDone = day.items.every((x) => _countedFor(x) >= x.sets);
+    Widget small(String t, VoidCallback f) => Padding(
+          padding: const EdgeInsets.only(left: 6),
+          child: SizedBox(height: 48, child: OutlinedButton(style: OutlinedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 10), minimumSize: const Size(48, 48)), onPressed: f, child: Text(t))),
+        );
+    return Material(
+      color: C.card,
+      elevation: 8,
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(12, 6, 12, 8),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            if (resting)
+              Row(children: [
+                Expanded(child: Align(alignment: Alignment.centerLeft, child: FittedBox(fit: BoxFit.scaleDown, child: PopupMenuButton<int>(
+                  tooltip: 'Set the rest',
+                  onSelected: (sec) {
+                    final since = _setAt == null ? Duration.zero : DateTime.now().difference(_setAt!);
+                    final n = Duration(seconds: sec) - since;
+                    if (n.inSeconds <= 0) return _stopRest();
+                    _beeped = false;
+                    s.startRest(n);
+                  },
+                  itemBuilder: (c) => [for (final sec in const [60, 90, 120, 180]) PopupMenuItem(value: sec, child: Text('Rest ${_mmss(Duration(seconds: sec))}'))],
+                  child: Row(mainAxisSize: MainAxisSize.min, children: [
+                    const Icon(Icons.timer_outlined, color: C.gold),
+                    const SizedBox(width: 6),
+                    Text(_mmss(left), style: const TextStyle(fontSize: 30, fontWeight: FontWeight.w700, color: C.gold, fontFeatures: [FontFeature.tabularFigures()])),
+                    const Icon(Icons.arrow_drop_down, color: C.dim),
+                  ]),
+                )))),
+                small('−30s', () => _addRest(-30)),
+                small('+30s', () => _addRest(30)),
+                small('Skip', _stopRest),
+              ]),
+            if (over)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 4),
+                child: Row(children: [
+                  const Icon(Icons.timer_off_outlined, color: C.gold),
+                  const SizedBox(width: 8),
+                  Expanded(child: Text('Rest over${s.restOver == null ? '' : ' · +${_mmss(s.restOver!)}'}', style: const TextStyle(color: C.gold, fontWeight: FontWeight.w600))),
+                ]),
+              ),
+            const SizedBox(height: 4),
+            Row(textDirection: thumbRow, children: [
+              if (_lastSetId != null)
+                SizedBox(width: 52, height: 56, child: IconButton(tooltip: 'Undo last set', onPressed: _saving ? null : _undo, icon: const Icon(Icons.undo))),
+              Expanded(
+                child: SizedBox(
+                  height: 56,
+                  child: allDone
+                      ? FilledButton(onPressed: _finish, child: const Text('Finish workout', style: TextStyle(fontSize: 18)))
+                      : FilledButton(onPressed: _saving ? null : _done, child: Text(_needsWeight ? 'Pick weight' : (_type == SetType.work ? 'Done set' : 'Done: ${setTypeLabel[_type]!.toLowerCase()}'), style: const TextStyle(fontSize: 18))),
+                ),
+              ),
+              const SizedBox(width: 8),
+              SizedBox(height: 56, child: allDone ? OutlinedButton(onPressed: _saving ? null : _done, child: const Text('+ Set')) : OutlinedButton(onPressed: _finish, child: const Text('Finish'))),
+            ]),
+          ]),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (!loaded || s.session == null || day.items.isEmpty) return const Scaffold(body: Center(child: CircularProgressIndicator()));
@@ -786,11 +1054,22 @@ class _LogScreenState extends State<LogScreen> {
     final m = counted;
     final rows = m.length > item.sets ? m.length : item.sets;
     final left = s.restLeft;
-    final showRest = left != null && (left > Duration.zero || !_beeped);
+    final simple = s.settings.simple;
+    final lt = [for (final x in last) if (x.counts) x];
+    final warm = all.where((x) => x.type == SetType.warmup).length;
     final reps = item.repLow == item.repHigh ? '${item.repLow}' : '${item.repLow}-${item.repHigh}';
+    final dim = _dimmed;
     return PopScope(
-      canPop: true,
-      child: Scaffold(
+      // dark in a rest: the first Back only wakes the screen, like a touch (review 5, P3-N39)
+      canPop: !dim,
+      onPopInvokedWithResult: (popped, _) {
+        if (!popped && dim) setState(() => _touchAt = DateTime.now());
+      },
+      child: Listener(
+        behavior: HitTestBehavior.translucent,
+        onPointerDown: (_) => dim ? null : _touchAt = DateTime.now(),
+        child: Stack(children: [
+      Scaffold(
         appBar: AppBar(
           title: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(day.name),
@@ -801,18 +1080,22 @@ class _LogScreenState extends State<LogScreen> {
             PopupMenuButton<String>(
               onSelected: (v) {
                 if (v == 'fill') _fillRest();
+                if (v == 'timers') Navigator.push(context, MaterialPageRoute(builder: (_) => TimersScreen(s: s)));
+                if (v == 'finish') _finish();
               },
               itemBuilder: (c) => [
                 if (counted.length < item.sets) const PopupMenuItem(value: 'fill', child: Text('Fill the rest of this exercise')),
+                const PopupMenuItem(value: 'timers', child: Text('Timers (stopwatch, EMOM, Tabata)')),
+                const PopupMenuItem(value: 'finish', child: Text('Finish workout')),
               ],
             ),
-            TextButton(onPressed: _finish, child: const Text('Finish')),
           ],
         ),
+        bottomNavigationBar: _bottomBar(),
         body: SafeArea(
           child: ListView(padding: const EdgeInsets.fromLTRB(14, 0, 14, 16), children: [
             SizedBox(
-              height: 44,
+              height: 48,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 itemCount: day.items.length + 1,
@@ -820,7 +1103,7 @@ class _LogScreenState extends State<LogScreen> {
                 itemBuilder: (c, i) {
                   if (i == day.items.length) return ActionChip(label: const Text('+ Add'), onPressed: _addExercise);
                   final it = day.items[i];
-                  final done = _countedFor(it.exerciseId) >= it.sets;
+                  final done = _countedFor(it) >= it.sets;
                   final gl = groupLabel(day.items, i);
                   return ChoiceChip(
                     label: Text('${gl.isEmpty ? '${i + 1}' : gl}${done ? ' ✓' : ''}', style: TextStyle(color: i == ex ? C.onTeal : (done ? C.green : C.text))),
@@ -831,7 +1114,7 @@ class _LogScreenState extends State<LogScreen> {
                 },
               ),
             ),
-            if (sets.isEmpty && s.warmupsOn)
+            if (sets.isEmpty && s.warmupsOn && !s.settings.simple)
               Card(
                 child: ExpansionTile(
                   leading: const Icon(Icons.local_fire_department_outlined, color: C.gold),
@@ -850,6 +1133,7 @@ class _LogScreenState extends State<LogScreen> {
               },
               child: Center(child: ExerciseAnim(key: ValueKey(e.id), e: e, size: 150)),
             ),
+            if (day.items.length > 1) const Center(child: Dim('Swipe the picture for the next exercise', size: 12)),
             const SizedBox(height: 8),
             Container(
               padding: const EdgeInsets.all(12),
@@ -869,8 +1153,36 @@ class _LogScreenState extends State<LogScreen> {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(e.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                  InkWell(onTap: _liftHistory, child: Dim('Target ${item.sets} × $reps${e.timed ? ' s' : ''}${item.style.isEmpty ? '' : ', last set ${lastSetStyles[item.style]!.toLowerCase()}'} · ${_lastText()} ›')),
-                  if (target?.why != null) Text(target!.why!, style: const TextStyle(color: C.teal, fontSize: 12.5)),
+                  Text(
+                      item.perSet != null
+                          ? 'Target ${setsPlain(item.perSet!)}'
+                          : 'Target ${item.sets} × $reps${e.timed ? ' s' : ''}${item.style.isEmpty ? '' : ', last set ${lastSetStyles[item.style]!.toLowerCase()}'}',
+                      style: const TextStyle(color: C.dim, fontSize: 13)),
+                  if (target?.tm != null && !s.settings.simple) Dim('Training max ${fmtWeight(target!.tm!, s.unit)} ${unitLabel(s.unit)} · % sets come from it', size: 12),
+                  if (target?.why != null)
+                    Row(children: [
+                      Flexible(child: Text(target!.why!, style: const TextStyle(color: C.teal, fontSize: 12.5))),
+                      // it does not hurt any more: back to the normal weights (P3-3)
+                      if (s.ramp.containsKey(item.exerciseId))
+                        TextButton(
+                            style: TextButton.styleFrom(visualDensity: VisualDensity.compact),
+                            onPressed: () async {
+                              await s.clearRamp(item.exerciseId);
+                              await _load();
+                            },
+                            child: const Text('Back to normal')),
+                    ]),
+                  InkWell(
+                    onTap: () => whySheet(context, s, e, item, ex, target, setReps: item.perSet != null ? _setReps : null),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(minHeight: 48), // 48 dp to tap (F367)
+                      child: Row(mainAxisSize: MainAxisSize.min, children: [
+                        const Icon(Icons.help_outline, size: 15, color: C.teal),
+                        const SizedBox(width: 4),
+                        Flexible(child: Text(target?.reason == null ? 'Why this?' : 'Why? ${target!.reason}', style: const TextStyle(color: C.teal, fontSize: 12.5), maxLines: 2, overflow: TextOverflow.ellipsis)), // P3-N6
+                      ]),
+                    ),
+                  ),
                   if (_cue.isNotEmpty) Text(_cue, style: const TextStyle(color: C.sky, fontSize: 12.5, fontStyle: FontStyle.italic), maxLines: 2, overflow: TextOverflow.ellipsis),
                   if (_exNote.isNotEmpty)
                     Row(children: [const Icon(Icons.push_pin, size: 14, color: C.gold), const SizedBox(width: 4), Expanded(child: Text(_exNote, style: const TextStyle(color: C.gold, fontSize: 13)))]),
@@ -883,8 +1195,23 @@ class _LogScreenState extends State<LogScreen> {
               const Icon(Icons.info_outline, color: C.dim),
             ]),
             ),
-            const SizedBox(height: 12),
-            Row(children: [
+            // last time, as a button: the whole history of this lift
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton.icon(
+                style: TextButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 4), minimumSize: const Size(0, 40)),
+                onPressed: _liftHistory,
+                icon: const Icon(Icons.history, size: 18),
+                label: Text(_lastText(), overflow: TextOverflow.ellipsis),
+              ),
+            ),
+            if (_firstTimeLift)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Text('First time: set a weight you can do for about ${repsWord(_setReps)}. A guess is fine; it adjusts after today. Tap the number for a quick pick.', style: const TextStyle(color: C.gold, fontSize: 13)),
+              ),
+            const SizedBox(height: 4),
+            Row(textDirection: thumbRow, children: [
               Expanded(
                 flex: 13,
                 child: BigStepper(
@@ -892,7 +1219,7 @@ class _LogScreenState extends State<LogScreen> {
                   unit: unitLabel(s.unit),
                   onMinus: () => setState(() => kg = (kg - _step).clamp(0, 2000)),
                   onPlus: () => setState(() => kg = kg + _step),
-                  onTapValue: _typeWeight,
+                  onTapValue: _pickWeight,
                 ),
               ),
               const SizedBox(width: 8),
@@ -901,7 +1228,15 @@ class _LogScreenState extends State<LogScreen> {
                 child: BigStepper(value: '${this.reps}', unit: e.timed ? 'seconds' : 'reps', onMinus: () => setState(() => this.reps = (this.reps - 1).clamp(0, 500)), onPlus: () => setState(() => this.reps++), onTapValue: _typeReps),
               ),
             ]),
-            if (!e.bodyweight && kg > 0 && (_bestRepsAt[(kg * 10).round()] ?? 0) > 0)
+            if (!e.bodyweight)
+              Padding(
+                padding: const EdgeInsets.only(top: 6),
+                child: Wrap(spacing: 6, runSpacing: 4, children: [
+                  for (final d in _jumps)
+                    ActionChip(label: Text('${d > 0 ? '+' : '−'}${fmtNum(d.abs())}'), onPressed: () => _jump(d)),
+                ]),
+              ),
+            if (!simple && !e.bodyweight && kg > 0 && (_bestRepsAt[(kg * 10).round()] ?? 0) > 0)
               Padding(
                 padding: const EdgeInsets.only(top: 6),
                 child: Dim(
@@ -914,59 +1249,64 @@ class _LogScreenState extends State<LogScreen> {
             if (_plates != null)
               InkWell(
                 onTap: () => plateSheet(context, s, kg, e),
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 6),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(minHeight: 48), // 48 dp to tap (F367)
                   child: Row(children: [
                     const Icon(Icons.album_outlined, size: 18, color: C.teal),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
-                        'Per side: ${platesText(_plates!.$1)}${(_plates!.$2 - kg).abs() > 0.05 ? '  (closest you can load: ${fmtWeight(_plates!.$2, s.unit)})' : ''}',
+                        'Per side: ${platesText(_plates!.$1)}${!simple && (_plates!.$2 - kg).abs() > 0.05 ? '  (closest you can load: ${fmtWeight(_plates!.$2, s.unit)})' : ''}',
                         style: const TextStyle(color: C.teal),
                       ),
                     ),
                   ]),
                 ),
               ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 6),
             if (e.timed)
               Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: OutlinedButton.icon(
-                  onPressed: _hold,
-                  icon: Icon(_holdStart == null ? Icons.play_arrow : Icons.stop),
-                  label: Text(_holdStart == null ? 'Start the hold timer' : 'Stop: ${DateTime.now().difference(_holdStart!).inSeconds} s (target ${item.repLow}-${item.repHigh} s)'),
+                padding: const EdgeInsets.only(top: 4),
+                child: SizedBox(
+                  height: 48,
+                  child: OutlinedButton.icon(
+                    onPressed: _hold,
+                    icon: Icon(_holdStart == null ? Icons.play_arrow : Icons.stop),
+                    label: Text(_holdStart == null ? 'Start the hold timer' : 'Stop: ${DateTime.now().difference(_holdStart!).inSeconds} s (target ${item.repLow}-${item.repHigh} s)'),
+                  ),
                 ),
               ),
-            Row(children: [
-              PopupMenuButton<SetType>(
-                tooltip: 'Kind of set',
-                initialValue: _type,
-                onSelected: (t) => setState(() => _type = t),
-                itemBuilder: (c) => [for (final t in SetType.values) PopupMenuItem(value: t, child: Text(setTypeLabel[t]!))],
-                child: Chip(
-                  avatar: Icon(Icons.tune, size: 16, color: _type == SetType.work ? C.dim : C.gold),
-                  label: Text(setTypeLabel[_type]!, style: TextStyle(color: _type == SetType.work ? C.text : C.gold)),
+            if (!simple)
+              Wrap(spacing: 8, crossAxisAlignment: WrapCrossAlignment.center, children: [
+                PopupMenuButton<SetType>(
+                  tooltip: 'Kind of set',
+                  initialValue: _type,
+                  onSelected: (t) => setState(() => _type = t),
+                  itemBuilder: (c) => [
+                    for (final t in SetType.values)
+                      PopupMenuItem(
+                        value: t,
+                        child: Column(crossAxisAlignment: CrossAxisAlignment.start, mainAxisSize: MainAxisSize.min, children: [Text(setTypeLabel[t]!), Dim(setTypeHelp[t]!, size: 12)]),
+                      ),
+                  ],
+                  child: Chip(
+                    avatar: Icon(Icons.tune, size: 16, color: _type == SetType.work ? C.dim : C.gold),
+                    label: Text('Kind: ${setTypeLabel[_type]!}', style: TextStyle(color: _type == SetType.work ? C.text : C.gold)),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(child: FilledButton(onPressed: _saving ? null : _done, child: Text(_type == SetType.work ? 'Done set' : 'Done: ${setTypeLabel[_type]!.toLowerCase()}'))),
-            ]),
+                if (m.isNotEmpty && _type == SetType.work && !_dropOffered && item.perSet == null) // not on a program's planned sets (P3-7)
+                  TextButton.icon(
+                    onPressed: () => setState(() {
+                      _type = SetType.drop;
+                      kg = roundToStep(kg * 0.8, e.step, s.unit);
+                    }),
+                    icon: const Icon(Icons.trending_down, size: 18),
+                    label: const Text('Drop set (−20%)'),
+                  ),
+              ]),
             if (_type == SetType.drop && _dropOffered)
               const Padding(padding: EdgeInsets.only(top: 6), child: Dim('Drop set: weight lowered by about 20%. Go again straight away, as many reps as you can.', size: 12)),
-            if (m.isNotEmpty && _type == SetType.work && !_dropOffered)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: TextButton.icon(
-                  onPressed: () => setState(() {
-                    _type = SetType.drop;
-                    kg = roundToStep(kg * 0.8, e.step, s.unit);
-                  }),
-                  icon: const Icon(Icons.trending_down, size: 18),
-                  label: const Text('Drop set (−20%)'),
-                ),
-              ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 8),
             Card(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
@@ -974,16 +1314,18 @@ class _LogScreenState extends State<LogScreen> {
                   if (m.isEmpty)
                     for (final (i, (wkg, wreps)) in _warmups.indexed)
                       InkWell(
-                        onTap: all.where((x) => x.type == SetType.warmup).length > i ? null : () => _logWarmup(wkg, wreps),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                        onTap: warm > i ? null : () => _logWarmup(wkg, wreps),
+                        child: Container(
+                          constraints: const BoxConstraints(minHeight: 48),
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          alignment: Alignment.centerLeft,
                           child: DefaultTextStyle.merge(
-                            style: TextStyle(color: all.where((x) => x.type == SetType.warmup).length > i ? C.green : C.sky),
+                            style: TextStyle(color: warm > i ? C.green : C.sky),
                             child: Row(children: [
-                              SizedBox(width: 60, child: Text('Warm ${i + 1}')),
+                              SizedBox(width: 64, child: Text('Warm-up ${i + 1}')),
                               Expanded(child: Text('${fmtWeight(wkg, s.unit)} ${unitLabel(s.unit)}')),
-                              Expanded(child: Text('$wreps reps')),
-                              SizedBox(width: 20, child: Text(all.where((x) => x.type == SetType.warmup).length > i ? '✓' : '○')),
+                              Expanded(child: Text(repsWord(wreps))), // "1 rep" (P3-N10)
+                              Text(warm > i ? '✓' : 'tap when done', style: const TextStyle(fontSize: 12)),
                             ]),
                           ),
                         ),
@@ -991,10 +1333,12 @@ class _LogScreenState extends State<LogScreen> {
                   for (final x in all.where((x) => !x.counts && !(m.isEmpty && x.type == SetType.warmup && _warmups.isNotEmpty)))
                     InkWell(
                       onTap: () => _editSet(x),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 5),
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        alignment: Alignment.centerLeft,
                         child: Row(children: [
-                          SizedBox(width: 60, child: Text(setTypeLetter[x.type]!, style: const TextStyle(color: C.sky, fontWeight: FontWeight.w700))),
+                          SizedBox(width: 64, child: Text(setTypeLabel[x.type]!, style: const TextStyle(color: C.sky, fontWeight: FontWeight.w700))),
                           Expanded(child: Text('${fmtWeight(x.kg, s.unit)} ${unitLabel(s.unit)}', style: const TextStyle(color: C.sky))),
                           Expanded(child: Text('${x.reps} ${e.timed ? 's' : 'reps'}', style: const TextStyle(color: C.sky))),
                           SizedBox(width: 20, child: Text(x.note.isEmpty ? '' : '✎', style: const TextStyle(color: C.sky))),
@@ -1003,18 +1347,11 @@ class _LogScreenState extends State<LogScreen> {
                     ),
                   for (var i = 0; i < rows; i++)
                     _swipe(i < m.length ? m[i] : null, InkWell(
-                      onLongPress: i < m.length ? () => _editSet(m[i]) : null,
-                      onTap: i < m.length
-                          ? () => _editSet(m[i])
-                          : () => setState(() {
-                                final lt = [for (final x in last) if (x.counts) x];
-                                if (i < lt.length) {
-                                  kg = lt[i].kg;
-                                  this.reps = lt[i].reps;
-                                }
-                              }),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+                      onTap: i < m.length ? () => _editSet(m[i]) : null,
+                      child: Container(
+                        constraints: const BoxConstraints(minHeight: 48),
+                        padding: const EdgeInsets.symmetric(horizontal: 14),
+                        alignment: Alignment.centerLeft,
                         child: DefaultTextStyle.merge(
                           style: TextStyle(
                             color: i < m.length ? C.green : (i == m.length ? C.gold : C.dim),
@@ -1022,14 +1359,18 @@ class _LogScreenState extends State<LogScreen> {
                             fontFeatures: const [FontFeature.tabularFigures()],
                           ),
                           child: Row(children: [
-                            SizedBox(width: 60, child: Text(i < m.length && m[i].type != SetType.work ? 'Set ${i + 1} ${setTypeLetter[m[i].type]}' : 'Set ${i + 1}')),
-                            Expanded(child: Text(i < m.length ? '${fmtWeight(m[i].kg, s.unit)} ${unitLabel(s.unit)}' : (target?.kg == null ? '–' : '${fmtWeight(target!.kg!, s.unit)} ${unitLabel(s.unit)}'))),
-                            Expanded(child: Text(i < m.length ? '${m[i].reps} ${e.timed ? 's' : 'reps'}' : '$reps ${e.timed ? 's' : 'reps'}')),
-                            if (i >= m.length && i < [for (final x in last) if (x.counts) x].length)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 6),
-                                child: Text('last ${fmtWeight([for (final x in last) if (x.counts) x][i].kg, s.unit)}×${[for (final x in last) if (x.counts) x][i].reps}',
-                                    style: const TextStyle(color: C.dim, fontSize: 12, fontWeight: FontWeight.normal)),
+                            SizedBox(width: 64, child: Text(i < m.length && m[i].type != SetType.work ? 'Set ${i + 1} ${setTypeLetter[m[i].type]}' : 'Set ${i + 1}')),
+                            Expanded(child: Text(i < m.length ? '${fmtWeight(m[i].kg, s.unit)} ${unitLabel(s.unit)}' : _plannedKg(i))),
+                            Expanded(child: Text(i < m.length ? '${m[i].reps} ${e.timed ? 's' : 'reps'}' : _plannedReps(i))),
+                            if (i >= m.length && i < lt.length)
+                              // last time's numbers for this set: tap to use them
+                              TextButton(
+                                style: TextButton.styleFrom(minimumSize: const Size(0, 40), padding: const EdgeInsets.symmetric(horizontal: 8)),
+                                onPressed: () => setState(() {
+                                  kg = lt[i].kg;
+                                  this.reps = lt[i].reps;
+                                }),
+                                child: Text('use ${fmtWeight(lt[i].kg, s.unit)}×${lt[i].reps}', style: const TextStyle(fontSize: 12, color: C.sky, fontWeight: FontWeight.normal)),
                               ),
                             if (i < m.length && m[i].effort != null)
                               Container(
@@ -1043,21 +1384,14 @@ class _LogScreenState extends State<LogScreen> {
                         ),
                       ),
                     )),
+                  if (m.any((x) => x.type != SetType.work))
+                    const Padding(padding: EdgeInsets.fromLTRB(14, 2, 14, 4), child: Align(alignment: Alignment.centerLeft, child: Dim(setTypeKey, size: 12))),
                 ]),
               ),
             ),
-            if (left != null && left == Duration.zero)
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.timer_off_outlined, color: C.gold),
-                  title: const Text('Rest over: time for your next set'),
-                  subtitle: s.restOver == null ? null : Dim('+${s.restOver!.inMinutes}:${(s.restOver!.inSeconds % 60).toString().padLeft(2, '0')} since', size: 12),
-                  trailing: TextButton(onPressed: _stopRest, child: const Text('OK')),
-                ),
-              ),
-            if (showRest && left > Duration.zero && _setAt != null && !_lastWasFinal && s.settings.rest == null && s.settings.smartRest)
+            if (!simple && s.settings.effortChips && left != null && left > Duration.zero && _setAt != null && !_lastWasFinal && s.settings.rest == null && s.settings.smartRest)
               Padding(
-                padding: const EdgeInsets.only(bottom: 6),
+                padding: const EdgeInsets.only(top: 6),
                 child: Wrap(spacing: 6, crossAxisAlignment: WrapCrossAlignment.center, children: [
                   const Dim('How was that set?'),
                   for (final ef in Effort.values)
@@ -1069,51 +1403,39 @@ class _LogScreenState extends State<LogScreen> {
                     ),
                 ]),
               ),
-            if (showRest && left > Duration.zero)
-              Card(
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(children: [
-                    const Dim('Rest'),
-                    Text('${left.inMinutes}:${(left.inSeconds % 60).toString().padLeft(2, '0')}',
-                        style: const TextStyle(fontSize: 40, fontWeight: FontWeight.w700, color: C.gold, fontFeatures: [FontFeature.tabularFigures()])),
-                    Wrap(alignment: WrapAlignment.center, spacing: 6, children: [
-                      for (final sec in const [60, 90, 120, 180])
-                        ActionChip(
-                          label: Text(sec % 60 == 0 ? '${sec ~/ 60}:00' : '${sec ~/ 60}:${(sec % 60).toString().padLeft(2, '0')}'),
-                          onPressed: () {
-                            final since = _setAt == null ? Duration.zero : DateTime.now().difference(_setAt!);
-                            final n = Duration(seconds: sec) - since;
-                            if (n.inSeconds <= 0) return _stopRest();
-                            _beeped = false;
-                            s.startRest(n);
-                          },
-                        ),
-                    ]),
-                    const SizedBox(height: 4),
-                    Row(mainAxisAlignment: MainAxisAlignment.center, children: [
-                      OutlinedButton(onPressed: () => _addRest(-30), child: const Text('−30s')),
-                      const SizedBox(width: 8),
-                      OutlinedButton(onPressed: () => _addRest(30), child: const Text('+30s')),
-                      const SizedBox(width: 8),
-                      OutlinedButton(onPressed: _stopRest, child: const Text('Skip')),
-                    ]),
-                  ]),
-                ),
-              ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 8),
             Wrap(alignment: WrapAlignment.spaceBetween, spacing: 8, runSpacing: 8, children: [
               OutlinedButton.icon(onPressed: ex > 0 ? () => _go(ex - 1) : null, icon: const Icon(Icons.chevron_left), label: const Text('Back')),
               OutlinedButton(onPressed: _note, child: const Text('Note')),
               OutlinedButton(onPressed: _swap, child: const Text('Swap')),
-              OutlinedButton.icon(
-                onPressed: ex < day.items.length - 1 ? () => _go(ex + 1) : _finish,
-                icon: const Icon(Icons.chevron_right),
-                label: Text(ex < day.items.length - 1 ? 'Next' : 'Finish'),
-              ),
+              OutlinedButton.icon(onPressed: ex < day.items.length - 1 ? () => _go(ex + 1) : null, icon: const Icon(Icons.chevron_right), label: const Text('Next')),
             ]),
           ]),
         ),
+      ),
+      // F086: dark while resting; every touch on it only wakes the screen (nothing under it is pressed)
+      if (dim)
+        Positioned.fill(
+          // a Material above the text: no yellow "no Material" underline, the app's font (review 5, P2-6)
+          child: Material(
+            type: MaterialType.transparency,
+            child: GestureDetector(
+            key: const Key('restDim'),
+            behavior: HitTestBehavior.opaque,
+            onTap: () => setState(() => _touchAt = DateTime.now()),
+            child: ColoredBox(
+              color: const Color(0xF2000000),
+              child: Center(
+                child: Column(mainAxisSize: MainAxisSize.min, children: [
+                  Text(_mmss(left!), style: const TextStyle(fontSize: 56, fontWeight: FontWeight.w300, color: Color(0xFF5E6B73), fontFeatures: [FontFeature.tabularFigures()])),
+                  const SizedBox(height: 8),
+                  const Text('Resting · tap to wake', style: TextStyle(color: Color(0xFF4A555C), fontSize: 14)),
+                ]),
+              ),
+            ),
+          ),
+        )),
+        ]),
       ),
     );
   }

@@ -114,6 +114,32 @@ DO: change ${s.today!.items.first.exerciseId} sets=99 today
     await s.repo.close();
   });
 
+  test('newer settings, notes, steps and fill have AI tools too', () async {
+    final s = await app();
+    final first = s.today!.items.first.exerciseId;
+    var r = parseToolReply('DO: setting checkin on\nDO: setting effort_chips on\nDO: setting simple on\nDO: setting formula brzycki\nDO: setting drop_pct 15\nDO: setting effort_drives off\nDO: setting steps dumbbell 10\nDO: step $first 10\nDO: note $first seat 4, wide grip', s);
+    expect(r.errors, isEmpty);
+    await s.runActions('new', r.actions);
+    final st = s.settings;
+    expect([st.checkin, st.effortChips, st.simple, st.formula, st.dropPct, st.effortDrives], [true, true, true, 'brzycki', 15, false]);
+    expect(st.steps['dumbbell_lb'], 10);
+    expect(s.exStep[first], closeTo(fromUnit(10, Unit.lb), 0.001));
+    expect(await s.repo.exNote(first), 'seat 4, wide grip');
+    expect(parseToolReply('DO: setting formula wrong', s).errors, isNotEmpty);
+    expect(parseToolReply('DO: fill $first 100 5', s).errors, isNotEmpty, reason: 'no workout is going');
+    await s.startWorkout();
+    r = parseToolReply('DO: fill $first 100 5', s);
+    expect(r.errors, isEmpty);
+    await s.runActions('fill', r.actions);
+    final planned = s.session!.day.items.first.sets;
+    expect((await s.repo.setsFor(s.session!.id)).length, planned);
+    // quick command, no AI
+    final q = quickCommand('turn off simple mode', s)!;
+    await s.runActions('q', q.actions);
+    expect(s.settings.simple, isFalse);
+    await s.repo.close();
+  });
+
   test('on-phone grammar names real tools and only this gym\'s exercises', () {
     final p = profile.copyWith(have: {Equipment.dumbbell});
     final g = toolGrammar(lib, p, 4);

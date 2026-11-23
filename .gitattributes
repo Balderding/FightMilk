@@ -1,0 +1,11 @@
+# one line ending in the repo, so diffs show real changes, not CRLF/LF churn (review 2, P3-N9)
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.webp binary
+*.ttf binary
+*.otf binary
+*.gguf binary
+*.bin binary
+*.jks binary
+*.keystore binary

@@ -79,7 +79,13 @@ void main() {
     await importBackup(b, text, replace: true);
     expect(await b.exNote(it.exerciseId), 'seat 4');
     expect((await b.setsFor(s.id)).firstWhere((x) => x.type == SetType.drop).rpe, 10);
-    final oldStyle = (jsonDecode(text) as Map<String, dynamic>)..remove('body')..remove('ex_note');
+    // a backup from before 0.8 (no body, no notes) was format 1, with no check (batch 22)
+    final oldStyle = (jsonDecode(text) as Map<String, dynamic>)
+      ..remove('body')
+      ..remove('ex_note')
+      ..remove('sha256')
+      ..remove('schema')
+      ..['format'] = 1;
     final c = await Repo.open('${dir.path}/c.db', factory: databaseFactoryFfi);
     await importBackup(c, jsonEncode(oldStyle), replace: true);
     expect((await c.setsFor(s.id)).length, all.length);
