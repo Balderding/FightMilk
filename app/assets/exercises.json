@@ -638,7 +638,7 @@
   },
   {
    "id": "pec_deck",
-   "name": "Pec deck",
+   "name": "Machine chest fly (pec deck)",
    "equipment": "machine",
    "primary": [
     "chest"
@@ -1454,7 +1454,7 @@
   },
   {
    "id": "reverse_pec_deck",
-   "name": "Reverse pec deck",
+   "name": "Machine reverse fly (rear delt)",
    "equipment": "machine",
    "primary": [
     "rear_delts"

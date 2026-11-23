@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:workout/net/guarded_client.dart';
+import 'package:workout/ui/app_state.dart' show AppState;
 import 'package:workout/update/updater.dart';
 import 'package:workout/version.dart';
 
@@ -82,6 +83,36 @@ void main() {
           }),
           200));
       await expectLater(checkUpdate(GuardedClient(const NetGuard(), c), 'arm64-v8a'), throwsA(isA<UpdateError>()));
+    });
+  });
+
+  group('after the download: the installer step is never a silent nothing (0.9.1 lesson)', () {
+    test('an update that is not newer is said, with both numbers, before Android is asked', () {
+      final n = AppState.installNote('not_newer:13:2012');
+      expect(n, contains('not newer than the app on your phone'));
+      expect(n, contains('13'));
+      expect(n, contains('2012'));
+      expect(n, contains('Nothing was changed'));
+    });
+
+    test("the installer's refusal is said with its reason", () {
+      expect(AppState.installNote('failed:-25'), contains('older than the app on your phone'));
+      expect(AppState.installNote('failed:-7'), contains('different key'));
+      expect(AppState.installNote('failed:-4'), contains('not enough free space'));
+      expect(AppState.installNote('failed:-99'), contains('code -99'));
+      expect(AppState.installNote('failed:x'), contains('Android did not install'));
+      for (final r in ['failed:-25', 'failed:-7', 'failed:-4', 'not_apk', 'other_app', 'cancelled']) {
+        expect(AppState.installNote(r), isNot(contains('The installer is open')), reason: '$r is not "it is opening"');
+      }
+    });
+
+    test('the other answers', () {
+      expect(AppState.installNote('cancelled'), contains('installer was closed'));
+      expect(AppState.installNote('need_permission'), contains('Allow FightMilk'));
+      expect(AppState.installNote('not_apk'), contains('not an app file'));
+      expect(AppState.installNote('other_app'), contains('different app'));
+      expect(AppState.installNote('installed'), 'Updated.');
+      expect(AppState.installNote(null), contains('installer is open'));
     });
   });
 }

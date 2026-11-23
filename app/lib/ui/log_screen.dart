@@ -802,6 +802,19 @@ class _LogScreenState extends State<LogScreen> {
     }
   }
 
+  /// One planned set fewer or more of this exercise, today only. A set already logged is never
+  /// taken away here (swipe it away to delete it).
+  Future<void> _changeSets(int by) async {
+    final n = (item.sets + by).clamp(counted.length < 1 ? 1 : counted.length, 20);
+    if (n == item.sets) return;
+    final ps = item.perSet;
+    final l = [...day.items];
+    l[ex] = ps == null || ps.isEmpty ? item.copyWith(sets: n) : item.copyWith(sets: n, perSet: n > ps.length ? [...ps, for (var k = ps.length; k < n; k++) ps.last] : ps.sublist(0, n));
+    await s.setToday(day.copyWith(items: l));
+    await _load();
+    if (mounted) toast(context, by > 0 ? 'One more set: ${l[ex].sets} today.' : 'One set fewer: ${l[ex].sets} today.');
+  }
+
   Future<void> _addExercise() async {
     // today only, or the plan too (one helper with Today)
     if (await addTodayItem(context, s) == null) return;
@@ -1163,11 +1176,18 @@ class _LogScreenState extends State<LogScreen> {
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text(e.name, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w700)),
-                  Text(
-                      item.perSet != null
-                          ? 'Target ${setsPlain(item.perSet!)}'
-                          : 'Target ${item.sets} × $reps${e.timed ? ' s' : ''}${item.style.isEmpty ? '' : ', last set ${lastSetStyles[item.style]!.toLowerCase()}'}',
-                      style: const TextStyle(color: C.dim, fontSize: 13)),
+                  Row(children: [
+                    Flexible(
+                      child: Text(
+                          item.perSet != null
+                              ? 'Target ${setsPlain(item.perSet!)}'
+                              : 'Target ${item.sets} × $reps${e.timed ? ' s' : ''}${item.style.isEmpty ? '' : ', last set ${lastSetStyles[item.style]!.toLowerCase()}'}',
+                          style: const TextStyle(color: C.dim, fontSize: 13)),
+                    ),
+                    // one tap: a set fewer or a set more, for today, while lifting
+                    IconButton(tooltip: 'One set fewer', icon: const Icon(Icons.remove_circle_outline, color: C.teal), onPressed: item.sets > counted.length && item.sets > 1 ? () => _changeSets(-1) : null),
+                    IconButton(tooltip: 'One set more', icon: const Icon(Icons.add_circle_outline, color: C.teal), onPressed: item.sets < 20 ? () => _changeSets(1) : null),
+                  ]),
                   if (target?.tm != null && !s.settings.simple) Dim('Training max ${fmtWeight(target!.tm!, s.unit)} ${unitLabel(s.unit)} · % sets come from it', size: 12),
                   if (target?.why != null)
                     Row(children: [

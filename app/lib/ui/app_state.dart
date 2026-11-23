@@ -2368,6 +2368,33 @@ class AppState extends ChangeNotifier {
     }
   }
 
+  /// What the installer step said, in plain words: never a silent nothing (0.9.1 lesson).
+  static String installNote(String? r) {
+    final v = r ?? '';
+    if (v == 'need_permission') return 'Allow FightMilk to install updates on the screen that opened, then tap Install again.';
+    if (v == 'installed') return 'Updated.';
+    if (v == 'cancelled') return 'The update was not installed: the installer was closed. Tap Install to try again; your workouts stay.';
+    if (v == 'busy') return 'The installer is already open.';
+    if (v == 'not_apk') return 'The downloaded file is not an app file, so it was not installed. Nothing was changed.';
+    if (v == 'other_app') return 'The downloaded file is a different app, so it was not installed. Nothing was changed.';
+    if (v.startsWith('not_newer:')) {
+      final p = v.split(':');
+      return 'This update is not newer than the app on your phone (its version code ${p.length > 1 ? p[1] : '?'}, yours ${p.length > 2 ? p[2] : '?'}), so Android would refuse it. Nothing was changed. Please tell the app\'s maker.';
+    }
+    if (v.startsWith('failed:')) {
+      final code = int.tryParse(v.substring(7)) ?? 0;
+      final why = switch (code) {
+        -25 => 'it is older than the app on your phone',
+        -7 => 'it is signed with a different key than the app on your phone (a test build installed earlier?)',
+        -4 => 'there is not enough free space on the phone',
+        -2 || -3 => 'the file is damaged',
+        _ => 'Android said no (code $code)',
+      };
+      return 'Android did not install the update: $why. Nothing was changed; your workouts stay.';
+    }
+    return 'The installer is open. Confirm there to update; your workouts stay.';
+  }
+
   /// Downloads the update, checks its fingerprint and opens Android's installer.
   Future<void> installUpdate() async {
     final u = update;
@@ -2382,10 +2409,9 @@ class AppState extends ChangeNotifier {
         updateProgress = x;
         notifyListeners();
       });
-      final r = await _sys.invokeMethod<String>('install', {'path': path});
-      updateNote = r == 'need_permission'
-          ? 'Allow FightMilk to install updates on the screen that opened, then tap Install again.'
-          : 'The installer is open. Confirm there to update; your workouts stay.';
+      updateNote = 'The installer is open. Confirm there to update; your workouts stay.';
+      notifyListeners();
+      updateNote = installNote(await _sys.invokeMethod<String>('install', {'path': path}));
     } on UpdateError catch (e) {
       updateNote = e.message;
     } catch (e) {

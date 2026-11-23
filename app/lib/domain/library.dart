@@ -66,12 +66,29 @@ class Library {
           if (x.swap == e.swap && x.id != e.id && usable(x, have, avoid, items: items)) x
       ];
 
+  /// Finds exercises by every word typed, in any order: in the name, its other names (what
+  /// gyms and other apps call it), a muscle, or the equipment. "machine chest fly" finds the pec
+  /// deck.
   List<Exercise> search(String q) {
-    final s = q.trim().toLowerCase();
-    if (s.isEmpty) return all;
+    final words = q.trim().toLowerCase().split(RegExp(r'\s+')).where((w) => w.isNotEmpty).toList();
+    if (words.isEmpty) return all;
     return [
       for (final e in all)
-        if (e.name.toLowerCase().contains(s) || e.primary.any((m) => m.contains(s)) || e.equipment.name.contains(s)) e
+        if (words.every((w) => _searchText(e).contains(w))) e
     ];
   }
+
+  String _searchText(Exercise e) => '${e.name.toLowerCase()} ${otherNames[e.id] ?? ''} ${e.primary.join(' ')} ${e.equipment.name}';
+
+  /// Other names people use for some exercises (shown nowhere; only searched).
+  static const otherNames = {
+    'pec_deck': 'chest fly machine fly butterfly pec fly',
+    'reverse_pec_deck': 'reverse fly rear delt fly rear fly machine fly',
+    'cable_fly': 'chest fly cable crossover',
+    'db_fly': 'chest fly',
+    'band_fly': 'chest fly',
+    'cable_rear_delt_fly': 'reverse fly rear fly',
+    'db_rear_delt_fly': 'reverse fly rear fly',
+    'chest_supported_rear_fly': 'reverse fly rear delt fly',
+  };
 }

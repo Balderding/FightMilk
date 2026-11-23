@@ -39,6 +39,15 @@ class MainActivity : FlutterActivity() {
 
     private var pickResult: MethodChannel.Result? = null
     private var folderResult: MethodChannel.Result? = null
+    private var installResult: MethodChannel.Result? = null
+
+    /** What a downloaded APK says it is (package, version code). */
+    private fun archiveInfo(path: String): android.content.pm.PackageInfo? =
+        if (Build.VERSION.SDK_INT >= 33) packageManager.getPackageArchiveInfo(path, android.content.pm.PackageManager.PackageInfoFlags.of(0))
+        else @Suppress("DEPRECATION") packageManager.getPackageArchiveInfo(path, 0)
+
+    private fun codeOf(p: android.content.pm.PackageInfo): Long =
+        if (Build.VERSION.SDK_INT >= 28) p.longVersionCode else @Suppress("DEPRECATION") p.versionCode.toLong()
 
     // ---- the backup folder (batch 22, F339): only the folder the person picked, through Android's
     // own documents access; nothing else on the phone is seen
@@ -297,6 +306,19 @@ class MainActivity : FlutterActivity() {
     @Deprecated("FlutterActivity still routes results here")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == INSTALL_APK) {
+            // the installer's answer: installed (rare: the app is usually replaced first), closed, or a refusal code
+            val r = installResult ?: return
+            installResult = null
+            r.success(
+                when (resultCode) {
+                    Activity.RESULT_OK -> "installed"
+                    Activity.RESULT_CANCELED -> "cancelled"
+                    else -> "failed:${data?.getIntExtra("android.intent.extra.INSTALL_RESULT", 0) ?: 0}"
+                }
+            )
+            return
+        }
         if (requestCode == PICK_FOLDER) {
             // the backup folder (batch 22, F339): picked once, kept with a lasting permission
             val r = folderResult ?: return
@@ -392,12 +414,40 @@ class MainActivity : FlutterActivity() {
                         result.success("need_permission")
                         return@setMethodCallHandler
                     }
+                    // first: is the file this app, and newer than what is installed? Android
+                    // refuses an older version code without a word (0.9.1 lesson)
+                    val info = try { archiveInfo(path) } catch (_: Exception) { null }
+                    if (info == null) {
+                        result.success("not_apk")
+                        return@setMethodCallHandler
+                    }
+                    if (info.packageName != packageName) {
+                        result.success("other_app")
+                        return@setMethodCallHandler
+                    }
+                    val now = codeOf(packageManager.getPackageInfo(packageName, 0))
+                    val next = codeOf(info)
+                    if (next <= now) {
+                        result.success("not_newer:$next:$now")
+                        return@setMethodCallHandler
+                    }
+                    if (installResult != null) {
+                        result.success("busy")
+                        return@setMethodCallHandler
+                    }
                     try {
                         val uri = FileProvider.getUriForFile(this, "$packageName.updates", File(path))
-                        startActivity(Intent(Intent.ACTION_VIEW).setDataAndType(uri, "application/vnd.android.package-archive")
-                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK))
-                        result.success("started")
+                        // the form of the installer that reports back, so a refusal is shown with its reason
+                        @Suppress("DEPRECATION")
+                        val i = Intent(Intent.ACTION_INSTALL_PACKAGE).setData(uri)
+                            .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                            .putExtra(Intent.EXTRA_RETURN_RESULT, true)
+                            .putExtra(Intent.EXTRA_NOT_UNKNOWN_SOURCE, true)
+                        installResult = result
+                        @Suppress("DEPRECATION")
+                        startActivityForResult(i, INSTALL_APK)
                     } catch (e: Exception) {
+                        installResult = null
                         result.error("install_failed", e.message, null)
                     }
                 }
@@ -480,3 +530,4 @@ class MainActivity : FlutterActivity() {
 
 private const val PICK_MODEL = 4711
 private const val PICK_FOLDER = 4712
+private const val INSTALL_APK = 4713
